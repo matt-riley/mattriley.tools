@@ -28,6 +28,13 @@ jobs:
       - name: Check out site repo
         uses: actions/checkout@v4
 
+      - name: Validate tap checkout token
+        run: |
+          if [ -z "${{ secrets.HOMEBREW_TOOLS_READ_TOKEN }}" ]; then
+            echo "HOMEBREW_TOOLS_READ_TOKEN is required to check out matt-riley/homebrew-tools." >&2
+            exit 1
+          fi
+
       - name: Check out Homebrew tap
         uses: actions/checkout@v4
         with:
