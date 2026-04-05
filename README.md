@@ -62,20 +62,9 @@ pnpm format:check       # Verify formatting
 
 ## Automatic updates
 
-`.github/workflows/sync-tools-data.yml` refreshes the generated tool data when it is manually dispatched or when the tap repo tells it to sync. The intended event-driven path is:
+`.github/workflows/sync-tools-data.yml` syncs tool data on a schedule (every 6 hours) and can also be triggered manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap, regenerates `src/data/tools.generated.ts`, and commits if anything changed.
 
-1. `homebrew-tools` receives a push that changes `Formula/**`
-2. `homebrew-tools/.github/workflows/trigger-mattriley-tools-sync.yml` dispatches `mattriley.tools/.github/workflows/sync-tools-data.yml`
-3. the site repo checks out the tap at the pushed commit SHA, regenerates `src/data/tools.generated.ts`, and commits the updated generated data if anything changed
-
-For this to work in GitHub, configure both secrets:
-
-- In `homebrew-tools`: `MATTRILEY_TOOLS_WORKFLOW_DISPATCH_TOKEN`
-  - needs permission to dispatch workflows in `matt-riley/mattriley.tools`
-- In `mattriley.tools`: `HOMEBREW_TOOLS_READ_TOKEN`
-  - needs read access to `matt-riley/homebrew-tools` so the sync workflow can check out the private tap repo
-
-You can use two separate fine-grained tokens, or reuse the same token value in both repos if that token has both capabilities.
+No additional secrets or tokens are required — the tap is public and the workflow uses the built-in `GITHUB_TOKEN` for pushing to this repo.
 
 Deployment remains intentionally undecided; the site output is plain static Astro so hosting can be chosen later.
 

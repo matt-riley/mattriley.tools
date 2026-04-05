@@ -1,17 +1,9 @@
 name: Sync tool data
 
 on:
+  schedule:
+    - cron: "0 */6 * * *"
   workflow_dispatch:
-    inputs:
-      tap_sha:
-        description: Commit SHA from matt-riley/homebrew-tools to sync against
-        required: false
-        type: string
-      tap_ref:
-        description: Tap branch or ref to sync when no explicit SHA is provided
-        required: false
-        default: main
-        type: string
 
 permissions:
   contents: write
@@ -28,20 +20,11 @@ jobs:
       - name: Check out site repo
         uses: actions/checkout@v4
 
-      - name: Validate tap checkout token
-        run: |
-          if [ -z "${{ secrets.HOMEBREW_TOOLS_READ_TOKEN }}" ]; then
-            echo "HOMEBREW_TOOLS_READ_TOKEN is required to check out matt-riley/homebrew-tools." >&2
-            exit 1
-          fi
-
       - name: Check out Homebrew tap
         uses: actions/checkout@v4
         with:
           repository: matt-riley/homebrew-tools
           path: tap-source
-          ref: ${{ inputs.tap_sha || inputs.tap_ref }}
-          token: ${{ secrets.HOMEBREW_TOOLS_READ_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
