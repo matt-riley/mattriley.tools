@@ -34,6 +34,7 @@ jobs:
           repository: matt-riley/homebrew-tools
           path: tap-source
           ref: ${{ inputs.tap_sha || inputs.tap_ref }}
+          token: ${{ secrets.HOMEBREW_TOOLS_READ_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

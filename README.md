@@ -68,7 +68,14 @@ pnpm format:check       # Verify formatting
 2. `homebrew-tools/.github/workflows/trigger-mattriley-tools-sync.yml` dispatches `mattriley.tools/.github/workflows/sync-tools-data.yml`
 3. the site repo checks out the tap at the pushed commit SHA, regenerates `src/data/tools.generated.ts`, and commits the updated generated data if anything changed
 
-For this to work in GitHub, `homebrew-tools` needs a repository secret named `MATTRILEY_TOOLS_WORKFLOW_DISPATCH_TOKEN` with permission to dispatch workflows in `matt-riley/mattriley.tools`.
+For this to work in GitHub, configure both secrets:
+
+- In `homebrew-tools`: `MATTRILEY_TOOLS_WORKFLOW_DISPATCH_TOKEN`
+  - needs permission to dispatch workflows in `matt-riley/mattriley.tools`
+- In `mattriley.tools`: `HOMEBREW_TOOLS_READ_TOKEN`
+  - needs read access to `matt-riley/homebrew-tools` so the sync workflow can check out the private tap repo
+
+You can use two separate fine-grained tokens, or reuse the same token value in both repos if that token has both capabilities.
 
 Deployment remains intentionally undecided; the site output is plain static Astro so hosting can be chosen later.
 
