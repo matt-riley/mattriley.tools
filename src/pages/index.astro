@@ -1,0 +1,61 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { generatedAt, tools } from "../data/tools.generated";
+---
+
+<Layout
+  title="mattriley.tools"
+  description="Static catalog of tools currently available in the matt-riley/tools Homebrew tap."
+>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">
+        Source of truth:
+        <a href="https://github.com/matt-riley/homebrew-tools">matt-riley/homebrew-tools</a>
+      </p>
+      <h1>mattriley.tools</h1>
+      <p class="lede">
+        A plain Astro catalog of the tools currently packaged in the Homebrew tap. The site data is
+        generated from the tap's formula files, starting with the packaged versions in the tap.
+      </p>
+      <p>Last synced: <time datetime={generatedAt}>{generatedAt}</time></p>
+    </header>
+
+    <section class="stack" aria-labelledby="available-tools">
+      <div>
+        <h2 id="available-tools">Available tools</h2>
+        <p>
+          Each entry links to a static detail page with the packaged version, install command,
+          supported platforms, binary name, and source repository.
+        </p>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Tool</th>
+              <th scope="col">Version</th>
+              <th scope="col">Description</th>
+              <th scope="col">Install</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tools.map((tool) => (
+              <tr>
+                <td>
+                  <a href={`/tools/${tool.slug}/`}>{tool.name}</a>
+                </td>
+                <td>{tool.version}</td>
+                <td>{tool.description}</td>
+                <td>
+                  <code>{tool.installCommand}</code>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</Layout>

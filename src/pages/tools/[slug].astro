@@ -1,0 +1,63 @@
+---
+import { generatedAt, tools } from "../../data/tools.generated";
+import Layout from "../../layouts/Layout.astro";
+
+interface Props {
+  tool: (typeof tools)[number];
+}
+
+export function getStaticPaths() {
+  return tools.map((tool) => ({
+    params: { slug: tool.slug },
+    props: { tool },
+  }));
+}
+
+const { tool } = Astro.props;
+---
+
+<Layout title={tool.name} description={tool.description}>
+  <main class="page">
+    <p class="eyebrow"><a href="/">Back to all tools</a></p>
+
+    <header class="hero">
+      <h1>{tool.name}</h1>
+      <p class="lede">{tool.description}</p>
+      <p>Last synced: <time datetime={generatedAt}>{generatedAt}</time></p>
+    </header>
+
+    <section class="panel" aria-labelledby="tool-metadata">
+      <h2 id="tool-metadata">Formula metadata</h2>
+      <dl class="meta-list">
+        <dt>Version</dt>
+        <dd>{tool.version}</dd>
+
+        <dt>Homepage</dt>
+        <dd>
+          <a href={tool.homepage}>{tool.homepage}</a>
+        </dd>
+
+        <dt>Formula file</dt>
+        <dd>
+          <code>{tool.formulaFile}</code>
+        </dd>
+
+        <dt>Install</dt>
+        <dd>
+          <span class="install-command">
+            <code>{tool.installCommand}</code>
+          </span>
+        </dd>
+
+        <dt>Binary name{tool.binaryNames.length === 1 ? "" : "s"}</dt>
+        <dd>{tool.binaryNames.join(", ")}</dd>
+
+        <dt>Platforms</dt>
+        <dd>{tool.platforms.join(", ")}</dd>
+
+        <dt>License</dt>
+        <dd>{tool.license ?? "Not declared in the formula"}</dd>
+      </dl>
+    </section>
+  </main>
+</Layout>

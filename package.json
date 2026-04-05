@@ -1,0 +1,27 @@
+{
+  "name": "mattriley.tools",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "generate:data": "node ./scripts/generate-tools-data.mjs",
+    "preview": "astro preview",
+    "lint": "oxlint src/ scripts/ tests/",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "astro": "^6.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "oxfmt": "^0.43.0",
+    "oxlint": "^1.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.0"
+  },
+  "packageManager": "pnpm@10.33.0"
+}

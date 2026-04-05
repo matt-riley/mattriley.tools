@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@bd605dc142b75bef90c69f2707997f8cb161abc8 # main
+    with:
+      package-manager: pnpm
+      run-lint: true
+      run-test: true
+      run-build: true

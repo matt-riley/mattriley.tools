@@ -1,0 +1,64 @@
+name: Sync tool data
+
+on:
+  workflow_dispatch:
+    inputs:
+      tap_sha:
+        description: Commit SHA from matt-riley/homebrew-tools to sync against
+        required: false
+        type: string
+      tap_ref:
+        description: Tap branch or ref to sync when no explicit SHA is provided
+        required: false
+        default: main
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-tools-data
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out site repo
+        uses: actions/checkout@v4
+
+      - name: Check out Homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: matt-riley/homebrew-tools
+          path: tap-source
+          ref: ${{ inputs.tap_sha || inputs.tap_ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Regenerate tool data
+        run: pnpm run generate:data -- --tap-path "${{ github.workspace }}/tap-source"
+
+      - name: Commit updated data
+        run: |
+          if git diff --quiet -- src/data/tools.generated.ts; then
+            echo "No tool data changes detected."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/tools.generated.ts
+          git commit -m "chore(data): sync Homebrew tap metadata"
+          git push
