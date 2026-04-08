@@ -10,11 +10,6 @@ import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
 >
   <main class="page">
     <header class="hero">
-      <p class="eyebrow">
-        Sources of truth:
-        <a href="https://github.com/matt-riley/homebrew-tools">matt-riley/homebrew-tools</a>
-        and Matt's GitHub repos whose names contain <code>.nvim</code>
-      </p>
       <h1>mattriley.tools</h1>
       <p class="lede">
         A plain Astro catalog of the Homebrew tools and Neovim plugins Matt ships publicly. Tool
@@ -77,9 +72,8 @@ import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
           <thead>
             <tr>
               <th scope="col">Plugin</th>
+              <th scope="col">Version</th>
               <th scope="col">Description</th>
-              <th scope="col">Language</th>
-              <th scope="col">Install</th>
             </tr>
           </thead>
           <tbody>
@@ -88,11 +82,8 @@ import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
                 <td>
                   <a href={`/plugins/${plugin.slug}/`}>{plugin.name}</a>
                 </td>
+                <td>{plugin.version}</td>
                 <td>{plugin.description}</td>
-                <td>{plugin.language ?? "Unknown"}</td>
-                <td>
-                  <code>{plugin.lazyInstallSnippet}</code>
-                </td>
               </tr>
             ))}
           </tbody>

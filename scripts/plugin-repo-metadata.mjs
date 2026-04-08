@@ -17,6 +17,7 @@
  *   description: string;
  *   repository: string;
  *   homepage: string;
+ *   version: string;
  *   updatedAt: string;
  *   language: string | null;
  *   topics: string[];
@@ -37,15 +38,17 @@ export function filterPluginRepos(repos) {
 
 /**
  * @param {GitHubRepo} repo
+ * @param {string} version
  * @returns {PluginRecord}
  */
-export function toPluginRecord(repo) {
+export function toPluginRecord(repo, version) {
   return {
     slug: repo.name,
     name: repo.name,
     description: repo.description ?? "No description provided.",
     repository: repo.full_name,
     homepage: repo.html_url,
+    version,
     updatedAt: repo.pushed_at,
     language: repo.language,
     topics: repo.topics ?? [],

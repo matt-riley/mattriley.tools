@@ -23,12 +23,13 @@ describe("plugin repo metadata", () => {
       topics: ["neovim", "slides"],
     };
 
-    expect(toPluginRecord(repo)).toEqual({
+    expect(toPluginRecord(repo, "v0.1.4")).toEqual({
       slug: "slides.nvim",
       name: "slides.nvim",
       description: "Neovim plugin for presenting Markdown slides in a full-screen floating window.",
       repository: "matt-riley/slides.nvim",
       homepage: "https://github.com/matt-riley/slides.nvim",
+      version: "v0.1.4",
       updatedAt: "2026-04-08T01:02:03Z",
       language: "Lua",
       topics: ["neovim", "slides"],
@@ -47,7 +48,7 @@ describe("plugin repo metadata", () => {
       language: "Lua",
       topics: ["neovim", "slides"],
     };
-    expect(toPluginRecord(repo).description).toBe("No description provided.");
+    expect(toPluginRecord(repo, "v0.1.4").description).toBe("No description provided.");
   });
 
   it("builds the lazy.nvim snippet from the full repository name", () => {
@@ -61,6 +62,6 @@ describe("plugin repo metadata", () => {
       topics: ["neovim", "slides"],
     };
 
-    expect(toPluginRecord(repo).lazyInstallSnippet).toBe('{ "acme/slides.nvim" }');
+    expect(toPluginRecord(repo, "v0.1.4").lazyInstallSnippet).toBe('{ "acme/slides.nvim" }');
   });
 });

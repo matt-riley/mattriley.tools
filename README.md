@@ -37,6 +37,7 @@ The generated plugin data currently focuses on:
 - repository name and slug
 - description
 - homepage URL
+- latest Git tag version
 - last updated timestamp
 - language and topics
 - `lazy.nvim` install snippet

@@ -97,6 +97,31 @@ async function fetchGitHubRepos(owner) {
   return repos;
 }
 
+async function fetchLatestGitHubTag(owner, repoName) {
+  const response = await fetch(`${GITHUB_API_BASE_URL}/repos/${owner}/${repoName}/tags?per_page=1`, {
+    headers: buildGitHubHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorBody = response.headers.get("content-type")?.includes("application/json")
+      ? await response.json()
+      : null;
+    const message = typeof errorBody?.message === "string" ? ` - ${errorBody.message}` : "";
+
+    throw new Error(
+      `GitHub tag fetch failed for ${owner}/${repoName}: ${response.status} ${response.statusText}${message}`,
+    );
+  }
+
+  const tags = await response.json();
+
+  if (!Array.isArray(tags)) {
+    throw new TypeError(`GitHub tag fetch for ${owner}/${repoName} returned a non-array response`);
+  }
+
+  return typeof tags[0]?.name === "string" && tags[0].name.length > 0 ? tags[0].name : "Unreleased";
+}
+
 async function writeGeneratedModule(
   outputPath,
   timestampExportName,
@@ -121,7 +146,12 @@ async function main() {
   const toolsOutputPath = join(dataDir, "tools.generated.ts");
   const pluginsOutputPath = join(dataDir, "plugins.generated.ts");
   const tools = await readFormulas(formulaDir);
-  const plugins = filterPluginRepos(await fetchGitHubRepos(GITHUB_OWNER)).map(toPluginRecord);
+  const pluginRepos = filterPluginRepos(await fetchGitHubRepos(GITHUB_OWNER));
+  const plugins = await Promise.all(
+    pluginRepos.map(async (repo) =>
+      toPluginRecord(repo, await fetchLatestGitHubTag(GITHUB_OWNER, repo.name)),
+    ),
+  );
   const generatedAt = new Date().toISOString();
 
   await Promise.all([
