@@ -10,12 +10,35 @@
  * }} GitHubRepo
  */
 
+/**
+ * @typedef {{
+ *   slug: string;
+ *   name: string;
+ *   description: string;
+ *   repository: string;
+ *   homepage: string;
+ *   updatedAt: string;
+ *   language: string | null;
+ *   topics: string[];
+ *   lazyInstallSnippet: string;
+ *   vimPackInstallSnippet: string;
+ * }} PluginRecord
+ */
+
+/**
+ * @param {{ name: string }[]} repos
+ * @returns {{ name: string }[]}
+ */
 export function filterPluginRepos(repos) {
   return repos
     .filter((repo) => repo.name.includes(".nvim"))
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 
+/**
+ * @param {GitHubRepo} repo
+ * @returns {PluginRecord}
+ */
 export function toPluginRecord(repo) {
   return {
     slug: repo.name,
