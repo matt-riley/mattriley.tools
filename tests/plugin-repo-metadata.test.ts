@@ -8,9 +8,9 @@ import {
 describe("plugin repo metadata", () => {
   it("keeps only repos whose names contain .nvim", () => {
     const repos = [
-      { name: "slides.nvim" },
       { name: "waystone.nvim" },
       { name: "hopcli" },
+      { name: "slides.nvim" },
     ];
 
     expect(filterPluginRepos(repos).map((repo) => repo.name)).toEqual([
