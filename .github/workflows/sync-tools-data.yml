@@ -39,6 +39,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Regenerate site data
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm run generate:data -- --tap-path "${{ github.workspace }}/tap-source"
 
       - name: Commit updated site data

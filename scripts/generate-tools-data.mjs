@@ -7,6 +7,20 @@ import { filterPluginRepos, toPluginRecord } from "./plugin-repo-metadata.mjs";
 const GITHUB_API_BASE_URL = "https://api.github.com";
 const GITHUB_OWNER = "matt-riley";
 
+function buildGitHubHeaders() {
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "mattriley.tools data generator",
+  };
+  const token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+}
+
 function readTapPathFromArgs(argv) {
   const tapPathIndex = argv.indexOf("--tap-path");
 
@@ -43,12 +57,7 @@ async function fetchGitHubRepos(owner) {
   while (true) {
     const response = await fetch(
       `${GITHUB_API_BASE_URL}/users/${owner}/repos?per_page=100&page=${page}&type=owner&sort=updated`,
-      {
-        headers: {
-          Accept: "application/vnd.github+json",
-          "User-Agent": "mattriley.tools data generator",
-        },
-      },
+      { headers: buildGitHubHeaders() },
     );
 
     if (!response.ok) {
