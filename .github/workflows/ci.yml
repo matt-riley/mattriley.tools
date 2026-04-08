@@ -18,7 +18,7 @@ jobs:
   deploy:
     needs: ci
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    uses: matt-riley/matt-riley-ci/.github/workflows/request-infra-deploy.yml@924fe06ffe4b4bd8637220bd5a950d56b4ed41a0
+    uses: ./.github/workflows/request-infra-deploy.yml
     with:
       app-name: mattriley-tools
     secrets:
