@@ -103,6 +103,10 @@ tbody tr:last-child td {
   gap: 1rem;
 }
 
+.catalog-section + .catalog-section {
+  margin-top: 2rem;
+}
+
 .panel {
   background: #fff;
   border: 1px solid #d9e2ec;
@@ -120,5 +124,27 @@ tbody tr:last-child td {
 }
 
 .install-command code {
+  color: inherit;
+}
+
+.snippet-group h3 {
+  margin: 0;
+}
+
+.snippet-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.snippet-block {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  background: #102a43;
+  color: #f0f4f8;
+  border-radius: 0.5rem;
+}
+
+.snippet-block code {
   color: inherit;
 }

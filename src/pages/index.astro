@@ -1,33 +1,36 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { generatedAt, tools } from "../data/tools.generated";
+import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
 ---
 
 <Layout
   title="mattriley.tools"
-  description="Static catalog of tools currently available in the matt-riley/tools Homebrew tap."
+  description="Static catalog of Matt Riley's Homebrew tools and Neovim plugins."
 >
   <main class="page">
     <header class="hero">
       <p class="eyebrow">
-        Source of truth:
+        Sources of truth:
         <a href="https://github.com/matt-riley/homebrew-tools">matt-riley/homebrew-tools</a>
+        and Matt's GitHub repos whose names contain <code>.nvim</code>
       </p>
       <h1>mattriley.tools</h1>
       <p class="lede">
-        A plain Astro catalog of the tools currently packaged in the Homebrew tap. The site data is
-        generated from the tap's formula files, starting with the packaged versions in the tap.
+        A plain Astro catalog of the Homebrew tools and Neovim plugins Matt ships publicly. Tool
+        data is generated from the tap's formula files; plugin data is generated from GitHub repos
+        whose names contain <code>.nvim</code>.
       </p>
-      <p>Last synced: <time datetime={generatedAt}>{generatedAt}</time></p>
     </header>
 
-    <section class="stack" aria-labelledby="available-tools">
+    <section class="stack catalog-section" aria-labelledby="homebrew-tools">
       <div>
-        <h2 id="available-tools">Available tools</h2>
+        <h2 id="homebrew-tools">Homebrew tools</h2>
         <p>
           Each entry links to a static detail page with the packaged version, install command,
           supported platforms, binary name, and source repository.
         </p>
+        <p>Last synced: <time datetime={generatedAt}>{generatedAt}</time></p>
       </div>
 
       <div class="table-wrapper">
@@ -50,6 +53,45 @@ import { generatedAt, tools } from "../data/tools.generated";
                 <td>{tool.description}</td>
                 <td>
                   <code>{tool.installCommand}</code>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="stack catalog-section" aria-labelledby="neovim-plugins">
+      <div>
+        <h2 id="neovim-plugins">Neovim plugins</h2>
+        <p>
+          Repositories from Matt's GitHub account whose names contain <code>.nvim</code>. Each
+          entry links to plugin details with <code>lazy.nvim</code> and <code>vim.pack</code>
+          install snippets.
+        </p>
+        <p>Last synced: <time datetime={pluginsGeneratedAt}>{pluginsGeneratedAt}</time></p>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Plugin</th>
+              <th scope="col">Description</th>
+              <th scope="col">Language</th>
+              <th scope="col">Install</th>
+            </tr>
+          </thead>
+          <tbody>
+            {plugins.map((plugin) => (
+              <tr>
+                <td>
+                  <a href={`/plugins/${plugin.slug}/`}>{plugin.name}</a>
+                </td>
+                <td>{plugin.description}</td>
+                <td>{plugin.language ?? "Unknown"}</td>
+                <td>
+                  <code>{plugin.lazyInstallSnippet}</code>
                 </td>
               </tr>
             ))}

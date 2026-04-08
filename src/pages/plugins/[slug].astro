@@ -1,0 +1,64 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { plugins, pluginsGeneratedAt } from "../../data/plugins.generated";
+
+interface Props {
+  plugin: (typeof plugins)[number];
+}
+
+export function getStaticPaths() {
+  return plugins.map((plugin) => ({
+    params: { slug: plugin.slug },
+    props: { plugin },
+  }));
+}
+
+const { plugin } = Astro.props;
+---
+
+<Layout title={plugin.name} description={plugin.description}>
+  <main class="page">
+    <p class="eyebrow"><a href="/">Back to all catalogs</a></p>
+
+    <header class="hero">
+      <h1>{plugin.name}</h1>
+      <p class="lede">{plugin.description}</p>
+      <p>Last synced: <time datetime={pluginsGeneratedAt}>{pluginsGeneratedAt}</time></p>
+    </header>
+
+    <section class="panel" aria-labelledby="plugin-metadata">
+      <h2 id="plugin-metadata">Plugin metadata</h2>
+      <dl class="meta-list">
+        <dt>Repository</dt>
+        <dd>
+          <a href={plugin.homepage}>{plugin.repository}</a>
+        </dd>
+
+        <dt>Language</dt>
+        <dd>{plugin.language ?? "Unknown"}</dd>
+
+        <dt>Topics</dt>
+        <dd>{plugin.topics.length > 0 ? plugin.topics.join(", ") : "No topics set"}</dd>
+
+        <dt>Last updated</dt>
+        <dd>
+          <time datetime={plugin.updatedAt}>{plugin.updatedAt}</time>
+        </dd>
+      </dl>
+    </section>
+
+    <section class="panel stack" aria-labelledby="plugin-install">
+      <h2 id="plugin-install">Install</h2>
+
+      <div class="snippet-group">
+        <h3>lazy.nvim</h3>
+        <pre class="snippet-block"><code>{plugin.lazyInstallSnippet}</code></pre>
+      </div>
+
+      <div class="snippet-group">
+        <h3>vim.pack</h3>
+        <pre class="snippet-block"><code>{plugin.vimPackInstallSnippet}</code></pre>
+      </div>
+    </section>
+  </main>
+</Layout>
