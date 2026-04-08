@@ -8,7 +8,7 @@ on:
 
 jobs:
   ci:
-    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@bd605dc142b75bef90c69f2707997f8cb161abc8 # main
+    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@556c658a6a3ce52b1f7e219e30eb70dcd2fe4f31 # main
     with:
       package-manager: pnpm
       run-lint: true
