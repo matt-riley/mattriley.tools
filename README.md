@@ -1,6 +1,6 @@
 # mattriley.tools
 
-> A static Astro site that lists the tools packaged in the [`matt-riley/tools`](https://github.com/matt-riley/homebrew-tools) Homebrew tap.
+> A static Astro site that lists Matt Riley's Homebrew tools and Neovim plugins.
 
 ## Stack
 
@@ -12,13 +12,16 @@
 
 ## Data flow
 
-The site renders from a generated data file:
+The site renders from generated data files:
 
-- Source of truth: `homebrew-tools/Formula/*.rb`
+- Source of truth for Homebrew tools: `homebrew-tools/Formula/*.rb`
+- Source of truth for Neovim plugins: public `matt-riley/*` GitHub repositories whose names contain `.nvim`
 - Generator: `scripts/generate-tools-data.mjs`
-- Generated artifact: `src/data/tools.generated.ts`
+- Generated artifacts:
+  - `src/data/tools.generated.ts`
+  - `src/data/plugins.generated.ts`
 
-The generated data currently focuses on:
+The generated Homebrew tool data currently focuses on:
 
 - formula name
 - packaged version in the tap
@@ -29,7 +32,17 @@ The generated data currently focuses on:
 - install command
 - installed binary name
 
-This repo assumes the tap's duplicate cask/formula issue is resolved elsewhere and that the site consumes the formula-only end state.
+The generated plugin data currently focuses on:
+
+- repository name and slug
+- description
+- repository URL
+- last updated timestamp
+- language and topics
+- `lazy.nvim` install snippet
+- `vim.pack` install snippet
+
+This repo assumes the tap's duplicate cask/formula issue is resolved elsewhere and that the site consumes the formula-only end state for the Homebrew catalog.
 
 ## Local development
 
@@ -62,9 +75,9 @@ pnpm format:check       # Verify formatting
 
 ## Automatic updates
 
-`.github/workflows/sync-tools-data.yml` syncs tool data on a schedule (every 6 hours) and can also be triggered manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap, regenerates `src/data/tools.generated.ts`, and commits if anything changed.
+`.github/workflows/sync-tools-data.yml` syncs site data on a schedule (every 6 hours) and can also be triggered manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap, regenerates both generated data files, and commits if either one changed.
 
-No additional secrets or tokens are required — the tap is public and the workflow uses the built-in `GITHUB_TOKEN` for pushing to this repo.
+No additional secrets or tokens are required — the tap is public, the plugin metadata comes from the public GitHub API, and the workflow uses the built-in `GITHUB_TOKEN` for pushing to this repo.
 
 Deployment remains intentionally undecided; the site output is plain static Astro so hosting can be chosen later.
 

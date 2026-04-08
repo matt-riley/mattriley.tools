@@ -131,6 +131,11 @@ tbody tr:last-child td {
   margin: 0;
 }
 
+.snippet-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
 .snippet-block {
   margin: 0;
   padding: 1rem;
