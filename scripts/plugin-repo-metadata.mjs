@@ -6,7 +6,7 @@
  *   description: string | null;
  *   pushed_at: string;
  *   language: string | null;
- *   topics: string[];
+ *   topics?: string[];
  * }} GitHubRepo
  */
 
@@ -49,7 +49,7 @@ export function toPluginRecord(repo) {
     updatedAt: repo.pushed_at,
     language: repo.language,
     topics: repo.topics ?? [],
-    lazyInstallSnippet: `{ "matt-riley/${repo.name}" }`,
+    lazyInstallSnippet: `{ "${repo.full_name}" }`,
     vimPackInstallSnippet: `vim.pack.add({ '${repo.html_url}' })`,
   };
 }

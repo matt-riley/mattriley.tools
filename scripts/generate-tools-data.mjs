@@ -1,24 +1,36 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { parseFormula } from "./formula-parser.mjs";
 import { filterPluginRepos, toPluginRecord } from "./plugin-repo-metadata.mjs";
 
 const GITHUB_API_BASE_URL = "https://api.github.com";
 const GITHUB_OWNER = "matt-riley";
+const GITHUB_API_VERSION = "2022-11-28";
 
-function buildGitHubHeaders() {
+export function buildGitHubHeaders(token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN) {
   const headers = {
     Accept: "application/vnd.github+json",
     "User-Agent": "mattriley.tools data generator",
+    "X-GitHub-Api-Version": GITHUB_API_VERSION,
   };
-  const token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
 
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
   return headers;
+}
+
+export function formatGitHubApiError(status, statusText, body) {
+  const message = typeof body?.message === "string" ? ` - ${body.message}` : "";
+  const authHint =
+    status === 401 || status === 403
+      ? ". Set GITHUB_TOKEN or GH_TOKEN to avoid low unauthenticated rate limits."
+      : "";
+
+  return `GitHub repo fetch failed: ${status} ${statusText}${message}${authHint}`;
 }
 
 function readTapPathFromArgs(argv) {
@@ -61,7 +73,11 @@ async function fetchGitHubRepos(owner) {
     );
 
     if (!response.ok) {
-      throw new Error(`GitHub repo fetch failed: ${response.status} ${response.statusText}`);
+      const errorBody = response.headers.get("content-type")?.includes("application/json")
+        ? await response.json()
+        : null;
+
+      throw new Error(formatGitHubApiError(response.status, response.statusText, errorBody));
     }
 
     const pageRepos = await response.json();
@@ -117,4 +133,6 @@ async function main() {
   console.log(`Generated ${plugins.length} plugins from GitHub repositories under ${GITHUB_OWNER}`);
 }
 
-await main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main();
+}

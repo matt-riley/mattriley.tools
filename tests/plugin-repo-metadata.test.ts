@@ -49,4 +49,18 @@ describe("plugin repo metadata", () => {
     };
     expect(toPluginRecord(repo).description).toBe("No description provided.");
   });
+
+  it("builds the lazy.nvim snippet from the full repository name", () => {
+    const repo = {
+      name: "slides.nvim",
+      full_name: "acme/slides.nvim",
+      html_url: "https://github.com/acme/slides.nvim",
+      description: "Neovim plugin for presenting Markdown slides in a full-screen floating window.",
+      pushed_at: "2026-04-08T01:02:03Z",
+      language: "Lua",
+      topics: ["neovim", "slides"],
+    };
+
+    expect(toPluginRecord(repo).lazyInstallSnippet).toBe('{ "acme/slides.nvim" }');
+  });
 });
