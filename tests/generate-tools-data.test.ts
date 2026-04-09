@@ -91,6 +91,7 @@ describe("generate tools data GitHub helpers", () => {
       markdown: null,
       htmlUrl: null,
       downloadUrl: null,
+      images: [],
     });
 
     globalThis.fetch = originalFetch;
