@@ -4,6 +4,15 @@ import indexPageSource from "../src/pages/index.astro?raw";
 import { generatedAt, tools } from "../src/data/tools.generated";
 import { plugins, pluginsGeneratedAt } from "../src/data/plugins.generated";
 
+function hasValidReadmeImageShape(image: unknown) {
+  const readmeImage = image as { source?: unknown; mirroredPath?: unknown };
+
+  return (
+    typeof readmeImage.source === "string" &&
+    (typeof readmeImage.mirroredPath === "string" || readmeImage.mirroredPath === null)
+  );
+}
+
 describe("generated site data", () => {
   it("includes at least one tool", () => {
     expect(tools.length).toBeGreaterThan(0);
@@ -54,11 +63,7 @@ describe("generated site data", () => {
           "htmlUrl" in tool.readme &&
           "downloadUrl" in tool.readme &&
           Array.isArray(tool.readme.images) &&
-          tool.readme.images.every(
-            (image) =>
-              typeof image.source === "string" &&
-              (typeof image.mirroredPath === "string" || image.mirroredPath === null),
-          ),
+          tool.readme.images.every(hasValidReadmeImageShape),
       ),
     ).toBe(true);
     expect(
@@ -69,11 +74,7 @@ describe("generated site data", () => {
           "htmlUrl" in plugin.readme &&
           "downloadUrl" in plugin.readme &&
           Array.isArray(plugin.readme.images) &&
-          plugin.readme.images.every(
-            (image) =>
-              typeof image.source === "string" &&
-              (typeof image.mirroredPath === "string" || image.mirroredPath === null),
-          ),
+          plugin.readme.images.every(hasValidReadmeImageShape),
       ),
     ).toBe(true);
     expect([...tools, ...plugins].some((entry) => typeof entry.readme.markdown === "string")).toBe(
