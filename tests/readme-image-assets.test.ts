@@ -36,4 +36,24 @@ describe("syncReadmeImages", () => {
       },
     ]);
   });
+
+  it("records a null mirrored path when an image download throws", async () => {
+    const imageRecords = await syncReadmeImages({
+      owner: "matt-riley",
+      repo: "slides.nvim",
+      markdown: "![Logo](images/logo.png)",
+      downloadUrl: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/README.md",
+      outputDir: "test-artifacts/readme-images",
+      fetchImpl: async () => {
+        throw new Error("socket hang up");
+      },
+    });
+
+    expect(imageRecords).toEqual([
+      {
+        source: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/images/logo.png",
+        mirroredPath: null,
+      },
+    ]);
+  });
 });

@@ -193,14 +193,20 @@ export async function syncReadmeImages({
 
   return Promise.all(
     sources.map(async (source) => {
-      const mirroredPath = await mirrorReadmeImage({
-        owner,
-        repo,
-        source,
-        outputDir,
-        fetchImpl,
-        headers,
-      });
+      let mirroredPath = null;
+
+      try {
+        mirroredPath = await mirrorReadmeImage({
+          owner,
+          repo,
+          source,
+          outputDir,
+          fetchImpl,
+          headers,
+        });
+      } catch {
+        mirroredPath = null;
+      }
 
       return { source, mirroredPath };
     }),
