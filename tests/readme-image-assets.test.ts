@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveReadmeImageRefs, syncReadmeImages } from "../scripts/readme-image-assets.mjs";
+import {
+  pruneMirroredReadmeImages,
+  resolveReadmeImageRefs,
+  syncReadmeImages,
+} from "../scripts/readme-image-assets.mjs";
 
 describe("resolveReadmeImageRefs", () => {
   it("collects absolute image urls from markdown", () => {
@@ -68,6 +72,7 @@ describe("syncReadmeImages", () => {
   });
 
   it("derives an image extension from the response content type when the source url has none", async () => {
+    const writes: Array<{ outputPath: string; bytes: Uint8Array }> = [];
     const imageRecords = await syncReadmeImages({
       owner: "matt-riley",
       repo: "slides.nvim",
@@ -79,6 +84,9 @@ describe("syncReadmeImages", () => {
           status: 200,
           headers: { "content-type": "image/webp" },
         }),
+      writeAssetImpl: async (outputPath: string, bytes: Uint8Array) => {
+        writes.push({ outputPath, bytes });
+      },
     });
 
     expect(imageRecords).toEqual([
@@ -89,5 +97,43 @@ describe("syncReadmeImages", () => {
         ),
       },
     ]);
+    expect(writes).toEqual([
+      {
+        outputPath:
+          "test-artifacts/readme-images/matt-riley/slides.nvim/927d665c5a13ef5c387c9eb619a88c8a3a4f95376fde5e13e02aa9a2bfb2e1a0.webp",
+        bytes: expect.any(Uint8Array),
+      },
+    ]);
+  });
+
+  it("prunes stale mirrored assets from the generated subtree", async () => {
+    const removedFiles: string[] = [];
+    const removeEmptyDirectoriesCalls: string[] = [];
+
+    await pruneMirroredReadmeImages({
+      outputDir: "public/generated/readme-images",
+      mirroredPaths: [
+        "/generated/readme-images/matt-riley/hopcli/keep.png",
+        "/generated/readme-images/matt-riley/slides.nvim/current.webp",
+      ],
+      listRelativeFilesImpl: async () => [
+        "matt-riley/hopcli/keep.png",
+        "matt-riley/hopcli/stale.png",
+        "matt-riley/slides.nvim/current.webp",
+        "matt-riley/waystone.nvim/orphan.gif",
+      ],
+      removeFileImpl: async (path: string) => {
+        removedFiles.push(path);
+      },
+      removeEmptyDirectoriesImpl: async (path: string) => {
+        removeEmptyDirectoriesCalls.push(path);
+      },
+    });
+
+    expect(removedFiles).toEqual([
+      "public/generated/readme-images/matt-riley/hopcli/stale.png",
+      "public/generated/readme-images/matt-riley/waystone.nvim/orphan.gif",
+    ]);
+    expect(removeEmptyDirectoriesCalls).toEqual(["public/generated/readme-images"]);
   });
 });

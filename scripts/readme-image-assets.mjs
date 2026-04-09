@@ -1,5 +1,5 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { extname, join } from "node:path";
+import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
+import { dirname, extname, join } from "node:path";
 import { createHash } from "node:crypto";
 
 const MARKDOWN_IMAGE_PATTERN = /!\[[^\]]*]\(([^)\s]+)(?:\s+["'][^"']*["'])?\)/g;
@@ -166,6 +166,110 @@ function getDownloadHeaders(source, headers) {
 }
 
 /**
+ * @param {string} outputPath
+ * @param {Uint8Array} bytes
+ * @returns {Promise<void>}
+ */
+async function writeMirroredAsset(outputPath, bytes) {
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, bytes);
+}
+
+/**
+ * @param {string} outputDir
+ * @param {string} currentDir
+ * @param {string} prefix
+ * @returns {Promise<string[]>}
+ */
+async function listRelativeFiles(outputDir, currentDir = outputDir, prefix = "") {
+  let entries;
+
+  try {
+    entries = await readdir(currentDir, { withFileTypes: true });
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      return [];
+    }
+
+    throw error;
+  }
+
+  const files = [];
+
+  for (const entry of entries) {
+    const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
+    const entryPath = join(currentDir, entry.name);
+
+    if (entry.isDirectory()) {
+      files.push(...(await listRelativeFiles(outputDir, entryPath, relativePath)));
+      continue;
+    }
+
+    if (entry.isFile()) {
+      files.push(relativePath);
+    }
+  }
+
+  return files;
+}
+
+/**
+ * @param {string} outputDir
+ * @param {string} currentDir
+ * @returns {Promise<void>}
+ */
+async function removeEmptyDirectories(outputDir, currentDir = outputDir) {
+  let entries;
+
+  try {
+    entries = await readdir(currentDir, { withFileTypes: true });
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      return;
+    }
+
+    throw error;
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    await removeEmptyDirectories(outputDir, join(currentDir, entry.name));
+  }
+
+  if (currentDir === outputDir) {
+    return;
+  }
+
+  const remainingEntries = await readdir(currentDir);
+
+  if (remainingEntries.length === 0) {
+    await rm(currentDir, { recursive: false, force: true });
+  }
+}
+
+/**
+ * @param {string | null | undefined} mirroredPath
+ * @returns {string | null}
+ */
+function toRelativeMirroredPath(mirroredPath) {
+  if (typeof mirroredPath !== "string" || mirroredPath.length === 0) {
+    return null;
+  }
+
+  const normalizedPath = mirroredPath.replace(/^\/+/, "");
+  const generatedPrefix = "generated/readme-images/";
+
+  if (!normalizedPath.startsWith(generatedPrefix)) {
+    return null;
+  }
+
+  return normalizedPath.slice(generatedPrefix.length);
+}
+
+/**
  * @param {{
  *   owner: string;
  *   repo: string;
@@ -173,6 +277,7 @@ function getDownloadHeaders(source, headers) {
  *   outputDir: string;
  *   fetchImpl?: typeof fetch;
  *   headers?: Record<string, string>;
+ *   writeAssetImpl?: (outputPath: string, bytes: Uint8Array) => Promise<void>;
  * }} input
  * @returns {Promise<string | null>}
  */
@@ -183,6 +288,7 @@ export async function mirrorReadmeImage({
   outputDir,
   fetchImpl = fetch,
   headers,
+  writeAssetImpl = writeMirroredAsset,
 }) {
   const response = await fetchImpl(source, {
     headers: getDownloadHeaders(source, headers),
@@ -201,11 +307,7 @@ export async function mirrorReadmeImage({
   const relativePathSegments = [sanitizePathSegment(owner), sanitizePathSegment(repo), filename];
   const relativePath = relativePathSegments.join("/");
   const outputPath = join(outputDir, ...relativePathSegments);
-
-  await mkdir(join(outputDir, sanitizePathSegment(owner), sanitizePathSegment(repo)), {
-    recursive: true,
-  });
-  await writeFile(outputPath, Buffer.from(bytes));
+  await writeAssetImpl(outputPath, Buffer.from(bytes));
 
   return `/generated/readme-images/${relativePath}`;
 }
@@ -219,6 +321,7 @@ export async function mirrorReadmeImage({
  *   outputDir: string;
  *   fetchImpl?: typeof fetch;
  *   headers?: Record<string, string>;
+ *   writeAssetImpl?: (outputPath: string, bytes: Uint8Array) => Promise<void>;
  * }} input
  * @returns {Promise<Array<{ source: string; mirroredPath: string | null }>>}
  */
@@ -230,6 +333,7 @@ export async function syncReadmeImages({
   outputDir,
   fetchImpl = fetch,
   headers,
+  writeAssetImpl = writeMirroredAsset,
 }) {
   const sources = resolveReadmeImageRefs({ markdown, downloadUrl });
 
@@ -245,6 +349,7 @@ export async function syncReadmeImages({
           outputDir,
           fetchImpl,
           headers,
+          writeAssetImpl,
         });
       } catch {
         mirroredPath = null;
@@ -253,4 +358,35 @@ export async function syncReadmeImages({
       return { source, mirroredPath };
     }),
   );
+}
+
+/**
+ * @param {{
+ *   outputDir: string;
+ *   mirroredPaths: Array<string | null | undefined>;
+ *   listRelativeFilesImpl?: (outputDir: string) => Promise<string[]>;
+ *   removeFileImpl?: (filePath: string) => Promise<void>;
+ *   removeEmptyDirectoriesImpl?: (outputDir: string) => Promise<void>;
+ * }} input
+ * @returns {Promise<void>}
+ */
+export async function pruneMirroredReadmeImages({
+  outputDir,
+  mirroredPaths,
+  listRelativeFilesImpl = listRelativeFiles,
+  removeFileImpl = async (filePath) => rm(filePath, { force: true }),
+  removeEmptyDirectoriesImpl = removeEmptyDirectories,
+}) {
+  const referencedPaths = new Set(
+    mirroredPaths.map((mirroredPath) => toRelativeMirroredPath(mirroredPath)).filter(Boolean),
+  );
+  const existingFiles = await listRelativeFilesImpl(outputDir);
+
+  await Promise.all(
+    existingFiles
+      .filter((relativePath) => !referencedPaths.has(relativePath))
+      .map((relativePath) => removeFileImpl(join(outputDir, relativePath))),
+  );
+
+  await removeEmptyDirectoriesImpl(outputDir);
 }

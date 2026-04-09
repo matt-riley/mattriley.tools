@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 
 import { parseFormula } from "./formula-parser.mjs";
 import { filterPluginRepos, toPluginRecord } from "./plugin-repo-metadata.mjs";
-import { syncReadmeImages } from "./readme-image-assets.mjs";
+import { pruneMirroredReadmeImages, syncReadmeImages } from "./readme-image-assets.mjs";
 
 const GITHUB_API_BASE_URL = "https://api.github.com";
 const GITHUB_OWNER = "matt-riley";
@@ -151,6 +151,7 @@ export async function fetchGitHubReadme(owner, repoName, token, options = {}) {
   const {
     fetchImpl = fetch,
     outputDir = resolve(process.cwd(), "public/generated/readme-images"),
+    writeAssetImpl,
   } = options;
   const headers = buildGitHubHeaders(token);
   const response = await fetchImpl(`${GITHUB_API_BASE_URL}/repos/${owner}/${repoName}/readme`, {
@@ -193,6 +194,7 @@ export async function fetchGitHubReadme(owner, repoName, token, options = {}) {
       outputDir,
       fetchImpl,
       headers,
+      writeAssetImpl,
     }),
   };
 }
@@ -292,6 +294,14 @@ async function main() {
     })),
   );
   const generatedAt = new Date().toISOString();
+  const mirroredPaths = [...tools, ...plugins].flatMap((entry) =>
+    entry.readme.images.map((image) => image.mirroredPath),
+  );
+
+  await pruneMirroredReadmeImages({
+    outputDir: publicReadmeImageDir,
+    mirroredPaths,
+  });
 
   await Promise.all([
     writeGeneratedModule(toolsOutputPath, "generatedAt", "tools", tools, generatedAt),

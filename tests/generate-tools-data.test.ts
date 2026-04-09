@@ -81,6 +81,7 @@ describe("generate tools data GitHub helpers", () => {
   it("mirrors README images and returns their metadata", async () => {
     const originalFetch = globalThis.fetch;
     const outputDir = "test-artifacts/generator-readme-images";
+    const writes: Array<{ outputPath: string; bytes: Uint8Array }> = [];
 
     globalThis.fetch = async (input) => {
       const url = String(input);
@@ -107,7 +108,12 @@ describe("generate tools data GitHub helpers", () => {
       return new Response("not found", { status: 404 });
     };
 
-    const readme = await fetchGitHubReadme("matt-riley", "newbrew", "tool-token", { outputDir });
+    const readme = await fetchGitHubReadme("matt-riley", "newbrew", "tool-token", {
+      outputDir,
+      writeAssetImpl: async (outputPath: string, bytes: Uint8Array) => {
+        writes.push({ outputPath, bytes });
+      },
+    });
 
     expect(readme.images).toEqual([
       {
@@ -115,6 +121,14 @@ describe("generate tools data GitHub helpers", () => {
         mirroredPath: expect.stringMatching(
           /^\/generated\/readme-images\/matt-riley\/newbrew\/[a-f0-9]{64}\.png$/,
         ),
+      },
+    ]);
+    expect(writes).toEqual([
+      {
+        outputPath: expect.stringMatching(
+          /^test-artifacts\/generator-readme-images\/matt-riley\/newbrew\/[a-f0-9]{64}\.png$/,
+        ),
+        bytes: expect.any(Uint8Array),
       },
     ]);
     globalThis.fetch = originalFetch;
