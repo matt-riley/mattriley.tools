@@ -1,6 +1,7 @@
 ---
 import { generatedAt, tools } from "../../data/tools.generated";
 import Layout from "../../layouts/Layout.astro";
+import { formatUtcTimestamp } from "../../utils/date";
 
 interface Props {
   tool: (typeof tools)[number];
@@ -14,6 +15,7 @@ export function getStaticPaths() {
 }
 
 const { tool } = Astro.props;
+const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
 ---
 
 <Layout title={tool.name} description={tool.description}>
@@ -23,7 +25,7 @@ const { tool } = Astro.props;
     <header class="hero">
       <h1>{tool.name}</h1>
       <p class="lede">{tool.description}</p>
-      <p>Last synced: <time datetime={generatedAt}>{generatedAt}</time></p>
+      <p>Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time></p>
     </header>
 
     <section class="panel" aria-labelledby="tool-metadata">

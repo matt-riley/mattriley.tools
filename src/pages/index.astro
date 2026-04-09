@@ -2,6 +2,10 @@
 import Layout from "../layouts/Layout.astro";
 import { generatedAt, tools } from "../data/tools.generated";
 import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
+import { formatUtcTimestamp } from "../utils/date";
+
+const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
+const formattedPluginsGeneratedAt = formatUtcTimestamp(pluginsGeneratedAt);
 ---
 
 <Layout
@@ -25,7 +29,7 @@ import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
           Each entry links to a static detail page with the packaged version, install command,
           supported platforms, binary name, and source repository.
         </p>
-        <p>Last synced: <time datetime={generatedAt}>{generatedAt}</time></p>
+        <p>Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time></p>
       </div>
 
       <div class="table-wrapper">
@@ -64,7 +68,7 @@ import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
           entry links to plugin details with <code>lazy.nvim</code> and <code>vim.pack</code>
           install snippets.
         </p>
-        <p>Last synced: <time datetime={pluginsGeneratedAt}>{pluginsGeneratedAt}</time></p>
+        <p>Last synced: <time datetime={pluginsGeneratedAt}>{formattedPluginsGeneratedAt}</time></p>
       </div>
 
       <div class="table-wrapper">
