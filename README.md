@@ -20,6 +20,11 @@ The site renders from generated data files:
 - Generated artifacts:
   - `src/data/tools.generated.ts`
   - `src/data/plugins.generated.ts`
+  - `public/generated/readme-images/`
+
+`pnpm run generate:data` owns all three generated outputs. It syncs README markdown into the
+generated data modules and mirrors any allowed README image assets into
+`public/generated/readme-images/` so the site can serve them locally.
 
 The generated Homebrew tool data currently focuses on:
 
@@ -59,7 +64,8 @@ pnpm dev
 
 If you want local generated data to include README content from private tool repositories, set
 `TOOL_REPOS_GITHUB_TOKEN` to a token that can read those repos before running
-`pnpm run generate:data`.
+`pnpm run generate:data`. That generation step also refreshes mirrored README image assets under
+`public/generated/readme-images/`.
 
 If your tap checkout is somewhere else, point the generator at it explicitly:
 
@@ -70,7 +76,7 @@ pnpm run generate:data -- --tap-path /absolute/path/to/homebrew-tools
 ## Commands
 
 ```bash
-pnpm run generate:data  # Regenerate both generated data files from the tap and GitHub
+pnpm run generate:data  # Regenerate all three generated outputs from the tap and GitHub
 pnpm dev                # Start local dev server
 pnpm build              # Run astro check and build static output
 pnpm preview            # Preview the production build locally
@@ -82,7 +88,7 @@ pnpm format:check       # Verify formatting
 
 ## Automatic updates
 
-`.github/workflows/sync-tools-data.yml` syncs site data on a schedule (every 6 hours) and can also be triggered manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap, uses the repo's existing GitHub App credentials (`vars.APP_ID` and `secrets.PRIVATE_KEY`) to read private tool READMEs, regenerates both generated data files, and commits if either one changed.
+`.github/workflows/sync-tools-data.yml` syncs site data on a schedule (every 6 hours) and can also be triggered manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap, uses the repo's existing GitHub App credentials (`vars.APP_ID` and `secrets.PRIVATE_KEY`) to read private tool READMEs, regenerates all three generated outputs, and commits if any of those generated outputs changed.
 
 Deployment remains intentionally undecided; the site output is plain static Astro so hosting can be chosen later.
 

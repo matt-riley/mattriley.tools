@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 
 import { parseFormula } from "./formula-parser.mjs";
 import { filterPluginRepos, toPluginRecord } from "./plugin-repo-metadata.mjs";
+import { pruneMirroredReadmeImages, syncReadmeImages } from "./readme-image-assets.mjs";
 
 const GITHUB_API_BASE_URL = "https://api.github.com";
 const GITHUB_OWNER = "matt-riley";
@@ -16,6 +17,7 @@ function createUnavailableReadme() {
     markdown: null,
     htmlUrl: null,
     downloadUrl: null,
+    images: [],
   };
 }
 
@@ -145,9 +147,15 @@ async function fetchGitHubRepos(owner) {
   return repos;
 }
 
-export async function fetchGitHubReadme(owner, repoName, token) {
-  const response = await fetch(`${GITHUB_API_BASE_URL}/repos/${owner}/${repoName}/readme`, {
-    headers: buildGitHubHeaders(token),
+export async function fetchGitHubReadme(owner, repoName, token, options = {}) {
+  const {
+    fetchImpl = fetch,
+    outputDir = resolve(process.cwd(), "public/generated/readme-images"),
+    writeAssetImpl,
+  } = options;
+  const headers = buildGitHubHeaders(token);
+  const response = await fetchImpl(`${GITHUB_API_BASE_URL}/repos/${owner}/${repoName}/readme`, {
+    headers,
   });
 
   if (response.status === 404) {
@@ -171,10 +179,23 @@ export async function fetchGitHubReadme(owner, repoName, token) {
     throw new TypeError(`GitHub README fetch for ${owner}/${repoName} returned no content`);
   }
 
+  const markdown = Buffer.from(readme.content.replace(/\n/g, ""), "base64").toString("utf8");
+  const downloadUrl = stripUrlSearchAndHash(readme.download_url);
+
   return {
-    markdown: Buffer.from(readme.content.replace(/\n/g, ""), "base64").toString("utf8"),
+    markdown,
     htmlUrl: typeof readme.html_url === "string" ? readme.html_url : null,
-    downloadUrl: stripUrlSearchAndHash(readme.download_url),
+    downloadUrl,
+    images: await syncReadmeImages({
+      owner,
+      repo: repoName,
+      markdown,
+      downloadUrl,
+      outputDir,
+      fetchImpl,
+      headers,
+      writeAssetImpl,
+    }),
   };
 }
 
@@ -206,9 +227,9 @@ async function fetchLatestGitHubTag(owner, repoName) {
   return typeof tags[0]?.name === "string" && tags[0].name.length > 0 ? tags[0].name : "Unreleased";
 }
 
-async function fetchGitHubReadmeWithFallback(owner, repoName, token) {
+async function fetchGitHubReadmeWithFallback(owner, repoName, token, outputDir) {
   try {
-    return await fetchGitHubReadme(owner, repoName, token);
+    return await fetchGitHubReadme(owner, repoName, token, { outputDir });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
 
@@ -239,6 +260,7 @@ async function main() {
     : resolve(process.cwd(), "../homebrew-tools");
   const formulaDir = join(tapPath, "Formula");
   const dataDir = resolve(process.cwd(), "src/data");
+  const publicReadmeImageDir = resolve(process.cwd(), "public/generated/readme-images");
   const toolsOutputPath = join(dataDir, "tools.generated.ts");
   const pluginsOutputPath = join(dataDir, "plugins.generated.ts");
   const parsedTools = await readFormulas(formulaDir);
@@ -253,6 +275,7 @@ async function main() {
               repository.owner,
               repository.repo,
               TOOL_README_TOKEN,
+              publicReadmeImageDir,
             )
           : createUnavailableReadme(),
       };
@@ -262,10 +285,23 @@ async function main() {
   const plugins = await Promise.all(
     pluginRepos.map(async (repo) => ({
       ...toPluginRecord(repo, await fetchLatestGitHubTag(GITHUB_OWNER, repo.name)),
-      readme: await fetchGitHubReadmeWithFallback(GITHUB_OWNER, repo.name),
+      readme: await fetchGitHubReadmeWithFallback(
+        GITHUB_OWNER,
+        repo.name,
+        undefined,
+        publicReadmeImageDir,
+      ),
     })),
   );
   const generatedAt = new Date().toISOString();
+  const mirroredPaths = [...tools, ...plugins].flatMap((entry) =>
+    entry.readme.images.map((image) => image.mirroredPath),
+  );
+
+  await pruneMirroredReadmeImages({
+    outputDir: publicReadmeImageDir,
+    mirroredPaths,
+  });
 
   await Promise.all([
     writeGeneratedModule(toolsOutputPath, "generatedAt", "tools", tools, generatedAt),
