@@ -114,6 +114,10 @@ tbody tr:last-child td {
   padding: 1rem 1.25rem;
 }
 
+.panel + .panel {
+  margin-top: 1.5rem;
+}
+
 .install-command {
   display: inline-block;
   padding: 0.75rem 1rem;
@@ -147,4 +151,55 @@ tbody tr:last-child td {
 
 .snippet-block code {
   color: inherit;
+}
+
+.readme-content > :first-child {
+  margin-top: 0;
+}
+
+.readme-content > :last-child {
+  margin-bottom: 0;
+}
+
+.readme-content :is(h1, h2, h3, h4, h5, h6) {
+  scroll-margin-top: 1rem;
+}
+
+.readme-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.readme-content pre {
+  margin: 1rem 0;
+  padding: 1rem;
+  overflow-x: auto;
+  background: #102a43;
+  color: #f0f4f8;
+  border-radius: 0.5rem;
+}
+
+.readme-content code {
+  overflow-wrap: anywhere;
+}
+
+.readme-content :not(pre) > code {
+  padding: 0.1rem 0.3rem;
+  background: #f0f4f8;
+  border-radius: 0.25rem;
+}
+
+.readme-content blockquote {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 4px solid #bcccdc;
+  color: #486581;
+}
+
+.readme-content table {
+  display: block;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid #d9e2ec;
+  border-radius: 0.5rem;
 }

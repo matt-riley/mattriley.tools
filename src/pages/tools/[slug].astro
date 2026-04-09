@@ -2,6 +2,7 @@
 import { generatedAt, tools } from "../../data/tools.generated";
 import Layout from "../../layouts/Layout.astro";
 import { formatUtcTimestamp } from "../../utils/date";
+import { renderReadme } from "../../utils/readme";
 
 interface Props {
   tool: (typeof tools)[number];
@@ -16,6 +17,7 @@ export function getStaticPaths() {
 
 const { tool } = Astro.props;
 const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
+const readmeHtml = renderReadme(tool.readme);
 ---
 
 <Layout title={tool.name} description={tool.description}>
@@ -60,6 +62,17 @@ const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
         <dt>License</dt>
         <dd>{tool.license ?? "Not declared in the formula"}</dd>
       </dl>
+    </section>
+
+    <section class="panel" aria-labelledby="tool-readme">
+      <h2 id="tool-readme">README</h2>
+      {
+        tool.readme.markdown ? (
+          <div class="readme-content" set:html={readmeHtml} />
+        ) : (
+          <p>README unavailable.</p>
+        )
+      }
     </section>
   </main>
 </Layout>

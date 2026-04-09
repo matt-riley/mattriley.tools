@@ -9,6 +9,14 @@ const GITHUB_API_BASE_URL = "https://api.github.com";
 const GITHUB_OWNER = "matt-riley";
 const GITHUB_API_VERSION = "2022-11-28";
 
+function createUnavailableReadme() {
+  return {
+    markdown: null,
+    htmlUrl: null,
+    downloadUrl: null,
+  };
+}
+
 export function buildGitHubHeaders(token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN) {
   const headers = {
     Accept: "application/vnd.github+json",
@@ -31,6 +39,32 @@ export function formatGitHubApiError(status, statusText, body) {
       : "";
 
   return `GitHub repo fetch failed: ${status} ${statusText}${message}${authHint}`;
+}
+
+export function extractGitHubRepository(urlString) {
+  try {
+    const url = new URL(urlString);
+
+    if (url.hostname !== "github.com") {
+      return null;
+    }
+
+    const pathSegments = url.pathname
+      .replace(/\.git$/, "")
+      .split("/")
+      .filter(Boolean);
+
+    if (pathSegments.length !== 2) {
+      return null;
+    }
+
+    return {
+      owner: pathSegments[0],
+      repo: pathSegments[1],
+    };
+  } catch {
+    return null;
+  }
 }
 
 function readTapPathFromArgs(argv) {
@@ -97,10 +131,46 @@ async function fetchGitHubRepos(owner) {
   return repos;
 }
 
-async function fetchLatestGitHubTag(owner, repoName) {
-  const response = await fetch(`${GITHUB_API_BASE_URL}/repos/${owner}/${repoName}/tags?per_page=1`, {
+export async function fetchGitHubReadme(owner, repoName) {
+  const response = await fetch(`${GITHUB_API_BASE_URL}/repos/${owner}/${repoName}/readme`, {
     headers: buildGitHubHeaders(),
   });
+
+  if (response.status === 404) {
+    return createUnavailableReadme();
+  }
+
+  if (!response.ok) {
+    const errorBody = response.headers.get("content-type")?.includes("application/json")
+      ? await response.json()
+      : null;
+    const message = typeof errorBody?.message === "string" ? ` - ${errorBody.message}` : "";
+
+    throw new Error(
+      `GitHub README fetch failed for ${owner}/${repoName}: ${response.status} ${response.statusText}${message}`,
+    );
+  }
+
+  const readme = await response.json();
+
+  if (typeof readme?.content !== "string") {
+    throw new TypeError(`GitHub README fetch for ${owner}/${repoName} returned no content`);
+  }
+
+  return {
+    markdown: Buffer.from(readme.content.replace(/\n/g, ""), "base64").toString("utf8"),
+    htmlUrl: typeof readme.html_url === "string" ? readme.html_url : null,
+    downloadUrl: typeof readme.download_url === "string" ? readme.download_url : null,
+  };
+}
+
+async function fetchLatestGitHubTag(owner, repoName) {
+  const response = await fetch(
+    `${GITHUB_API_BASE_URL}/repos/${owner}/${repoName}/tags?per_page=1`,
+    {
+      headers: buildGitHubHeaders(),
+    },
+  );
 
   if (!response.ok) {
     const errorBody = response.headers.get("content-type")?.includes("application/json")
@@ -120,6 +190,18 @@ async function fetchLatestGitHubTag(owner, repoName) {
   }
 
   return typeof tags[0]?.name === "string" && tags[0].name.length > 0 ? tags[0].name : "Unreleased";
+}
+
+async function fetchGitHubReadmeWithFallback(owner, repoName) {
+  try {
+    return await fetchGitHubReadme(owner, repoName);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    console.warn(`Skipping README sync for ${owner}/${repoName}: ${message}`);
+
+    return createUnavailableReadme();
+  }
 }
 
 async function writeGeneratedModule(
@@ -145,12 +227,25 @@ async function main() {
   const dataDir = resolve(process.cwd(), "src/data");
   const toolsOutputPath = join(dataDir, "tools.generated.ts");
   const pluginsOutputPath = join(dataDir, "plugins.generated.ts");
-  const tools = await readFormulas(formulaDir);
+  const parsedTools = await readFormulas(formulaDir);
+  const tools = await Promise.all(
+    parsedTools.map(async (tool) => {
+      const repository = extractGitHubRepository(tool.homepage);
+
+      return {
+        ...tool,
+        readme: repository
+          ? await fetchGitHubReadmeWithFallback(repository.owner, repository.repo)
+          : createUnavailableReadme(),
+      };
+    }),
+  );
   const pluginRepos = filterPluginRepos(await fetchGitHubRepos(GITHUB_OWNER));
   const plugins = await Promise.all(
-    pluginRepos.map(async (repo) =>
-      toPluginRecord(repo, await fetchLatestGitHubTag(GITHUB_OWNER, repo.name)),
-    ),
+    pluginRepos.map(async (repo) => ({
+      ...toPluginRecord(repo, await fetchLatestGitHubTag(GITHUB_OWNER, repo.name)),
+      readme: await fetchGitHubReadmeWithFallback(GITHUB_OWNER, repo.name),
+    })),
   );
   const generatedAt = new Date().toISOString();
 

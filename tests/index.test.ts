@@ -45,22 +45,46 @@ describe("generated site data", () => {
     ).toBe(true);
   });
 
+  it("stores synced README metadata for every tool and plugin", () => {
+    expect(
+      tools.every(
+        (tool) =>
+          typeof tool.readme === "object" &&
+          "markdown" in tool.readme &&
+          "htmlUrl" in tool.readme &&
+          "downloadUrl" in tool.readme,
+      ),
+    ).toBe(true);
+    expect(
+      plugins.every(
+        (plugin) =>
+          typeof plugin.readme === "object" &&
+          "markdown" in plugin.readme &&
+          "htmlUrl" in plugin.readme &&
+          "downloadUrl" in plugin.readme,
+      ),
+    ).toBe(true);
+    expect([...tools, ...plugins].some((entry) => typeof entry.readme.markdown === "string")).toBe(
+      true,
+    );
+  });
+
   it("renders the plugin index table with plugin, version, and description columns only", async () => {
     const pluginSection = indexPageSource.split('aria-labelledby="neovim-plugins"')[1];
 
     const pluginHeader = pluginSection.match(/<thead>[\s\S]*?<\/thead>/)?.[0] ?? "";
 
-    expect(pluginHeader).toContain("<th scope=\"col\">Plugin</th>");
-    expect(pluginHeader).toContain("<th scope=\"col\">Version</th>");
-    expect(pluginHeader).toContain("<th scope=\"col\">Description</th>");
-    expect(pluginHeader.indexOf("<th scope=\"col\">Plugin</th>")).toBeLessThan(
-      pluginHeader.indexOf("<th scope=\"col\">Version</th>"),
+    expect(pluginHeader).toContain('<th scope="col">Plugin</th>');
+    expect(pluginHeader).toContain('<th scope="col">Version</th>');
+    expect(pluginHeader).toContain('<th scope="col">Description</th>');
+    expect(pluginHeader.indexOf('<th scope="col">Plugin</th>')).toBeLessThan(
+      pluginHeader.indexOf('<th scope="col">Version</th>'),
     );
-    expect(pluginHeader.indexOf("<th scope=\"col\">Version</th>")).toBeLessThan(
-      pluginHeader.indexOf("<th scope=\"col\">Description</th>"),
+    expect(pluginHeader.indexOf('<th scope="col">Version</th>')).toBeLessThan(
+      pluginHeader.indexOf('<th scope="col">Description</th>'),
     );
-    expect(pluginSection).not.toContain("<th scope=\"col\">Language</th>");
-    expect(pluginSection).not.toContain("<th scope=\"col\">Install</th>");
+    expect(pluginSection).not.toContain('<th scope="col">Language</th>');
+    expect(pluginSection).not.toContain('<th scope="col">Install</th>');
   });
 
   it("does not render the source-of-truth eyebrow on the homepage", () => {

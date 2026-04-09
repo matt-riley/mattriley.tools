@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import { plugins, pluginsGeneratedAt } from "../../data/plugins.generated";
 import { formatUtcTimestamp } from "../../utils/date";
+import { renderReadme } from "../../utils/readme";
 
 interface Props {
   plugin: (typeof plugins)[number];
@@ -16,6 +17,7 @@ export function getStaticPaths() {
 
 const { plugin } = Astro.props;
 const formattedPluginsGeneratedAt = formatUtcTimestamp(pluginsGeneratedAt);
+const readmeHtml = renderReadme(plugin.readme);
 ---
 
 <Layout title={plugin.name} description={plugin.description}>
@@ -61,6 +63,17 @@ const formattedPluginsGeneratedAt = formatUtcTimestamp(pluginsGeneratedAt);
         <h3>vim.pack</h3>
         <pre class="snippet-block"><code>{plugin.vimPackInstallSnippet}</code></pre>
       </div>
+    </section>
+
+    <section class="panel" aria-labelledby="plugin-readme">
+      <h2 id="plugin-readme">README</h2>
+      {
+        plugin.readme.markdown ? (
+          <div class="readme-content" set:html={readmeHtml} />
+        ) : (
+          <p>README unavailable.</p>
+        )
+      }
     </section>
   </main>
 </Layout>

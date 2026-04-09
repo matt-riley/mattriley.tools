@@ -27,6 +27,7 @@ The generated Homebrew tool data currently focuses on:
 - packaged version in the tap
 - description
 - homepage
+- synced repository README content when the homepage points at a GitHub repository
 - license
 - platform support
 - install command
@@ -37,6 +38,7 @@ The generated plugin data currently focuses on:
 - repository name and slug
 - description
 - homepage URL
+- synced repository README content
 - latest Git tag version
 - last updated timestamp
 - language and topics

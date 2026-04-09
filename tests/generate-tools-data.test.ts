@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildGitHubHeaders,
+  extractGitHubRepository,
+  fetchGitHubReadme,
   formatGitHubApiError,
 } from "../scripts/generate-tools-data.mjs";
 
@@ -28,5 +30,58 @@ describe("generate tools data GitHub helpers", () => {
     ).toBe(
       "GitHub repo fetch failed: 403 Forbidden - API rate limit exceeded. Set GITHUB_TOKEN or GH_TOKEN to avoid low unauthenticated rate limits.",
     );
+  });
+
+  it("extracts owner and repo from a GitHub repository url", () => {
+    expect(extractGitHubRepository("https://github.com/matt-riley/newbrew")).toEqual({
+      owner: "matt-riley",
+      repo: "newbrew",
+    });
+    expect(extractGitHubRepository("https://github.com/matt-riley/newbrew/issues")).toBeNull();
+    expect(extractGitHubRepository("https://example.com/matt-riley/newbrew")).toBeNull();
+  });
+
+  it("decodes README metadata from the GitHub readme endpoint", async () => {
+    const originalFetch = globalThis.fetch;
+
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          content: "IyBIZWxsbyBmcm9tIFJFQURNRQo=",
+          encoding: "base64",
+          html_url: "https://github.com/matt-riley/newbrew/blob/main/README.md",
+          download_url: "https://raw.githubusercontent.com/matt-riley/newbrew/main/README.md",
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      );
+
+    await expect(fetchGitHubReadme("matt-riley", "newbrew")).resolves.toEqual({
+      markdown: "# Hello from README\n",
+      htmlUrl: "https://github.com/matt-riley/newbrew/blob/main/README.md",
+      downloadUrl: "https://raw.githubusercontent.com/matt-riley/newbrew/main/README.md",
+    });
+
+    globalThis.fetch = originalFetch;
+  });
+
+  it("returns an unavailable README payload when GitHub reports no readme", async () => {
+    const originalFetch = globalThis.fetch;
+
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify({ message: "Not Found" }), {
+        status: 404,
+        headers: { "content-type": "application/json" },
+      });
+
+    await expect(fetchGitHubReadme("matt-riley", "newbrew")).resolves.toEqual({
+      markdown: null,
+      htmlUrl: null,
+      downloadUrl: null,
+    });
+
+    globalThis.fetch = originalFetch;
   });
 });
