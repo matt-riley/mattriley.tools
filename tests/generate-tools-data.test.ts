@@ -78,6 +78,48 @@ describe("generate tools data GitHub helpers", () => {
     globalThis.fetch = originalFetch;
   });
 
+  it("mirrors README images and returns their metadata", async () => {
+    const originalFetch = globalThis.fetch;
+    const outputDir = "test-artifacts/generator-readme-images";
+
+    globalThis.fetch = async (input) => {
+      const url = String(input);
+
+      if (url.endsWith("/readme")) {
+        return new Response(
+          JSON.stringify({
+            content: "IVtMb2dvXShpbWFnZXMvbG9nby5wbmcpCg==",
+            encoding: "base64",
+            html_url: "https://github.com/matt-riley/newbrew/blob/main/README.md",
+            download_url: "https://raw.githubusercontent.com/matt-riley/newbrew/main/README.md",
+          }),
+          {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          },
+        );
+      }
+
+      if (url === "https://raw.githubusercontent.com/matt-riley/newbrew/main/images/logo.png") {
+        return new Response("image-bytes", { status: 200 });
+      }
+
+      return new Response("not found", { status: 404 });
+    };
+
+    const readme = await fetchGitHubReadme("matt-riley", "newbrew", "tool-token", { outputDir });
+
+    expect(readme.images).toEqual([
+      {
+        source: "https://raw.githubusercontent.com/matt-riley/newbrew/main/images/logo.png",
+        mirroredPath: expect.stringMatching(
+          /^\/generated\/readme-images\/matt-riley\/newbrew\/[a-f0-9]{64}\.png$/,
+        ),
+      },
+    ]);
+    globalThis.fetch = originalFetch;
+  });
+
   it("returns an unavailable README payload when GitHub reports no readme", async () => {
     const originalFetch = globalThis.fetch;
 
