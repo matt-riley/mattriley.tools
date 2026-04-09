@@ -20,6 +20,24 @@ jobs:
       - name: Check out site repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+      - name: Validate GitHub App configuration
+        env:
+          APP_ID: ${{ vars.APP_ID }}
+        run: |
+          if [ -z "$APP_ID" ]; then
+            echo "Repository variable APP_ID is required." >&2
+            exit 1
+          fi
+
+      - name: Create GitHub App token for private tool repos
+        id: tool-readme-token
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
+        with:
+          app-id: ${{ vars.APP_ID }}
+          owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          repositories: hopcli,newbrew,workv2
+
       - name: Check out Homebrew tap
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -41,6 +59,7 @@ jobs:
       - name: Regenerate site data
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          TOOL_REPOS_GITHUB_TOKEN: ${{ steps.tool-readme-token.outputs.token }}
         run: pnpm run generate:data -- --tap-path "${{ github.workspace }}/tap-source"
 
       - name: Commit updated site data

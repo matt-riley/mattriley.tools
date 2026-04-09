@@ -13,4 +13,9 @@ describe("detail pages", () => {
     expect(pluginDetailPageSource).toContain('aria-labelledby="plugin-readme"');
     expect(pluginDetailPageSource).toContain("README unavailable.");
   });
+
+  it("does not render a separate install section on plugin detail pages", () => {
+    expect(pluginDetailPageSource).not.toContain('aria-labelledby="plugin-install"');
+    expect(pluginDetailPageSource).not.toContain('<h2 id="plugin-install">Install</h2>');
+  });
 });

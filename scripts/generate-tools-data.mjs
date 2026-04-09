@@ -8,6 +8,8 @@ import { filterPluginRepos, toPluginRecord } from "./plugin-repo-metadata.mjs";
 const GITHUB_API_BASE_URL = "https://api.github.com";
 const GITHUB_OWNER = "matt-riley";
 const GITHUB_API_VERSION = "2022-11-28";
+const TOOL_README_TOKEN =
+  process.env.TOOL_REPOS_GITHUB_TOKEN ?? process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
 
 function createUnavailableReadme() {
   return {
@@ -65,6 +67,18 @@ export function extractGitHubRepository(urlString) {
   } catch {
     return null;
   }
+}
+
+function stripUrlSearchAndHash(urlString) {
+  if (typeof urlString !== "string") {
+    return null;
+  }
+
+  const url = new URL(urlString);
+  url.search = "";
+  url.hash = "";
+
+  return url.toString();
 }
 
 function readTapPathFromArgs(argv) {
@@ -131,9 +145,9 @@ async function fetchGitHubRepos(owner) {
   return repos;
 }
 
-export async function fetchGitHubReadme(owner, repoName) {
+export async function fetchGitHubReadme(owner, repoName, token) {
   const response = await fetch(`${GITHUB_API_BASE_URL}/repos/${owner}/${repoName}/readme`, {
-    headers: buildGitHubHeaders(),
+    headers: buildGitHubHeaders(token),
   });
 
   if (response.status === 404) {
@@ -160,7 +174,7 @@ export async function fetchGitHubReadme(owner, repoName) {
   return {
     markdown: Buffer.from(readme.content.replace(/\n/g, ""), "base64").toString("utf8"),
     htmlUrl: typeof readme.html_url === "string" ? readme.html_url : null,
-    downloadUrl: typeof readme.download_url === "string" ? readme.download_url : null,
+    downloadUrl: stripUrlSearchAndHash(readme.download_url),
   };
 }
 
@@ -192,9 +206,9 @@ async function fetchLatestGitHubTag(owner, repoName) {
   return typeof tags[0]?.name === "string" && tags[0].name.length > 0 ? tags[0].name : "Unreleased";
 }
 
-async function fetchGitHubReadmeWithFallback(owner, repoName) {
+async function fetchGitHubReadmeWithFallback(owner, repoName, token) {
   try {
-    return await fetchGitHubReadme(owner, repoName);
+    return await fetchGitHubReadme(owner, repoName, token);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
 
@@ -235,7 +249,11 @@ async function main() {
       return {
         ...tool,
         readme: repository
-          ? await fetchGitHubReadmeWithFallback(repository.owner, repository.repo)
+          ? await fetchGitHubReadmeWithFallback(
+              repository.owner,
+              repository.repo,
+              TOOL_README_TOKEN,
+            )
           : createUnavailableReadme(),
       };
     }),

@@ -43,26 +43,36 @@ describe("generate tools data GitHub helpers", () => {
 
   it("decodes README metadata from the GitHub readme endpoint", async () => {
     const originalFetch = globalThis.fetch;
+    const seenHeaders: unknown[] = [];
 
-    globalThis.fetch = async () =>
-      new Response(
+    globalThis.fetch = async (_input, init) => {
+      seenHeaders.push(init?.headers);
+
+      return new Response(
         JSON.stringify({
           content: "IyBIZWxsbyBmcm9tIFJFQURNRQo=",
           encoding: "base64",
           html_url: "https://github.com/matt-riley/newbrew/blob/main/README.md",
-          download_url: "https://raw.githubusercontent.com/matt-riley/newbrew/main/README.md",
+          download_url:
+            "https://raw.githubusercontent.com/matt-riley/newbrew/main/README.md?token=secret",
         }),
         {
           status: 200,
           headers: { "content-type": "application/json" },
         },
       );
+    };
 
-    await expect(fetchGitHubReadme("matt-riley", "newbrew")).resolves.toEqual({
+    await expect(fetchGitHubReadme("matt-riley", "newbrew", "tool-token")).resolves.toEqual({
       markdown: "# Hello from README\n",
       htmlUrl: "https://github.com/matt-riley/newbrew/blob/main/README.md",
       downloadUrl: "https://raw.githubusercontent.com/matt-riley/newbrew/main/README.md",
     });
+    expect(seenHeaders).toContainEqual(
+      expect.objectContaining({
+        Authorization: "Bearer tool-token",
+      }),
+    );
 
     globalThis.fetch = originalFetch;
   });
