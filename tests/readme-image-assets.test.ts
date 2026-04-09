@@ -16,6 +16,16 @@ describe("resolveReadmeImageRefs", () => {
       "https://cdn.example/logo.png",
     ]);
   });
+
+  it("ignores image references inside html comments", () => {
+    expect(
+      resolveReadmeImageRefs({
+        markdown:
+          '<!-- ![Hidden](images/hidden.png) --><!-- <img src="images/commented-banner.png" alt="Hidden"> -->\n![Logo](images/logo.png)',
+        downloadUrl: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/README.md",
+      }),
+    ).toEqual(["https://raw.githubusercontent.com/matt-riley/slides.nvim/main/images/logo.png"]);
+  });
 });
 
 describe("syncReadmeImages", () => {
@@ -53,6 +63,30 @@ describe("syncReadmeImages", () => {
       {
         source: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/images/logo.png",
         mirroredPath: null,
+      },
+    ]);
+  });
+
+  it("derives an image extension from the response content type when the source url has none", async () => {
+    const imageRecords = await syncReadmeImages({
+      owner: "matt-riley",
+      repo: "slides.nvim",
+      markdown: "![Logo](https://cdn.example/assets/logo)",
+      downloadUrl: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/README.md",
+      outputDir: "test-artifacts/readme-images",
+      fetchImpl: async () =>
+        new Response("image-bytes", {
+          status: 200,
+          headers: { "content-type": "image/webp" },
+        }),
+    });
+
+    expect(imageRecords).toEqual([
+      {
+        source: "https://cdn.example/assets/logo",
+        mirroredPath: expect.stringMatching(
+          /^\/generated\/readme-images\/matt-riley\/slides\.nvim\/[a-f0-9]{64}\.webp$/,
+        ),
       },
     ]);
   });

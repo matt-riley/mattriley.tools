@@ -15,16 +15,54 @@ function sanitizePathSegment(value) {
 
 /**
  * @param {string} source
- * @returns {string}
+ * @returns {string | null}
  */
 function extensionForSource(source) {
   try {
     const url = new URL(source);
     const extension = extname(url.pathname);
 
-    return extension || ".bin";
+    return extension || null;
   } catch {
-    return ".bin";
+    return null;
+  }
+}
+
+/**
+ * @param {string | null} contentType
+ * @returns {string | null}
+ */
+function extensionForContentType(contentType) {
+  if (typeof contentType !== "string" || contentType.length === 0) {
+    return null;
+  }
+
+  const mimeType = contentType.split(";")[0]?.trim().toLowerCase();
+
+  switch (mimeType) {
+    case "image/apng":
+      return ".apng";
+    case "image/avif":
+      return ".avif";
+    case "image/bmp":
+      return ".bmp";
+    case "image/gif":
+      return ".gif";
+    case "image/jpeg":
+      return ".jpg";
+    case "image/png":
+      return ".png";
+    case "image/svg+xml":
+      return ".svg";
+    case "image/tiff":
+      return ".tiff";
+    case "image/vnd.microsoft.icon":
+    case "image/x-icon":
+      return ".ico";
+    case "image/webp":
+      return ".webp";
+    default:
+      return null;
   }
 }
 
@@ -76,9 +114,10 @@ export function resolveReadmeImageRefs({ markdown, downloadUrl }) {
     return [];
   }
 
+  const uncommentedMarkdown = markdown.replace(/<!--[\s\S]*?-->/g, "");
   const matches = [];
 
-  for (const match of markdown.matchAll(MARKDOWN_IMAGE_PATTERN)) {
+  for (const match of uncommentedMarkdown.matchAll(MARKDOWN_IMAGE_PATTERN)) {
     const resolved = resolveImageSource(match[1], downloadUrl);
 
     if (resolved) {
@@ -86,7 +125,7 @@ export function resolveReadmeImageRefs({ markdown, downloadUrl }) {
     }
   }
 
-  for (const match of markdown.matchAll(HTML_IMAGE_PATTERN)) {
+  for (const match of uncommentedMarkdown.matchAll(HTML_IMAGE_PATTERN)) {
     const resolved = resolveImageSource(match[2], downloadUrl);
 
     if (resolved) {
@@ -154,7 +193,10 @@ export async function mirrorReadmeImage({
   }
 
   const bytes = await response.arrayBuffer();
-  const extension = extensionForSource(source);
+  const extension =
+    extensionForSource(source) ??
+    extensionForContentType(response.headers.get("content-type")) ??
+    ".bin";
   const filename = `${createHash("sha256").update(source).digest("hex")}${extension}`;
   const relativePathSegments = [sanitizePathSegment(owner), sanitizePathSegment(repo), filename];
   const relativePath = relativePathSegments.join("/");
