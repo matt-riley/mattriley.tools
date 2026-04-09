@@ -76,7 +76,7 @@ pnpm run generate:data -- --tap-path /absolute/path/to/homebrew-tools
 ## Commands
 
 ```bash
-pnpm run generate:data  # Regenerate both generated data files from the tap and GitHub
+pnpm run generate:data  # Regenerate all three generated outputs from the tap and GitHub
 pnpm dev                # Start local dev server
 pnpm build              # Run astro check and build static output
 pnpm preview            # Preview the production build locally
