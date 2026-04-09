@@ -29,23 +29,36 @@ function resolveReadmeUrl(href: string, baseUrl: string | null) {
   }
 }
 
-function isAllowedReadmeImageSource(
+function isMirroredReadmeImagePath(src: string | null): src is string {
+  return typeof src === "string" && src.startsWith("/generated/readme-images/");
+}
+
+function rewriteReadmeImageSource(
   src: string | undefined,
-  allowedSources: Set<string>,
+  baseUrl: string | null,
+  imageMap: ReadonlyMap<string, string>,
+  allowedRemoteSources: ReadonlySet<string>,
+  allowedMirroredPaths: ReadonlySet<string>,
 ) {
   if (!src) {
-    return false;
+    return src;
   }
 
-  if (src.startsWith("/generated/readme-images/")) {
-    return true;
+  if (allowedMirroredPaths.has(src)) {
+    return src;
   }
 
-  if (allowedSources.has(src)) {
-    return true;
+  if (allowedRemoteSources.has(src)) {
+    return imageMap.get(src) ?? src;
   }
 
-  return false;
+  const resolvedSrc = resolveReadmeUrl(src, baseUrl);
+
+  if (allowedRemoteSources.has(resolvedSrc)) {
+    return imageMap.get(resolvedSrc) ?? resolvedSrc;
+  }
+
+  return resolvedSrc;
 }
 
 export function renderReadme(readme: SyncedReadme) {
@@ -53,10 +66,24 @@ export function renderReadme(readme: SyncedReadme) {
     return "";
   }
 
-  const imageMap = new Map(
-    readme.images.map((image) => [image.source, image.mirroredPath ?? image.source]),
+  const allowedRemoteSources = new Set(readme.images.map((image) => image.source));
+  const allowedMirroredPaths = new Set(
+    readme.images
+      .map((image) => image.mirroredPath)
+      .filter((path): path is string => isMirroredReadmeImagePath(path)),
   );
-  const allowedImageSources = new Set(imageMap.values());
+  const imageMap = new Map<string, string>(
+    readme.images.map(
+      (image): [string, string] => [
+        image.source,
+        isMirroredReadmeImagePath(image.mirroredPath) ? image.mirroredPath : image.source,
+      ],
+    ),
+  );
+  const allowedImageSources = new Set([
+    ...allowedRemoteSources,
+    ...allowedMirroredPaths,
+  ]);
 
   const parser = new Marked({
     async: false,
@@ -67,8 +94,14 @@ export function renderReadme(readme: SyncedReadme) {
       }
 
       if (token.type === "image") {
-        const resolvedSrc = resolveReadmeUrl(token.href, readme.downloadUrl);
-        token.href = imageMap.get(resolvedSrc) ?? resolvedSrc;
+        token.href =
+          rewriteReadmeImageSource(
+            token.href,
+            readme.downloadUrl,
+            imageMap,
+            allowedRemoteSources,
+            allowedMirroredPaths,
+          ) ?? token.href;
       }
     },
   });
@@ -116,10 +149,26 @@ export function renderReadme(readme: SyncedReadme) {
     },
     allowedSchemes: ["http", "https", "mailto"],
     allowProtocolRelative: false,
+    transformTags: {
+      img: (tagName, attribs) => ({
+        tagName,
+        attribs: {
+          ...attribs,
+          src:
+            rewriteReadmeImageSource(
+              attribs.src,
+              readme.downloadUrl,
+              imageMap,
+              allowedRemoteSources,
+              allowedMirroredPaths,
+            ) ?? attribs.src,
+        },
+      }),
+    },
     exclusiveFilter(frame) {
       return (
         frame.tag === "img" &&
-        !isAllowedReadmeImageSource(frame.attribs.src, allowedImageSources)
+        !allowedImageSources.has(frame.attribs.src)
       );
     },
   });
