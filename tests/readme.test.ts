@@ -8,6 +8,12 @@ describe("renderReadme", () => {
       markdown: "[Guide](docs/guide.md)\n\n![Logo](images/logo.png)",
       htmlUrl: "https://github.com/matt-riley/slides.nvim/blob/main/README.md",
       downloadUrl: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/README.md",
+      images: [
+        {
+          source: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/images/logo.png",
+          mirroredPath: null,
+        },
+      ],
     });
 
     expect(html).toContain(
@@ -23,6 +29,7 @@ describe("renderReadme", () => {
       markdown: 'Hello <script>alert("x")</script>\n\n[bad](javascript:alert(1))',
       htmlUrl: null,
       downloadUrl: null,
+      images: [],
     });
 
     expect(html).not.toContain("<script");
@@ -35,9 +42,51 @@ describe("renderReadme", () => {
         "![Tracker](https://evil.example/pixel.png)\n\n![Protocol Relative](//evil.example/pixel.png)\n\n![Repo Asset](images/logo.png)",
       htmlUrl: "https://github.com/matt-riley/slides.nvim/blob/main/README.md",
       downloadUrl: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/README.md",
+      images: [
+        {
+          source: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/images/logo.png",
+          mirroredPath: null,
+        },
+      ],
     });
 
     expect(html).not.toContain("evil.example");
+    expect(html).toContain(
+      'src="https://raw.githubusercontent.com/matt-riley/slides.nvim/main/images/logo.png"',
+    );
+  });
+
+  it("prefers mirrored local image paths over remote sources", () => {
+    const html = renderReadme({
+      markdown: "![Logo](images/logo.png)",
+      htmlUrl: "https://github.com/matt-riley/slides.nvim/blob/main/README.md",
+      downloadUrl: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/README.md",
+      images: [
+        {
+          source: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/images/logo.png",
+          mirroredPath: "/generated/readme-images/matt-riley/slides.nvim/logo.png",
+        },
+      ],
+    });
+
+    expect(html).toContain(
+      'src="/generated/readme-images/matt-riley/slides.nvim/logo.png"',
+    );
+  });
+
+  it("keeps the synced remote fallback url when mirroring failed", () => {
+    const html = renderReadme({
+      markdown: "![Logo](images/logo.png)",
+      htmlUrl: "https://github.com/matt-riley/slides.nvim/blob/main/README.md",
+      downloadUrl: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/README.md",
+      images: [
+        {
+          source: "https://raw.githubusercontent.com/matt-riley/slides.nvim/main/images/logo.png",
+          mirroredPath: null,
+        },
+      ],
+    });
+
     expect(html).toContain(
       'src="https://raw.githubusercontent.com/matt-riley/slides.nvim/main/images/logo.png"',
     );

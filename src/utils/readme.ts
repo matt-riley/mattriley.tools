@@ -1,19 +1,17 @@
 import { Marked } from "marked";
 import sanitizeHtml from "sanitize-html";
 
+export interface SyncedReadmeImage {
+  source: string;
+  mirroredPath: string | null;
+}
+
 export interface SyncedReadme {
   markdown: string | null;
   htmlUrl: string | null;
   downloadUrl: string | null;
+  images: readonly SyncedReadmeImage[];
 }
-
-const ALLOWED_IMAGE_HOSTS = new Set([
-  "avatars.githubusercontent.com",
-  "github.com",
-  "private-user-images.githubusercontent.com",
-  "raw.githubusercontent.com",
-  "user-images.githubusercontent.com",
-]);
 
 function resolveReadmeUrl(href: string, baseUrl: string | null) {
   if (href.startsWith("#")) {
@@ -31,24 +29,34 @@ function resolveReadmeUrl(href: string, baseUrl: string | null) {
   }
 }
 
-function isAllowedReadmeImageSource(src: string | undefined) {
+function isAllowedReadmeImageSource(
+  src: string | undefined,
+  allowedSources: Set<string>,
+) {
   if (!src) {
     return false;
   }
 
-  try {
-    const url = new URL(src);
-
-    return url.protocol === "https:" && ALLOWED_IMAGE_HOSTS.has(url.hostname);
-  } catch {
-    return false;
+  if (src.startsWith("/generated/readme-images/")) {
+    return true;
   }
+
+  if (allowedSources.has(src)) {
+    return true;
+  }
+
+  return false;
 }
 
 export function renderReadme(readme: SyncedReadme) {
   if (!readme.markdown) {
     return "";
   }
+
+  const imageMap = new Map(
+    readme.images.map((image) => [image.source, image.mirroredPath ?? image.source]),
+  );
+  const allowedImageSources = new Set(imageMap.values());
 
   const parser = new Marked({
     async: false,
@@ -59,7 +67,8 @@ export function renderReadme(readme: SyncedReadme) {
       }
 
       if (token.type === "image") {
-        token.href = resolveReadmeUrl(token.href, readme.downloadUrl);
+        const resolvedSrc = resolveReadmeUrl(token.href, readme.downloadUrl);
+        token.href = imageMap.get(resolvedSrc) ?? resolvedSrc;
       }
     },
   });
@@ -108,7 +117,10 @@ export function renderReadme(readme: SyncedReadme) {
     allowedSchemes: ["http", "https", "mailto"],
     allowProtocolRelative: false,
     exclusiveFilter(frame) {
-      return frame.tag === "img" && !isAllowedReadmeImageSource(frame.attribs.src);
+      return (
+        frame.tag === "img" &&
+        !isAllowedReadmeImageSource(frame.attribs.src, allowedImageSources)
+      );
     },
   });
 }
