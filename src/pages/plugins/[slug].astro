@@ -1,4 +1,5 @@
 ---
+import { Hero, MetaList, PageShell, Panel, Section } from "@matt-riley/ui-astro";
 import Layout from "../../layouts/Layout.astro";
 import { plugins, pluginsGeneratedAt } from "../../data/plugins.generated";
 import { formatUtcTimestamp } from "../../utils/date";
@@ -21,45 +22,51 @@ const readmeHtml = renderReadme(plugin.readme);
 ---
 
 <Layout title={plugin.name} description={plugin.description}>
-  <main class="page">
-    <p class="eyebrow"><a href="/">Back to all catalogs</a></p>
+  <main>
+    <PageShell>
+      <div class="page-stack">
+        <p class="eyebrow"><a href="/">Back to all catalogs</a></p>
 
-    <header class="hero">
-      <h1>{plugin.name}</h1>
-      <p class="lede">{plugin.description}</p>
-      <p>Last synced: <time datetime={pluginsGeneratedAt}>{formattedPluginsGeneratedAt}</time></p>
-    </header>
+        <Hero title={plugin.name} lede={plugin.description}>
+          <p>
+            Last synced: <time datetime={pluginsGeneratedAt}>{formattedPluginsGeneratedAt}</time>
+          </p>
+        </Hero>
 
-    <section class="panel" aria-labelledby="plugin-metadata">
-      <h2 id="plugin-metadata">Plugin metadata</h2>
-      <dl class="meta-list">
-        <dt>Repository</dt>
-        <dd>
-          <a href={plugin.homepage}>{plugin.repository}</a>
-        </dd>
+        <Section title="Plugin metadata" headingId="plugin-metadata">
+          <Panel>
+            <MetaList>
+              <dt>Repository</dt>
+              <dd>
+                <a href={plugin.homepage}>{plugin.repository}</a>
+              </dd>
 
-        <dt>Language</dt>
-        <dd>{plugin.language ?? "Unknown"}</dd>
+              <dt>Language</dt>
+              <dd>{plugin.language ?? "Unknown"}</dd>
 
-        <dt>Topics</dt>
-        <dd>{plugin.topics.length > 0 ? plugin.topics.join(", ") : "No topics set"}</dd>
+              <dt>Topics</dt>
+              <dd>{plugin.topics.length > 0 ? plugin.topics.join(", ") : "No topics set"}</dd>
 
-        <dt>Last updated</dt>
-        <dd>
-          <time datetime={plugin.updatedAt}>{plugin.updatedAt}</time>
-        </dd>
-      </dl>
-    </section>
+              <dt>Last updated</dt>
+              <dd>
+                <time datetime={plugin.updatedAt}>{plugin.updatedAt}</time>
+              </dd>
+            </MetaList>
+          </Panel>
+        </Section>
 
-    <section class="panel" aria-labelledby="plugin-readme">
-      <h2 id="plugin-readme">README</h2>
-      {
-        plugin.readme.markdown ? (
-          <div class="readme-content" set:html={readmeHtml} />
-        ) : (
-          <p>README unavailable.</p>
-        )
-      }
-    </section>
+        <Section title="README" headingId="plugin-readme">
+          <Panel>
+            {
+              plugin.readme.markdown ? (
+                <div class="readme-content" set:html={readmeHtml} />
+              ) : (
+                <p>README unavailable.</p>
+              )
+            }
+          </Panel>
+        </Section>
+      </div>
+    </PageShell>
   </main>
 </Layout>

@@ -83,9 +83,9 @@ describe("generated site data", () => {
   });
 
   it("renders the plugin index table with plugin, version, and description columns only", async () => {
-    const pluginSection = indexPageSource.split('aria-labelledby="neovim-plugins"')[1];
+    const pluginSection = indexPageSource.split('headingId="neovim-plugins"')[1] ?? "";
 
-    const pluginHeader = pluginSection.match(/<thead>[\s\S]*?<\/thead>/)?.[0] ?? "";
+    const pluginHeader = pluginSection.match(/<tr slot="head">[\s\S]*?<\/tr>/)?.[0] ?? "";
 
     expect(pluginHeader).toContain('<th scope="col">Plugin</th>');
     expect(pluginHeader).toContain('<th scope="col">Version</th>');
@@ -98,6 +98,14 @@ describe("generated site data", () => {
     );
     expect(pluginSection).not.toContain('<th scope="col">Language</th>');
     expect(pluginSection).not.toContain('<th scope="col">Install</th>');
+  });
+
+  it("composes the homepage from the shared Snurble Astro primitives", () => {
+    expect(indexPageSource).toContain('from "@matt-riley/ui-astro"');
+    expect(indexPageSource).toContain("<PageShell>");
+    expect(indexPageSource).toContain("<Hero");
+    expect(indexPageSource).toContain("<Section");
+    expect(indexPageSource).toContain("<DataTable");
   });
 
   it("does not render the source-of-truth eyebrow on the homepage", () => {

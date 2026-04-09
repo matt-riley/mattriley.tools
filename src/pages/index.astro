@@ -1,4 +1,5 @@
 ---
+import { DataTable, Hero, PageShell, Section, Stack } from "@matt-riley/ui-astro";
 import Layout from "../layouts/Layout.astro";
 import { generatedAt, tools } from "../data/tools.generated";
 import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
@@ -12,87 +13,85 @@ const formattedPluginsGeneratedAt = formatUtcTimestamp(pluginsGeneratedAt);
   title="mattriley.tools"
   description="Static catalog of Matt Riley's Homebrew tools and Neovim plugins."
 >
-  <main class="page">
-    <header class="hero">
-      <h1>mattriley.tools</h1>
-      <p class="lede">
-        A plain Astro catalog of the Homebrew tools and Neovim plugins Matt ships publicly. Tool
-        data is generated from the tap's formula files; plugin data is generated from GitHub repos
-        whose names contain <code>.nvim</code>.
-      </p>
-    </header>
+  <main>
+    <PageShell>
+      <div class="page-stack">
+        <section>
+          <Hero
+            title="mattriley.tools"
+            lede="A static catalog of the Homebrew tools and Neovim plugins Matt ships publicly. Tool data is generated from the tap's formula files; plugin data is generated from GitHub repos whose names contain `.nvim`."
+          />
+        </section>
 
-    <section class="stack catalog-section" aria-labelledby="homebrew-tools">
-      <div>
-        <h2 id="homebrew-tools">Homebrew tools</h2>
-        <p>
-          Each entry links to a static detail page with the packaged version, install command,
-          supported platforms, binary name, and source repository.
-        </p>
-        <p>Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time></p>
-      </div>
+        <Section title="Homebrew tools" headingId="homebrew-tools">
+          <Stack>
+            <div class="section-copy">
+              <p>
+                Each entry links to a static detail page with the packaged version, install command,
+                supported platforms, binary name, and source repository.
+              </p>
+              <p>Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time></p>
+            </div>
 
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Tool</th>
-              <th scope="col">Version</th>
-              <th scope="col">Description</th>
-              <th scope="col">Install</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tools.map((tool) => (
-              <tr>
-                <td>
-                  <a href={`/tools/${tool.slug}/`}>{tool.name}</a>
-                </td>
-                <td>{tool.version}</td>
-                <td>{tool.description}</td>
-                <td>
-                  <code>{tool.installCommand}</code>
-                </td>
+            <DataTable labelledBy="homebrew-tools">
+              <tr slot="head">
+                <th scope="col">Tool</th>
+                <th scope="col">Version</th>
+                <th scope="col">Description</th>
+                <th scope="col">Install</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
+              {
+                tools.map((tool) => (
+                  <tr>
+                    <td>
+                      <a href={`/tools/${tool.slug}/`}>{tool.name}</a>
+                    </td>
+                    <td>{tool.version}</td>
+                    <td>{tool.description}</td>
+                    <td>
+                      <code>{tool.installCommand}</code>
+                    </td>
+                  </tr>
+                ))
+              }
+            </DataTable>
+          </Stack>
+        </Section>
 
-    <section class="stack catalog-section" aria-labelledby="neovim-plugins">
-      <div>
-        <h2 id="neovim-plugins">Neovim plugins</h2>
-        <p>
-          Repositories from Matt's GitHub account whose names contain <code>.nvim</code>. Each
-          entry links to plugin details with <code>lazy.nvim</code> and <code>vim.pack</code>
-          install snippets.
-        </p>
-        <p>Last synced: <time datetime={pluginsGeneratedAt}>{formattedPluginsGeneratedAt}</time></p>
-      </div>
+        <Section title="Neovim plugins" headingId="neovim-plugins">
+          <Stack>
+            <div class="section-copy">
+              <p>
+                Repositories from Matt's GitHub account whose names contain <code>.nvim</code>.
+                Each entry links to plugin details with <code>lazy.nvim</code> and <code>vim.pack</code>
+                install snippets.
+              </p>
+              <p>
+                Last synced: <time datetime={pluginsGeneratedAt}>{formattedPluginsGeneratedAt}</time>
+              </p>
+            </div>
 
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Plugin</th>
-              <th scope="col">Version</th>
-              <th scope="col">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {plugins.map((plugin) => (
-              <tr>
-                <td>
-                  <a href={`/plugins/${plugin.slug}/`}>{plugin.name}</a>
-                </td>
-                <td>{plugin.version}</td>
-                <td>{plugin.description}</td>
+            <DataTable labelledBy="neovim-plugins">
+              <tr slot="head">
+                <th scope="col">Plugin</th>
+                <th scope="col">Version</th>
+                <th scope="col">Description</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+              {
+                plugins.map((plugin) => (
+                  <tr>
+                    <td>
+                      <a href={`/plugins/${plugin.slug}/`}>{plugin.name}</a>
+                    </td>
+                    <td>{plugin.version}</td>
+                    <td>{plugin.description}</td>
+                  </tr>
+                ))
+              }
+            </DataTable>
+          </Stack>
+        </Section>
       </div>
-    </section>
+    </PageShell>
   </main>
 </Layout>

@@ -57,6 +57,7 @@ This repo assumes the tap's duplicate cask/formula issue is resolved elsewhere a
 From the repository root:
 
 ```bash
+export NODE_AUTH_TOKEN=<github-token-with-package-read-access>
 pnpm install
 pnpm run generate:data -- --tap-path ../homebrew-tools
 pnpm dev
@@ -72,6 +73,11 @@ If your tap checkout is somewhere else, point the generator at it explicitly:
 ```bash
 pnpm run generate:data -- --tap-path /absolute/path/to/homebrew-tools
 ```
+
+The repo now consumes the published Snurble design-system packages from GitHub Packages, so
+fresh installs need `NODE_AUTH_TOKEN` set before `pnpm install`. The committed `.npmrc` keeps the
+`@matt-riley` scope pointed at `https://npm.pkg.github.com`, and CI injects `github.token` for the
+same install path.
 
 ## Commands
 

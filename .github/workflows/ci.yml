@@ -8,9 +8,13 @@ on:
 
 jobs:
   ci:
+    permissions:
+      contents: read
+      packages: read
     uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@556c658a6a3ce52b1f7e219e30eb70dcd2fe4f31 # main
     with:
       package-manager: pnpm
+      install-command: NODE_AUTH_TOKEN="${{ github.token }}" pnpm install --frozen-lockfile
       run-lint: true
       run-test: true
       run-build: true
