@@ -52,7 +52,13 @@ describe("generated site data", () => {
           typeof tool.readme === "object" &&
           "markdown" in tool.readme &&
           "htmlUrl" in tool.readme &&
-          "downloadUrl" in tool.readme,
+          "downloadUrl" in tool.readme &&
+          Array.isArray(tool.readme.images) &&
+          tool.readme.images.every(
+            (image) =>
+              typeof image.source === "string" &&
+              (typeof image.mirroredPath === "string" || image.mirroredPath === null),
+          ),
       ),
     ).toBe(true);
     expect(
@@ -61,7 +67,13 @@ describe("generated site data", () => {
           typeof plugin.readme === "object" &&
           "markdown" in plugin.readme &&
           "htmlUrl" in plugin.readme &&
-          "downloadUrl" in plugin.readme,
+          "downloadUrl" in plugin.readme &&
+          Array.isArray(plugin.readme.images) &&
+          plugin.readme.images.every(
+            (image) =>
+              typeof image.source === "string" &&
+              (typeof image.mirroredPath === "string" || image.mirroredPath === null),
+          ),
       ),
     ).toBe(true);
     expect([...tools, ...plugins].some((entry) => typeof entry.readme.markdown === "string")).toBe(

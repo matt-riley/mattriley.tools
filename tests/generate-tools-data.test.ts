@@ -67,6 +67,7 @@ describe("generate tools data GitHub helpers", () => {
       markdown: "# Hello from README\n",
       htmlUrl: "https://github.com/matt-riley/newbrew/blob/main/README.md",
       downloadUrl: "https://raw.githubusercontent.com/matt-riley/newbrew/main/README.md",
+      images: [],
     });
     expect(seenHeaders).toContainEqual(
       expect.objectContaining({
