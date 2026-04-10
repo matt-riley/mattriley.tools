@@ -12,8 +12,8 @@ importers:
         specifier: 1.1.0
         version: 1.1.0
       '@matt-riley/ui-astro':
-        specifier: 1.0.0
-        version: 1.0.0(@matt-riley/design-tokens@1.1.0)(astro@6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3))
+        specifier: 1.2.0
+        version: 1.2.0(@matt-riley/design-tokens@1.1.0)(astro@6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3))
       astro:
         specifier: ^6.0.0
         version: 6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3)
@@ -608,8 +608,8 @@ packages:
   '@matt-riley/design-tokens@1.1.0':
     resolution: {integrity: sha512-i/jG7KPcVdONHWpgIvcWrVqwSQ31xGqJNQ2en1STjEqn3XlQw8eejxFtTkAuj0sONtleVC833sq/qTCbmMzg7w==, tarball: https://npm.pkg.github.com/download/@matt-riley/design-tokens/1.1.0/a14649abaf747f87bb94ae2667572f411e004c23}
 
-  '@matt-riley/ui-astro@1.0.0':
-    resolution: {integrity: sha512-VvrpRbJPivYk2CZxqHA2E7k7/HEtXzBi07K0JxkusbsQtNLTjSjgVDQx8eaAdi1dSJBWSRn8Zv96AH7s6CyBfQ==, tarball: https://npm.pkg.github.com/download/@matt-riley/ui-astro/1.0.0/5b867c082fd882276fda152283ea55eb0d96d425}
+  '@matt-riley/ui-astro@1.2.0':
+    resolution: {integrity: sha512-AMGrg333BVQ2A5TjeGF+2Kbx459wAkUKnjR8erFg6Ul2P6RgYWFXs4EnxrfpqziwmXpnqZaqVEFFQizU1Sh71Q==, tarball: https://npm.pkg.github.com/download/@matt-riley/ui-astro/1.2.0/f6076d1f20ae55b80bb9f545bc780711bafe527f}
     peerDependencies:
       '@matt-riley/design-tokens': '>=0.0.0-0'
       astro: ^6.0.0
@@ -2839,7 +2839,7 @@ snapshots:
 
   '@matt-riley/design-tokens@1.1.0': {}
 
-  '@matt-riley/ui-astro@1.0.0(@matt-riley/design-tokens@1.1.0)(astro@6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3))':
+  '@matt-riley/ui-astro@1.2.0(@matt-riley/design-tokens@1.1.0)(astro@6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3))':
     dependencies:
       '@matt-riley/design-tokens': 1.1.0
       astro: 6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3)
