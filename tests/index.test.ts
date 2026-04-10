@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import indexPageSource from "../src/pages/index.astro?raw";
+import generatorSource from "../scripts/generate-tools-data.mjs?raw";
+import templateDetailPageSource from "../src/pages/templates/[slug].astro?raw";
 import { generatedAt, tools } from "../src/data/tools.generated";
 import { plugins, pluginsGeneratedAt } from "../src/data/plugins.generated";
 
@@ -83,7 +85,9 @@ describe("generated site data", () => {
   });
 
   it("renders the plugin index table with plugin, version, and description columns only", async () => {
-    const pluginSection = indexPageSource.split('headingId="neovim-plugins"')[1] ?? "";
+    const pluginSection =
+      indexPageSource.split('headingId="neovim-plugins"')[1]?.split('headingId="public-templates"')[0] ??
+      "";
 
     const pluginHeader = pluginSection.match(/<tr slot="head">[\s\S]*?<\/tr>/)?.[0] ?? "";
 
@@ -98,6 +102,26 @@ describe("generated site data", () => {
     );
     expect(pluginSection).not.toContain('<th scope="col">Language</th>');
     expect(pluginSection).not.toContain('<th scope="col">Install</th>');
+  });
+
+  it("renders a templates section on the homepage", () => {
+    const templatesSection = indexPageSource.split('headingId="public-templates"')[1] ?? "";
+
+    expect(indexPageSource).toContain('Section title="Public templates"');
+    expect(templatesSection).toContain('<th scope="col">Template</th>');
+    expect(templatesSection).toContain('<th scope="col">Language</th>');
+    expect(templatesSection).toContain('<th scope="col">Description</th>');
+  });
+
+  it("includes template data in the generator contract", () => {
+    expect(generatorSource).toContain('join(dataDir, "templates.generated.ts")');
+    expect(generatorSource).toContain("templatesGeneratedAt");
+    expect(generatorSource).toContain("templates");
+  });
+
+  it("has static template detail pages", () => {
+    expect(templateDetailPageSource).toContain("export function getStaticPaths()");
+    expect(templateDetailPageSource).toContain('from "../../data/templates.generated"');
   });
 
   it("composes the homepage from the shared Snurble Astro primitives", () => {

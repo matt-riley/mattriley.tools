@@ -1,6 +1,6 @@
 # mattriley.tools
 
-> A static Astro site that lists Matt Riley's Homebrew tools and Neovim plugins.
+> A static Astro site that lists Matt Riley's Homebrew tools, public template repositories, and Neovim plugins.
 
 ## Stack
 
@@ -15,14 +15,16 @@
 The site renders from generated data files:
 
 - Source of truth for Homebrew tools: `homebrew-tools/Formula/*.rb`
+- Source of truth for template repos: public `matt-riley/*` GitHub repositories where GitHub marks the repo as a template
 - Source of truth for Neovim plugins: public `matt-riley/*` GitHub repositories whose names contain `.nvim`
 - Generator: `scripts/generate-tools-data.mjs`
 - Generated artifacts:
   - `src/data/tools.generated.ts`
+  - `src/data/templates.generated.ts`
   - `src/data/plugins.generated.ts`
   - `public/generated/readme-images/`
 
-`pnpm run generate:data` owns all three generated outputs. It syncs README markdown into the
+`pnpm run generate:data` owns all four generated outputs. It syncs README markdown into the
 generated data modules and mirrors any allowed README image assets into
 `public/generated/readme-images/` so the site can serve them locally.
 
@@ -49,6 +51,15 @@ The generated plugin data currently focuses on:
 - language and topics
 - `lazy.nvim` install snippet
 - `vim.pack` install snippet
+
+The generated template data currently focuses on:
+
+- repository name and slug
+- description
+- homepage URL
+- synced repository README content
+- last updated timestamp
+- language and topics
 
 This repo assumes the tap's duplicate cask/formula issue is resolved elsewhere and that the site consumes the formula-only end state for the Homebrew catalog.
 
@@ -95,7 +106,7 @@ pnpm format:check       # Verify formatting
 
 ## Automatic updates
 
-`.github/workflows/sync-tools-data.yml` syncs site data on a schedule (every 6 hours) and can also be triggered manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap, uses the repo's existing GitHub App credentials (`vars.APP_ID` and `secrets.PRIVATE_KEY`) to identify any private tap-backed repositories so they can be excluded from the published site, regenerates all three generated outputs, and commits if any of those generated outputs changed.
+`.github/workflows/sync-tools-data.yml` syncs site data on a schedule (every 6 hours) and can also be triggered manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap, uses the repo's existing GitHub App credentials (`vars.APP_ID` and `secrets.PRIVATE_KEY`) to identify any private tap-backed repositories so they can be excluded from the published site, regenerates all four generated outputs, and commits if any of those generated outputs changed.
 
 Deployment remains intentionally undecided; the site output is plain static Astro so hosting can be chosen later.
 

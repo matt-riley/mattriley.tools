@@ -321,6 +321,7 @@ async function main() {
   const publicReadmeImageDir = resolve(process.cwd(), "public/generated/readme-images");
   const toolsOutputPath = join(dataDir, "tools.generated.ts");
   const pluginsOutputPath = join(dataDir, "plugins.generated.ts");
+  const templatesOutputPath = join(dataDir, "templates.generated.ts");
   const parsedTools = await readFormulas(formulaDir);
   const publicTools = await filterPublicToolsByRepository(parsedTools);
   const tools = await Promise.all(
@@ -340,7 +341,8 @@ async function main() {
       };
     }),
   );
-  const pluginRepos = filterPluginRepos(await fetchGitHubRepos(GITHUB_OWNER));
+  const githubRepos = await fetchGitHubRepos(GITHUB_OWNER);
+  const pluginRepos = filterPluginRepos(githubRepos);
   const plugins = await Promise.all(
     pluginRepos.map(async (repo) => ({
       ...toPluginRecord(repo, await fetchLatestGitHubTag(GITHUB_OWNER, repo.name)),
@@ -352,8 +354,29 @@ async function main() {
       ),
     })),
   );
+  const templateRepos = githubRepos
+    .filter((repo) => repo.private !== true && repo.is_template === true)
+    .sort((left, right) => left.name.localeCompare(right.name));
+  const templates = await Promise.all(
+    templateRepos.map(async (repo) => ({
+      slug: repo.name,
+      name: repo.name,
+      description: repo.description ?? "No description provided.",
+      repository: repo.full_name,
+      homepage: repo.html_url,
+      updatedAt: repo.pushed_at,
+      language: repo.language,
+      topics: repo.topics ?? [],
+      readme: await fetchGitHubReadmeWithFallback(
+        GITHUB_OWNER,
+        repo.name,
+        undefined,
+        publicReadmeImageDir,
+      ),
+    })),
+  );
   const generatedAt = new Date().toISOString();
-  const mirroredPaths = [...tools, ...plugins].flatMap((entry) =>
+  const mirroredPaths = [...tools, ...plugins, ...templates].flatMap((entry) =>
     entry.readme.images.map((image) => image.mirroredPath),
   );
 
@@ -365,10 +388,18 @@ async function main() {
   await Promise.all([
     writeGeneratedModule(toolsOutputPath, "generatedAt", "tools", tools, generatedAt),
     writeGeneratedModule(pluginsOutputPath, "pluginsGeneratedAt", "plugins", plugins, generatedAt),
+    writeGeneratedModule(
+      templatesOutputPath,
+      "templatesGeneratedAt",
+      "templates",
+      templates,
+      generatedAt,
+    ),
   ]);
 
   console.log(`Generated ${tools.length} tools from ${formulaDir}`);
   console.log(`Generated ${plugins.length} plugins from GitHub repositories under ${GITHUB_OWNER}`);
+  console.log(`Generated ${templates.length} templates from GitHub repositories under ${GITHUB_OWNER}`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

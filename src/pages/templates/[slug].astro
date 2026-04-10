@@ -1,0 +1,72 @@
+---
+import { Hero, MetaList, PageShell, Panel, Section } from "@matt-riley/ui-astro";
+import Layout from "../../layouts/Layout.astro";
+import { templates, templatesGeneratedAt } from "../../data/templates.generated";
+import { formatUtcTimestamp } from "../../utils/date";
+import { renderReadme } from "../../utils/readme";
+
+interface Props {
+  template: (typeof templates)[number];
+}
+
+export function getStaticPaths() {
+  return templates.map((template) => ({
+    params: { slug: template.slug },
+    props: { template },
+  }));
+}
+
+const { template } = Astro.props;
+const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
+const readmeHtml = renderReadme(template.readme);
+---
+
+<Layout title={template.name} description={template.description}>
+  <main>
+    <PageShell>
+      <div class="page-stack">
+        <p class="eyebrow"><a href="/">Back to all catalogs</a></p>
+
+        <Hero title={template.name} lede={template.description}>
+          <p>
+            Last synced: <time datetime={templatesGeneratedAt}>{formattedTemplatesGeneratedAt}</time>
+          </p>
+        </Hero>
+
+        <Section title="Template metadata" headingId="template-metadata">
+          <Panel>
+            <MetaList>
+              <dt>Repository</dt>
+              <dd>
+                <a href={template.homepage}>{template.repository}</a>
+              </dd>
+
+              <dt>Language</dt>
+              <dd>{template.language ?? "Unknown"}</dd>
+
+              <dt>Topics</dt>
+              <dd>{template.topics.length > 0 ? template.topics.join(", ") : "No topics set"}</dd>
+
+              <dt>Last updated</dt>
+              <dd>
+                <time datetime={template.updatedAt}>{template.updatedAt}</time>
+              </dd>
+            </MetaList>
+          </Panel>
+        </Section>
+
+        <Section title="README" headingId="template-readme">
+          <Panel>
+            {
+              template.readme.markdown ? (
+                <div class="readme-content" set:html={readmeHtml} />
+              ) : (
+                <p>README unavailable.</p>
+              )
+            }
+          </Panel>
+        </Section>
+      </div>
+    </PageShell>
+  </main>
+</Layout>

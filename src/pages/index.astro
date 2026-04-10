@@ -3,15 +3,17 @@ import { DataTable, Hero, PageShell, Section, Stack } from "@matt-riley/ui-astro
 import Layout from "../layouts/Layout.astro";
 import { generatedAt, tools } from "../data/tools.generated";
 import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
+import { templates, templatesGeneratedAt } from "../data/templates.generated";
 import { formatUtcTimestamp } from "../utils/date";
 
 const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
 const formattedPluginsGeneratedAt = formatUtcTimestamp(pluginsGeneratedAt);
+const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
 ---
 
 <Layout
   title="mattriley.tools"
-  description="Static catalog of Matt Riley's Homebrew tools and Neovim plugins."
+  description="Static catalog of Matt Riley's Homebrew tools, Neovim plugins, and public template repositories."
 >
   <main>
     <PageShell>
@@ -19,7 +21,7 @@ const formattedPluginsGeneratedAt = formatUtcTimestamp(pluginsGeneratedAt);
         <section>
           <Hero
             title="mattriley.tools"
-            lede="A static catalog of the Homebrew tools and Neovim plugins Matt ships publicly. Tool data is generated from the tap's formula files; plugin data is generated from GitHub repos whose names contain `.nvim`."
+            lede="A static catalog of the Homebrew tools, Neovim plugins, and public template repositories Matt ships publicly. Tool data is generated from the tap's formula files; plugin data and template data are generated from public GitHub repositories."
           />
         </section>
 
@@ -85,6 +87,39 @@ const formattedPluginsGeneratedAt = formatUtcTimestamp(pluginsGeneratedAt);
                     </td>
                     <td>{plugin.version}</td>
                     <td>{plugin.description}</td>
+                  </tr>
+                ))
+              }
+            </DataTable>
+          </Stack>
+        </Section>
+
+        <Section title="Public templates" headingId="public-templates">
+          <Stack>
+            <div class="section-copy">
+              <p>
+                Public repositories from Matt's GitHub account that GitHub marks as template repos.
+                Each entry links to template details with repository metadata and synced README content.
+              </p>
+              <p>
+                Last synced: <time datetime={templatesGeneratedAt}>{formattedTemplatesGeneratedAt}</time>
+              </p>
+            </div>
+
+            <DataTable labelledBy="public-templates">
+              <tr slot="head">
+                <th scope="col">Template</th>
+                <th scope="col">Language</th>
+                <th scope="col">Description</th>
+              </tr>
+              {
+                templates.map((template) => (
+                  <tr>
+                    <td>
+                      <a href={`/templates/${template.slug}/`}>{template.name}</a>
+                    </td>
+                    <td>{template.language ?? "Unknown"}</td>
+                    <td>{template.description}</td>
                   </tr>
                 ))
               }
