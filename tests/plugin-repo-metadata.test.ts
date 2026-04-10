@@ -29,6 +29,19 @@ describe("plugin repo metadata", () => {
     ]);
   });
 
+  it("excludes archived plugin repositories even when the name matches", () => {
+    const repos = [
+      { name: "waystone.nvim", private: false, archived: false },
+      { name: "old.nvim", private: false, archived: true },
+      { name: "slides.nvim", private: false, archived: false },
+    ];
+
+    expect(filterPluginRepos(repos).map((repo) => repo.name)).toEqual([
+      "slides.nvim",
+      "waystone.nvim",
+    ]);
+  });
+
   it("maps a GitHub repo into the plugin record used by the site", () => {
     const repo = {
       name: "slides.nvim",

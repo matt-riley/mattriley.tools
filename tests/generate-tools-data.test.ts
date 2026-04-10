@@ -76,6 +76,33 @@ describe("generate tools data GitHub helpers", () => {
     ]);
   });
 
+  it("filters out tools backed by archived GitHub repositories", async () => {
+    const tools = [
+      {
+        slug: "active-tool",
+        homepage: "https://github.com/matt-riley/newbrew",
+      },
+      {
+        slug: "archived-tool",
+        homepage: "https://github.com/matt-riley/gql_boilerplate",
+      },
+    ];
+
+    await expect(
+      filterPublicToolsByRepository(tools, {
+        fetchRepositoryVisibility: async (_owner: string, repo: string) => ({
+          isPublic: true,
+          isArchived: repo === "gql_boilerplate",
+        }),
+      }),
+    ).resolves.toEqual([
+      {
+        slug: "active-tool",
+        homepage: "https://github.com/matt-riley/newbrew",
+      },
+    ]);
+  });
+
   it("decodes README metadata from the GitHub readme endpoint", async () => {
     const originalFetch = globalThis.fetch;
     const seenHeaders: unknown[] = [];

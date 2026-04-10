@@ -64,9 +64,9 @@ const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
           <Stack>
             <div class="section-copy">
               <p>
-                Repositories from Matt's GitHub account whose names contain <code>.nvim</code>.
-                Each entry links to plugin details with <code>lazy.nvim</code> and <code>vim.pack</code>
-                install snippets.
+                Non-archived public repositories from Matt's GitHub account whose names contain{" "}
+                <code>.nvim</code>. Each entry links to plugin details with <code>lazy.nvim</code> and{" "}
+                <code>vim.pack</code> install snippets.
               </p>
               <p>
                 Last synced: <time datetime={pluginsGeneratedAt}>{formattedPluginsGeneratedAt}</time>
@@ -98,8 +98,9 @@ const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
           <Stack>
             <div class="section-copy">
               <p>
-                Public repositories from Matt's GitHub account that GitHub marks as template repos.
-                Each entry links to template details with repository metadata and synced README content.
+                Non-archived public repositories from Matt's GitHub account that GitHub marks as
+                template repos. Each entry links to template details with repository metadata and
+                synced README content.
               </p>
               <p>
                 Last synced: <time datetime={templatesGeneratedAt}>{formattedTemplatesGeneratedAt}</time>

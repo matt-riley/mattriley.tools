@@ -15,8 +15,8 @@
 The site renders from generated data files:
 
 - Source of truth for Homebrew tools: `homebrew-tools/Formula/*.rb`
-- Source of truth for template repos: public `matt-riley/*` GitHub repositories where GitHub marks the repo as a template
-- Source of truth for Neovim plugins: public `matt-riley/*` GitHub repositories whose names contain `.nvim`
+- Source of truth for template repos: public, non-archived `matt-riley/*` GitHub repositories where GitHub marks the repo as a template
+- Source of truth for Neovim plugins: public, non-archived `matt-riley/*` GitHub repositories whose names contain `.nvim`
 - Generator: `scripts/generate-tools-data.mjs`
 - Generated artifacts:
   - `src/data/tools.generated.ts`

@@ -74,7 +74,16 @@ export async function fetchGitHubRepositoryVisibility(owner, repoName, token, op
     );
   }
 
-  return { isPublic: repo.private === false };
+  if (typeof repo?.archived !== "boolean") {
+    throw new TypeError(
+      `GitHub repository visibility fetch for ${owner}/${repoName} returned no archived flag`,
+    );
+  }
+
+  return {
+    isPublic: repo.private === false,
+    isArchived: repo.archived,
+  };
 }
 
 export function extractGitHubRepository(urlString) {
@@ -141,12 +150,12 @@ export async function filterPublicToolsByRepository(tools, options = {}) {
 
       const visibility = await fetchRepositoryVisibility(repository.owner, repository.repo);
 
-      return {
-        tool,
-        include: visibility.isPublic,
-      };
-    }),
-  );
+        return {
+          tool,
+          include: visibility.isPublic && visibility.isArchived !== true,
+        };
+      }),
+    );
 
   return visibilityResults.filter((result) => result.include).map((result) => result.tool);
 }
@@ -355,7 +364,7 @@ async function main() {
     })),
   );
   const templateRepos = githubRepos
-    .filter((repo) => repo.private !== true && repo.is_template === true)
+    .filter((repo) => repo.private !== true && repo.archived !== true && repo.is_template === true)
     .sort((left, right) => left.name.localeCompare(right.name));
   const templates = await Promise.all(
     templateRepos.map(async (repo) => ({

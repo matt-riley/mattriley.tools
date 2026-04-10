@@ -246,7 +246,7 @@ async function removeEmptyDirectories(outputDir, currentDir = outputDir) {
   const remainingEntries = await readdir(currentDir);
 
   if (remainingEntries.length === 0) {
-    await rm(currentDir, { recursive: false, force: true });
+    await rm(currentDir, { recursive: true, force: true });
   }
 }
 

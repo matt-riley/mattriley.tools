@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import readmeImageAssetsSource from "../scripts/readme-image-assets.mjs?raw";
 import {
   pruneMirroredReadmeImages,
   resolveReadmeImageRefs,
@@ -135,5 +136,9 @@ describe("syncReadmeImages", () => {
       "public/generated/readme-images/matt-riley/waystone.nvim/orphan.gif",
     ]);
     expect(removeEmptyDirectoriesCalls).toEqual(["public/generated/readme-images"]);
+  });
+
+  it("removes orphaned empty directories recursively after pruning", () => {
+    expect(readmeImageAssetsSource).toContain("await rm(currentDir, { recursive: true, force: true });");
   });
 });
