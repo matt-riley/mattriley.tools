@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildGitHubHeaders,
   extractGitHubRepository,
+  filterPublicToolsByRepository,
   fetchGitHubReadme,
   formatGitHubApiError,
 } from "../scripts/generate-tools-data.mjs";
@@ -39,6 +40,40 @@ describe("generate tools data GitHub helpers", () => {
     });
     expect(extractGitHubRepository("https://github.com/matt-riley/newbrew/issues")).toBeNull();
     expect(extractGitHubRepository("https://example.com/matt-riley/newbrew")).toBeNull();
+  });
+
+  it("filters out tools backed by private GitHub repositories", async () => {
+    const tools = [
+      {
+        slug: "public-tool",
+        homepage: "https://github.com/matt-riley/newbrew",
+      },
+      {
+        slug: "private-tool",
+        homepage: "https://github.com/matt-riley/workv2",
+      },
+      {
+        slug: "external-tool",
+        homepage: "https://example.com/tools/external-tool",
+      },
+    ];
+
+    await expect(
+      filterPublicToolsByRepository(tools, {
+        fetchRepositoryVisibility: async (_owner: string, repo: string) => ({
+          isPublic: repo !== "workv2",
+        }),
+      }),
+    ).resolves.toEqual([
+      {
+        slug: "public-tool",
+        homepage: "https://github.com/matt-riley/newbrew",
+      },
+      {
+        slug: "external-tool",
+        homepage: "https://example.com/tools/external-tool",
+      },
+    ]);
   });
 
   it("decodes README metadata from the GitHub readme endpoint", async () => {

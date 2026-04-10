@@ -45,6 +45,38 @@ export function formatGitHubApiError(status, statusText, body) {
   return `GitHub repo fetch failed: ${status} ${statusText}${message}${authHint}`;
 }
 
+export async function fetchGitHubRepositoryVisibility(owner, repoName, token, options = {}) {
+  const { fetchImpl = fetch } = options;
+  const response = await fetchImpl(`${GITHUB_API_BASE_URL}/repos/${owner}/${repoName}`, {
+    headers: buildGitHubHeaders(token),
+  });
+
+  if (response.status === 404) {
+    return { isPublic: false };
+  }
+
+  if (!response.ok) {
+    const errorBody = response.headers.get("content-type")?.includes("application/json")
+      ? await response.json()
+      : null;
+    const message = typeof errorBody?.message === "string" ? ` - ${errorBody.message}` : "";
+
+    throw new Error(
+      `GitHub repository visibility fetch failed for ${owner}/${repoName}: ${response.status} ${response.statusText}${message}`,
+    );
+  }
+
+  const repo = await response.json();
+
+  if (typeof repo?.private !== "boolean") {
+    throw new TypeError(
+      `GitHub repository visibility fetch for ${owner}/${repoName} returned no private flag`,
+    );
+  }
+
+  return { isPublic: repo.private === false };
+}
+
 export function extractGitHubRepository(urlString) {
   try {
     const url = new URL(urlString);
@@ -91,6 +123,32 @@ function readTapPathFromArgs(argv) {
   }
 
   return argv[tapPathIndex + 1] ?? null;
+}
+
+export async function filterPublicToolsByRepository(tools, options = {}) {
+  const {
+    fetchRepositoryVisibility = (owner, repoName) =>
+      fetchGitHubRepositoryVisibility(owner, repoName, TOOL_README_TOKEN),
+  } = options;
+
+  const visibilityResults = await Promise.all(
+    tools.map(async (tool) => {
+      const repository = extractGitHubRepository(tool.homepage);
+
+      if (!repository) {
+        return { tool, include: true };
+      }
+
+      const visibility = await fetchRepositoryVisibility(repository.owner, repository.repo);
+
+      return {
+        tool,
+        include: visibility.isPublic,
+      };
+    }),
+  );
+
+  return visibilityResults.filter((result) => result.include).map((result) => result.tool);
 }
 
 async function readFormulas(formulaDir) {
@@ -264,8 +322,9 @@ async function main() {
   const toolsOutputPath = join(dataDir, "tools.generated.ts");
   const pluginsOutputPath = join(dataDir, "plugins.generated.ts");
   const parsedTools = await readFormulas(formulaDir);
+  const publicTools = await filterPublicToolsByRepository(parsedTools);
   const tools = await Promise.all(
-    parsedTools.map(async (tool) => {
+    publicTools.map(async (tool) => {
       const repository = extractGitHubRepository(tool.homepage);
 
       return {

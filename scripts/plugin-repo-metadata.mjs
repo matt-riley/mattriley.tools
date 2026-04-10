@@ -6,6 +6,7 @@
  *   description: string | null;
  *   pushed_at: string;
  *   language: string | null;
+ *   private?: boolean;
  *   topics?: string[];
  * }} GitHubRepo
  */
@@ -27,12 +28,12 @@
  */
 
 /**
- * @param {{ name: string }[]} repos
- * @returns {{ name: string }[]}
+ * @param {{ name: string; private?: boolean }[]} repos
+ * @returns {{ name: string; private?: boolean }[]}
  */
 export function filterPluginRepos(repos) {
   return repos
-    .filter((repo) => repo.name.includes(".nvim"))
+    .filter((repo) => repo.name.includes(".nvim") && repo.private !== true)
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 

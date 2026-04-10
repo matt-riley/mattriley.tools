@@ -4,7 +4,24 @@ import { filterPluginRepos, toPluginRecord } from "../scripts/plugin-repo-metada
 
 describe("plugin repo metadata", () => {
   it("keeps only repos whose names contain .nvim", () => {
-    const repos = [{ name: "waystone.nvim" }, { name: "hopcli" }, { name: "slides.nvim" }];
+    const repos = [
+      { name: "waystone.nvim", private: false },
+      { name: "hopcli", private: false },
+      { name: "slides.nvim", private: false },
+    ];
+
+    expect(filterPluginRepos(repos).map((repo) => repo.name)).toEqual([
+      "slides.nvim",
+      "waystone.nvim",
+    ]);
+  });
+
+  it("excludes private plugin repositories even when the name matches", () => {
+    const repos = [
+      { name: "waystone.nvim", private: false },
+      { name: "secret.nvim", private: true },
+      { name: "slides.nvim", private: false },
+    ];
 
     expect(filterPluginRepos(repos).map((repo) => repo.name)).toEqual([
       "slides.nvim",

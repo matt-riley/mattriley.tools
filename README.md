@@ -63,10 +63,11 @@ pnpm run generate:data -- --tap-path ../homebrew-tools
 pnpm dev
 ```
 
-If you want local generated data to include README content from private tool repositories, set
+If your tap includes formulas whose homepages point at private GitHub repositories, set
 `TOOL_REPOS_GITHUB_TOKEN` to a token that can read those repos before running
-`pnpm run generate:data`. That generation step also refreshes mirrored README image assets under
-`public/generated/readme-images/`.
+`pnpm run generate:data`. The generator uses that access to identify and exclude private
+repositories from the published site, then refreshes mirrored README image assets under
+`public/generated/readme-images/` for the remaining public entries.
 
 If your tap checkout is somewhere else, point the generator at it explicitly:
 
@@ -94,7 +95,7 @@ pnpm format:check       # Verify formatting
 
 ## Automatic updates
 
-`.github/workflows/sync-tools-data.yml` syncs site data on a schedule (every 6 hours) and can also be triggered manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap, uses the repo's existing GitHub App credentials (`vars.APP_ID` and `secrets.PRIVATE_KEY`) to read private tool READMEs, regenerates all three generated outputs, and commits if any of those generated outputs changed.
+`.github/workflows/sync-tools-data.yml` syncs site data on a schedule (every 6 hours) and can also be triggered manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap, uses the repo's existing GitHub App credentials (`vars.APP_ID` and `secrets.PRIVATE_KEY`) to identify any private tap-backed repositories so they can be excluded from the published site, regenerates all three generated outputs, and commits if any of those generated outputs changed.
 
 Deployment remains intentionally undecided; the site output is plain static Astro so hosting can be chosen later.
 
