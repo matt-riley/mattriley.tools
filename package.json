@@ -25,7 +25,7 @@
     "@types/sanitize-html": "^2.16.1",
     "oxfmt": "^0.44.0",
     "oxlint": "^1.0.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.0",
     "vitest": "^4.0.0"
   },
   "packageManager": "pnpm@10.33.0"
