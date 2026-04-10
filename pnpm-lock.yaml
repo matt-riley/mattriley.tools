@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@matt-riley/design-tokens':
-        specifier: 1.3.0
-        version: 1.3.0
+        specifier: 1.3.1
+        version: 1.3.1
       '@matt-riley/ui-astro':
         specifier: 1.3.0
-        version: 1.3.0(@matt-riley/design-tokens@1.3.0)(astro@6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3))
+        version: 1.3.0(@matt-riley/design-tokens@1.3.1)(astro@6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3))
       astro:
         specifier: ^6.0.0
         version: 6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3)
@@ -605,8 +605,8 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
-  '@matt-riley/design-tokens@1.3.0':
-    resolution: {integrity: sha512-W4dqHLE5k6g1jiOwqNbkAh+9FthVzaqNLANgLcC72cZaE6pwFmI7udtfN9pR6b0wa10BDEsCik3aVdBfj0dH4g==, tarball: https://npm.pkg.github.com/download/@matt-riley/design-tokens/1.3.0/71fede041f835bfdc8d457f11ca3593e5b61e9fd}
+  '@matt-riley/design-tokens@1.3.1':
+    resolution: {integrity: sha512-ALyhSp/luKdh+Yc45bo43NdRmMbGPZ8GjDmf2o58V2MVcRXUatOh+ZdvPMOJO/NrXmj2B4F5G6UWZxtr9SzXqg==, tarball: https://npm.pkg.github.com/download/@matt-riley/design-tokens/1.3.1/ef5d7b211a7dadf10c0a1cef805c2244c2b0ee46}
 
   '@matt-riley/ui-astro@1.3.0':
     resolution: {integrity: sha512-t5q0qLfSSMF/WCXqrs27HZ9Xt1YcBBgt23GdMoS/ScNYesz918lfyem6YpMbWo9BJgh7J455dZ17v3VuHjRMPw==, tarball: https://npm.pkg.github.com/download/@matt-riley/ui-astro/1.3.0/cdbfe2ac76099c9857e32dde3a5f23849664fbe1}
@@ -2837,11 +2837,11 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
-  '@matt-riley/design-tokens@1.3.0': {}
+  '@matt-riley/design-tokens@1.3.1': {}
 
-  '@matt-riley/ui-astro@1.3.0(@matt-riley/design-tokens@1.3.0)(astro@6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3))':
+  '@matt-riley/ui-astro@1.3.0(@matt-riley/design-tokens@1.3.1)(astro@6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3))':
     dependencies:
-      '@matt-riley/design-tokens': 1.3.0
+      '@matt-riley/design-tokens': 1.3.1
       astro: 6.1.3(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(typescript@6.0.2)(yaml@2.8.3)
 
   '@oslojs/encoding@1.1.0': {}
