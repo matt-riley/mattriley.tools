@@ -23,7 +23,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
     "@types/sanitize-html": "^2.16.1",
-    "oxfmt": "^0.44.0",
+    "oxfmt": "^0.45.0",
     "oxlint": "^1.0.0",
     "typescript": "^6.0.0",
     "vitest": "^4.0.0"
