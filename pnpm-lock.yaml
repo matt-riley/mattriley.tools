@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@matt-riley/design-tokens':
-        specifier: 1.4.0
-        version: 1.4.0
+        specifier: 1.5.0
+        version: 1.5.0
       '@matt-riley/ui-astro':
         specifier: 1.4.1
-        version: 1.4.1(@matt-riley/design-tokens@1.4.0)(astro@6.1.8(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))
+        version: 1.4.1(@matt-riley/design-tokens@1.5.0)(astro@6.1.8(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))
       astro:
         specifier: ^6.0.0
         version: 6.1.8(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3)
@@ -449,8 +449,8 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
-  '@matt-riley/design-tokens@1.4.0':
-    resolution: {integrity: sha512-TNnm0cH7Sg+XtyiyT6TGoEuoj/QxvtFXvUL7NkvyyaCruVdQ5Yk26hWoNrVH+B5Od5M6Wo9YH/+3+WGd9aZdYQ==, tarball: https://npm.pkg.github.com/download/@matt-riley/design-tokens/1.4.0/f877637f2280a0de5d04079697f1434f8b614887}
+  '@matt-riley/design-tokens@1.5.0':
+    resolution: {integrity: sha512-WbS85lEGmOc+2hEOYLdpEr6KjmjWgN6/eu1Ubi1RHU1qOEUSzNm6lhjtwQd/iIvInbxaBZs2uoUr2k4X5EazZg==, tarball: https://npm.pkg.github.com/download/@matt-riley/design-tokens/1.5.0/bd9e3ab1c522bfe9d412ed67e62c88b6a15b795a}
 
   '@matt-riley/ui-astro@1.4.1':
     resolution: {integrity: sha512-tRbNhnR9bK0ApBZLKSPqeDAz5CB9jnIYJT0dtWJHucbruXCArFq18ZfRq4oTwvT8iX3ASYHxTzeLlxY2HJStKw==, tarball: https://npm.pkg.github.com/download/@matt-riley/ui-astro/1.4.1/044cf3ab020fc4486e335d70d2a373fd22830714}
@@ -2514,11 +2514,11 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
-  '@matt-riley/design-tokens@1.4.0': {}
+  '@matt-riley/design-tokens@1.5.0': {}
 
-  '@matt-riley/ui-astro@1.4.1(@matt-riley/design-tokens@1.4.0)(astro@6.1.8(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))':
+  '@matt-riley/ui-astro@1.4.1(@matt-riley/design-tokens@1.5.0)(astro@6.1.8(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))':
     dependencies:
-      '@matt-riley/design-tokens': 1.4.0
+      '@matt-riley/design-tokens': 1.5.0
       astro: 6.1.8(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3)
       shiki: 4.0.2
 
