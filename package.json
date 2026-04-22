@@ -14,7 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@matt-riley/design-tokens": "1.4.0",
+    "@matt-riley/design-tokens": "1.5.0",
     "@matt-riley/ui-astro": "1.4.1",
     "astro": "^6.0.0",
     "marked": "^18.0.0",
