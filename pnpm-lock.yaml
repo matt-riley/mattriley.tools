@@ -12,8 +12,8 @@ importers:
         specifier: 1.7.2
         version: 1.7.2
       '@matt-riley/ui-astro':
-        specifier: 1.14.1
-        version: 1.14.1(@matt-riley/design-tokens@1.7.2)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))
+        specifier: 1.15.4
+        version: 1.15.4(@matt-riley/design-tokens@1.7.2)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))
       astro:
         specifier: ^6.0.0
         version: 6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3)
@@ -452,8 +452,8 @@ packages:
   '@matt-riley/design-tokens@1.7.2':
     resolution: {integrity: sha512-9tT54SUQGtpt0lOuIt63vyaXaxYN0Et9Zmjy51eGdel6bZvK3fY2M5Mb9cTMWJLMvzovGxO89ysPqFYcMHIwMQ==, tarball: https://npm.pkg.github.com/download/@matt-riley/design-tokens/1.7.2/0d1356f02a3ca8539e044d7130587d300608997e}
 
-  '@matt-riley/ui-astro@1.14.1':
-    resolution: {integrity: sha512-KG823l6uOZ99TqcrU9n0l3nPu5e0fu15wkKN2xxlpBElVxkTYVO6V/qTJv3oA5k0Eht2DgrM/KG2IG2Uo3vtbA==, tarball: https://npm.pkg.github.com/download/@matt-riley/ui-astro/1.14.1/44c9cd1e558b32d25c1ec0ef7068fdd1f55443a3}
+  '@matt-riley/ui-astro@1.15.4':
+    resolution: {integrity: sha512-7ejSGuTjyKlojVgc/0ZATbUKBl7/NEZ8PEoHIDuJ7psVqrjOJu2w491zLjctFosJLb36jliwVsgnmq+cJc7etw==, tarball: https://npm.pkg.github.com/download/@matt-riley/ui-astro/1.15.4/636c61e60915c9b32694ca7737c159e526d3b683}
     peerDependencies:
       '@matt-riley/design-tokens': '>=0.0.0-0'
       astro: ^6.0.0
@@ -2519,7 +2519,7 @@ snapshots:
 
   '@matt-riley/design-tokens@1.7.2': {}
 
-  '@matt-riley/ui-astro@1.14.1(@matt-riley/design-tokens@1.7.2)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))':
+  '@matt-riley/ui-astro@1.15.4(@matt-riley/design-tokens@1.7.2)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))':
     dependencies:
       '@matt-riley/design-tokens': 1.7.2
       '@tabler/icons': 3.41.1
