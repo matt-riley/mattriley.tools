@@ -12,8 +12,8 @@ importers:
         specifier: 1.5.0
         version: 1.5.0
       '@matt-riley/ui-astro':
-        specifier: 1.9.0
-        version: 1.9.0(@matt-riley/design-tokens@1.5.0)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))
+        specifier: 1.14.1
+        version: 1.14.1(@matt-riley/design-tokens@1.5.0)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))
       astro:
         specifier: ^6.0.0
         version: 6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3)
@@ -452,8 +452,8 @@ packages:
   '@matt-riley/design-tokens@1.5.0':
     resolution: {integrity: sha512-WbS85lEGmOc+2hEOYLdpEr6KjmjWgN6/eu1Ubi1RHU1qOEUSzNm6lhjtwQd/iIvInbxaBZs2uoUr2k4X5EazZg==, tarball: https://npm.pkg.github.com/download/@matt-riley/design-tokens/1.5.0/bd9e3ab1c522bfe9d412ed67e62c88b6a15b795a}
 
-  '@matt-riley/ui-astro@1.9.0':
-    resolution: {integrity: sha512-EnmdNoAOMDLIycCdT/tAtMLgVvG4ifJooC9nDQ1sxm/V1v5JHvbFh1k4Bpwv3zqPiehpCJgYF4Um7hpuOVEA5g==, tarball: https://npm.pkg.github.com/download/@matt-riley/ui-astro/1.9.0/3e87ffbead8111c391efddedf6aab924aa74f731}
+  '@matt-riley/ui-astro@1.14.1':
+    resolution: {integrity: sha512-KG823l6uOZ99TqcrU9n0l3nPu5e0fu15wkKN2xxlpBElVxkTYVO6V/qTJv3oA5k0Eht2DgrM/KG2IG2Uo3vtbA==, tarball: https://npm.pkg.github.com/download/@matt-riley/ui-astro/1.14.1/44c9cd1e558b32d25c1ec0ef7068fdd1f55443a3}
     peerDependencies:
       '@matt-riley/design-tokens': '>=0.0.0-0'
       astro: ^6.0.0
@@ -885,6 +885,9 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@tabler/icons@3.41.1':
+    resolution: {integrity: sha512-OaRnVbRmH2nHtFeg+RmMJ/7m2oBIF9XCJAUD5gQnMrpK9f05ydj8MZrAf3NZQqOXyxGN1UBL0D5IKLLEUfr74Q==}
 
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
@@ -2516,9 +2519,10 @@ snapshots:
 
   '@matt-riley/design-tokens@1.5.0': {}
 
-  '@matt-riley/ui-astro@1.9.0(@matt-riley/design-tokens@1.5.0)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))':
+  '@matt-riley/ui-astro@1.14.1(@matt-riley/design-tokens@1.5.0)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))':
     dependencies:
       '@matt-riley/design-tokens': 1.5.0
+      '@tabler/icons': 3.41.1
       astro: 6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3)
       shiki: 4.0.2
 
@@ -2762,6 +2766,8 @@ snapshots:
   '@shikijs/vscode-textmate@10.0.2': {}
 
   '@standard-schema/spec@1.1.0': {}
+
+  '@tabler/icons@3.41.1': {}
 
   '@types/chai@5.2.3':
     dependencies:
