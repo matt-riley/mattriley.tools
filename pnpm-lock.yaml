@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@matt-riley/design-tokens':
-        specifier: 1.5.0
-        version: 1.5.0
+        specifier: 1.7.0
+        version: 1.7.0
       '@matt-riley/ui-astro':
         specifier: 1.14.1
-        version: 1.14.1(@matt-riley/design-tokens@1.5.0)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))
+        version: 1.14.1(@matt-riley/design-tokens@1.7.0)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))
       astro:
         specifier: ^6.0.0
         version: 6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3)
@@ -449,8 +449,8 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
-  '@matt-riley/design-tokens@1.5.0':
-    resolution: {integrity: sha512-WbS85lEGmOc+2hEOYLdpEr6KjmjWgN6/eu1Ubi1RHU1qOEUSzNm6lhjtwQd/iIvInbxaBZs2uoUr2k4X5EazZg==, tarball: https://npm.pkg.github.com/download/@matt-riley/design-tokens/1.5.0/bd9e3ab1c522bfe9d412ed67e62c88b6a15b795a}
+  '@matt-riley/design-tokens@1.7.0':
+    resolution: {integrity: sha512-G4I3pJtoGTZ0XuABoczOJQ2dbAxkW5ftJEcFeQa5YpskoOfzE6hKQHHgYh7OPUv+jvXIW3KAorVqgAWauJrBRg==, tarball: https://npm.pkg.github.com/download/@matt-riley/design-tokens/1.7.0/9c615c8b830275202d8f102a23bbd63321d5ab9c}
 
   '@matt-riley/ui-astro@1.14.1':
     resolution: {integrity: sha512-KG823l6uOZ99TqcrU9n0l3nPu5e0fu15wkKN2xxlpBElVxkTYVO6V/qTJv3oA5k0Eht2DgrM/KG2IG2Uo3vtbA==, tarball: https://npm.pkg.github.com/download/@matt-riley/ui-astro/1.14.1/44c9cd1e558b32d25c1ec0ef7068fdd1f55443a3}
@@ -2517,11 +2517,11 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
-  '@matt-riley/design-tokens@1.5.0': {}
+  '@matt-riley/design-tokens@1.7.0': {}
 
-  '@matt-riley/ui-astro@1.14.1(@matt-riley/design-tokens@1.5.0)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))':
+  '@matt-riley/ui-astro@1.14.1(@matt-riley/design-tokens@1.7.0)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))':
     dependencies:
-      '@matt-riley/design-tokens': 1.5.0
+      '@matt-riley/design-tokens': 1.7.0
       '@tabler/icons': 3.41.1
       astro: 6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3)
       shiki: 4.0.2
