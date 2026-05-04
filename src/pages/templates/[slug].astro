@@ -1,5 +1,21 @@
 ---
-import { Hero, MetaList, PageShell, Panel, Section } from "@matt-riley/ui-astro";
+import {
+  Badge,
+  BentoGrid,
+  BentoItem,
+  Breadcrumbs,
+  Callout,
+  EmptyState,
+  Hero,
+  LinkButton,
+  MetaList,
+  PageShell,
+  Panel,
+  Section,
+  Stack,
+  StatCard,
+  TableOfContents,
+} from "@matt-riley/ui-astro";
 import Layout from "../../layouts/Layout.astro";
 import { templates, templatesGeneratedAt } from "../../data/templates.generated";
 import { formatUtcTimestamp } from "../../utils/date";
@@ -19,54 +35,135 @@ export function getStaticPaths() {
 const { template } = Astro.props;
 const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
 const readmeHtml = renderReadme(template.readme);
+const pageUrl = `https://mattriley.tools/templates/${template.slug}/`;
+const topicCount = Number(template.topics.length);
+const topicLabel = topicCount === 1 ? "topic" : "topics";
+const languageLabel = template.language ?? "Unknown";
+const jsonld = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  name: template.name,
+  description: template.description,
+  url: pageUrl,
+  codeRepository: template.homepage,
+  ...(template.language ? { programmingLanguage: template.language } : {}),
+  ...(template.topics.length > 0 ? { keywords: template.topics.join(", ") } : {}),
+};
+const tableOfContents = [
+  { id: "template-metadata", label: "Template metadata", level: 2 },
+  { id: "template-readme", label: "README", level: 2 },
+];
 ---
 
-<Layout title={template.name} description={template.description}>
-  <main>
-    <PageShell>
-      <div class="page-stack">
-        <p class="eyebrow"><a href="/">Back to all catalogs</a></p>
+<Layout
+  title={template.name}
+  description={template.description}
+  agentHint={[
+    `This is the detail page for the ${template.name} public template repository.`,
+    "Repository metadata comes from GitHub and the README is synced into this static site when available.",
+    "Use the linked GitHub repository to create a new project from the template.",
+  ]}
+  jsonld={jsonld}
+>
+  <PageShell>
+    <div class="page-stack">
+      <Breadcrumbs items={[{ label: "All catalogs", href: "/" }, { label: template.name }]} />
 
+      <Panel variant="glass" class="hero-panel">
         <Hero title={template.name} lede={template.description}>
+          <div class="hero-badges" aria-label="Template highlights">
+            <Badge>Template repository</Badge>
+            <Badge variant="info">{template.language ?? "Unknown language"}</Badge>
+            <Badge variant="success">
+              {topicCount} {topicLabel}
+            </Badge>
+          </div>
+
           <p>
             Last synced: <time datetime={templatesGeneratedAt}>{formattedTemplatesGeneratedAt}</time>
           </p>
+
+          <div class="hero-actions">
+            <LinkButton href={template.homepage} external size="sm">
+              Open on GitHub
+            </LinkButton>
+          </div>
         </Hero>
+      </Panel>
 
-        <Section title="Template metadata" headingId="template-metadata">
-          <Panel>
-            <MetaList>
-              <dt>Repository</dt>
-              <dd>
-                <a href={template.homepage}>{template.repository}</a>
-              </dd>
+      <BentoGrid class="detail-stat-grid" columns={1} columnsMd={2} columnsLg={4} gap={4}>
+        <BentoItem>
+          <StatCard label="Type" value="Template" />
+        </BentoItem>
+        <BentoItem>
+          <StatCard label="Language" value={languageLabel} />
+        </BentoItem>
+        <BentoItem>
+          <StatCard label="Topics" value={topicCount} />
+        </BentoItem>
+        <BentoItem>
+          <StatCard label="Updated" value={template.updatedAt.slice(0, 10)} />
+        </BentoItem>
+      </BentoGrid>
 
-              <dt>Language</dt>
-              <dd>{template.language ?? "Unknown"}</dd>
+      <BentoGrid columns={1} columnsMd={4} columnsLg={4} gap={5}>
+        <BentoItem colSpan={1} colSpanMd={3} colSpanLg={3}>
+          <Section title="Template metadata" headingId="template-metadata" decorated>
+            <Panel variant="elevated">
+              <MetaList>
+                <dt>Repository</dt>
+                <dd>
+                  <a href={template.homepage}>{template.repository}</a>
+                </dd>
 
-              <dt>Topics</dt>
-              <dd>{template.topics.length > 0 ? template.topics.join(", ") : "No topics set"}</dd>
+                <dt>Language</dt>
+                <dd>{template.language ?? "Unknown"}</dd>
 
-              <dt>Last updated</dt>
-              <dd>
-                <time datetime={template.updatedAt}>{template.updatedAt}</time>
-              </dd>
-            </MetaList>
-          </Panel>
-        </Section>
+                <dt>Topics</dt>
+                <dd>{template.topics.length > 0 ? template.topics.join(", ") : "No topics set"}</dd>
 
-        <Section title="README" headingId="template-readme">
-          <Panel>
-            {
-              template.readme.markdown ? (
-                <div class="readme-content" set:html={readmeHtml} />
-              ) : (
-                <p>README unavailable.</p>
-              )
-            }
-          </Panel>
-        </Section>
-      </div>
-    </PageShell>
-  </main>
+                <dt>Last updated</dt>
+                <dd>
+                  <time datetime={template.updatedAt}>{template.updatedAt}</time>
+                </dd>
+              </MetaList>
+            </Panel>
+          </Section>
+        </BentoItem>
+
+        <BentoItem colSpan={1} colSpanMd={1} colSpanLg={1}>
+          <Stack space={4} class="detail-rail">
+            <TableOfContents headings={tableOfContents} title="On this page" />
+
+            <Panel variant="glass">
+              <Callout title="Start from GitHub" variant="tip">
+                <span slot="icon">🚀</span>
+                <p>
+                  Use the linked repository's <strong>Use this template</strong> action on GitHub to spin
+                  up a new project from this starter.
+                </p>
+              </Callout>
+            </Panel>
+          </Stack>
+        </BentoItem>
+
+        <BentoItem colSpan={1} colSpanMd={4} colSpanLg={4}>
+          <Section title="README" headingId="template-readme" decorated>
+            <Panel variant="bordered">
+              {
+                template.readme.markdown ? (
+                  <div class="readme-content" set:html={readmeHtml} />
+                ) : (
+                  <EmptyState
+                    title="README unavailable"
+                    description="This template does not currently have synced README content to display."
+                  />
+                )
+              }
+            </Panel>
+          </Section>
+        </BentoItem>
+      </BentoGrid>
+    </div>
+  </PageShell>
 </Layout>

@@ -1,32 +1,145 @@
 ---
-import { DataTable, Hero, PageShell, Section, Stack } from "@matt-riley/ui-astro";
+import {
+  Badge,
+  BentoGrid,
+  BentoItem,
+  Callout,
+  DataTable,
+  EmptyState,
+  Hero,
+  LinkButton,
+  PageShell,
+  Panel,
+  Section,
+  Stack,
+  StatCard,
+} from "@matt-riley/ui-astro";
 import Layout from "../layouts/Layout.astro";
 import { generatedAt, tools } from "../data/tools.generated";
 import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
 import { templates, templatesGeneratedAt } from "../data/templates.generated";
 import { formatUtcTimestamp } from "../utils/date";
 
+const pageUrl = "https://mattriley.tools/";
+const description =
+  "Static catalog of Matt Riley's Homebrew tools, Neovim plugins, and public template repositories.";
 const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
 const formattedPluginsGeneratedAt = formatUtcTimestamp(pluginsGeneratedAt);
 const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
+const allEntries = [...tools, ...plugins, ...templates];
+const syncedReadmeCount = allEntries.filter((entry) => entry.readme.markdown.trim().length > 0).length;
+const mirroredReadmeAssetCount = allEntries
+  .flatMap((entry) => entry.readme.images)
+  .filter((image) => image.mirroredPath).length;
+const jsonld = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "mattriley.tools",
+  description,
+  url: pageUrl,
+  hasPart: [
+    {
+      "@type": "ItemList",
+      name: "Homebrew tools",
+      numberOfItems: tools.length,
+      url: `${pageUrl}#homebrew-tools`,
+    },
+    {
+      "@type": "ItemList",
+      name: "Neovim plugins",
+      numberOfItems: plugins.length,
+      url: `${pageUrl}#neovim-plugins`,
+    },
+    {
+      "@type": "ItemList",
+      name: "Public templates",
+      numberOfItems: templates.length,
+      url: `${pageUrl}#public-templates`,
+    },
+  ],
+};
 ---
 
 <Layout
   title="mattriley.tools"
-  description="Static catalog of Matt Riley's Homebrew tools, Neovim plugins, and public template repositories."
+  description={description}
+  agentHint={[
+    "This page is a static catalog of Matt Riley's published Homebrew tools, Neovim plugins, and public template repositories.",
+    "Catalog entries link to detail pages that include generated metadata and synced README content.",
+  ]}
+  jsonld={jsonld}
 >
-  <main>
-    <PageShell>
-      <div class="page-stack">
-        <section>
-          <Hero
-            title="mattriley.tools"
-            lede="A static catalog of the Homebrew tools, Neovim plugins, and public template repositories Matt ships publicly. Tool data is generated from the tap's formula files; plugin data and template data are generated from public GitHub repositories."
-          />
-        </section>
+  <PageShell>
+    <div class="page-stack">
+      <Panel variant="glass" class="hero-panel">
+        <Hero
+          title="mattriley.tools"
+          variant="display"
+          lede="A static catalog of the Homebrew tools, Neovim plugins, and public template repositories Matt ships publicly. Tool data is generated from the tap's formula files; plugin data and template data are generated from public GitHub repositories."
+        >
+          <div class="hero-badges" aria-label="Site highlights">
+            <Badge variant="info">Static Astro catalog</Badge>
+            <Badge>Snurble powered</Badge>
+            <Badge variant="success">README sync included</Badge>
+          </div>
 
-        <Section title="Homebrew tools" headingId="homebrew-tools">
-          <Stack>
+          <div class="hero-actions">
+            <LinkButton href="#homebrew-tools" size="lg">Browse tools</LinkButton>
+            <LinkButton href="#neovim-plugins" variant="secondary">Browse plugins</LinkButton>
+            <LinkButton href="#public-templates" variant="secondary">Browse templates</LinkButton>
+          </div>
+        </Hero>
+      </Panel>
+
+      <Section title="Catalog at a glance" headingId="catalog-overview" decorated spacing={5}>
+        <Stack space={4}>
+          <BentoGrid columns={1} columnsMd={2} columnsLg={4} gap={4}>
+            <BentoItem>
+              <StatCard
+                label="Homebrew tools"
+                value={tools.length}
+                trendValue={formattedGeneratedAt}
+                href="#homebrew-tools"
+              />
+            </BentoItem>
+            <BentoItem>
+              <StatCard
+                label="Neovim plugins"
+                value={plugins.length}
+                trendValue={formattedPluginsGeneratedAt}
+                href="#neovim-plugins"
+              />
+            </BentoItem>
+            <BentoItem>
+              <StatCard
+                label="Public templates"
+                value={templates.length}
+                trendValue={formattedTemplatesGeneratedAt}
+                href="#public-templates"
+              />
+            </BentoItem>
+            <BentoItem>
+              <StatCard
+                label="Mirrored README assets"
+                value={mirroredReadmeAssetCount}
+                trendValue={`${syncedReadmeCount} synced READMEs`}
+              />
+            </BentoItem>
+          </BentoGrid>
+
+          <Callout title="Generated, not hand-curated" variant="tip">
+            <span slot="icon">✨</span>
+            <p>
+              Every catalog on this site is rebuilt from repository metadata, formula files, and synced
+              README content before Astro publishes the final static pages.
+            </p>
+          </Callout>
+        </Stack>
+      </Section>
+
+      <Section title="Homebrew tools" headingId="homebrew-tools" decorated spacing={5}>
+        <Stack space={4}>
+          <Panel variant="glass" class="catalog-intro">
             <div class="section-copy">
               <p>
                 Each entry links to a static detail page with the packaged version, install command,
@@ -34,34 +147,45 @@ const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
               </p>
               <p>Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time></p>
             </div>
+          </Panel>
 
-            <DataTable labelledBy="homebrew-tools">
-              <tr slot="head">
-                <th scope="col">Tool</th>
-                <th scope="col">Version</th>
-                <th scope="col">Description</th>
-                <th scope="col">Install</th>
-              </tr>
-              {
-                tools.map((tool) => (
-                  <tr>
-                    <td>
-                      <a href={`/tools/${tool.slug}/`}>{tool.name}</a>
-                    </td>
-                    <td>{tool.version}</td>
-                    <td>{tool.description}</td>
-                    <td>
-                      <code>{tool.installCommand}</code>
-                    </td>
-                  </tr>
-                ))
-              }
-            </DataTable>
-          </Stack>
-        </Section>
+          {
+            tools.length > 0 ? (
+              <DataTable labelledBy="homebrew-tools" striped>
+                <tr slot="head">
+                  <th scope="col">Tool</th>
+                  <th scope="col">Version</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Install</th>
+                </tr>
+                {
+                  tools.map((tool) => (
+                    <tr>
+                      <td data-label="Tool">
+                        <a href={`/tools/${tool.slug}/`}>{tool.name}</a>
+                      </td>
+                      <td data-label="Version">{tool.version}</td>
+                      <td data-label="Description">{tool.description}</td>
+                      <td data-label="Install">
+                        <code>{tool.installCommand}</code>
+                      </td>
+                    </tr>
+                  ))
+                }
+              </DataTable>
+            ) : (
+              <EmptyState
+                title="No Homebrew tools are published yet"
+                description="Run the generator again after the tap includes at least one public formula-backed tool."
+              />
+            )
+          }
+        </Stack>
+      </Section>
 
-        <Section title="Neovim plugins" headingId="neovim-plugins">
-          <Stack>
+      <Section title="Neovim plugins" headingId="neovim-plugins" decorated spacing={5}>
+        <Stack space={4}>
+          <Panel variant="glass" class="catalog-intro">
             <div class="section-copy">
               <p>
                 Non-archived public repositories from Matt's GitHub account whose names contain{" "}
@@ -72,30 +196,41 @@ const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
                 Last synced: <time datetime={pluginsGeneratedAt}>{formattedPluginsGeneratedAt}</time>
               </p>
             </div>
+          </Panel>
 
-            <DataTable labelledBy="neovim-plugins">
-              <tr slot="head">
-                <th scope="col">Plugin</th>
-                <th scope="col">Version</th>
-                <th scope="col">Description</th>
-              </tr>
-              {
-                plugins.map((plugin) => (
-                  <tr>
-                    <td>
-                      <a href={`/plugins/${plugin.slug}/`}>{plugin.name}</a>
-                    </td>
-                    <td>{plugin.version}</td>
-                    <td>{plugin.description}</td>
-                  </tr>
-                ))
-              }
-            </DataTable>
-          </Stack>
-        </Section>
+          {
+            plugins.length > 0 ? (
+              <DataTable labelledBy="neovim-plugins" striped>
+                <tr slot="head">
+                  <th scope="col">Plugin</th>
+                  <th scope="col">Version</th>
+                  <th scope="col">Description</th>
+                </tr>
+                {
+                  plugins.map((plugin) => (
+                    <tr>
+                      <td data-label="Plugin">
+                        <a href={`/plugins/${plugin.slug}/`}>{plugin.name}</a>
+                      </td>
+                      <td data-label="Version">{plugin.version}</td>
+                      <td data-label="Description">{plugin.description}</td>
+                    </tr>
+                  ))
+                }
+              </DataTable>
+            ) : (
+              <EmptyState
+                title="No public Neovim plugins matched the catalog rules"
+                description="Public, non-archived repositories with .nvim in the name will appear here after the next sync."
+              />
+            )
+          }
+        </Stack>
+      </Section>
 
-        <Section title="Public templates" headingId="public-templates">
-          <Stack>
+      <Section title="Public templates" headingId="public-templates" decorated spacing={5}>
+        <Stack space={4}>
+          <Panel variant="glass" class="catalog-intro">
             <div class="section-copy">
               <p>
                 Non-archived public repositories from Matt's GitHub account that GitHub marks as
@@ -106,28 +241,37 @@ const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
                 Last synced: <time datetime={templatesGeneratedAt}>{formattedTemplatesGeneratedAt}</time>
               </p>
             </div>
+          </Panel>
 
-            <DataTable labelledBy="public-templates">
-              <tr slot="head">
-                <th scope="col">Template</th>
-                <th scope="col">Language</th>
-                <th scope="col">Description</th>
-              </tr>
-              {
-                templates.map((template) => (
-                  <tr>
-                    <td>
-                      <a href={`/templates/${template.slug}/`}>{template.name}</a>
-                    </td>
-                    <td>{template.language ?? "Unknown"}</td>
-                    <td>{template.description}</td>
-                  </tr>
-                ))
-              }
-            </DataTable>
-          </Stack>
-        </Section>
-      </div>
-    </PageShell>
-  </main>
+          {
+            templates.length > 0 ? (
+              <DataTable labelledBy="public-templates" striped>
+                <tr slot="head">
+                  <th scope="col">Template</th>
+                  <th scope="col">Language</th>
+                  <th scope="col">Description</th>
+                </tr>
+                {
+                  templates.map((template) => (
+                    <tr>
+                      <td data-label="Template">
+                        <a href={`/templates/${template.slug}/`}>{template.name}</a>
+                      </td>
+                      <td data-label="Language">{template.language ?? "Unknown"}</td>
+                      <td data-label="Description">{template.description}</td>
+                    </tr>
+                  ))
+                }
+              </DataTable>
+            ) : (
+              <EmptyState
+                title="No public templates matched the current GitHub filters"
+                description="Template repositories appear here once GitHub marks them as templates and the generator syncs them."
+              />
+            )
+          }
+        </Stack>
+      </Section>
+    </div>
+  </PageShell>
 </Layout>

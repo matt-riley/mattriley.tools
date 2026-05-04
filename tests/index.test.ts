@@ -84,7 +84,7 @@ describe("generated site data", () => {
     );
   });
 
-  it("renders the plugin index table with plugin, version, and description columns only", async () => {
+  it("renders the plugin index table with plugin, version, and description columns only", () => {
     const pluginSection =
       indexPageSource.split('headingId="neovim-plugins"')[1]?.split('headingId="public-templates"')[0] ??
       "";
@@ -124,12 +124,23 @@ describe("generated site data", () => {
     expect(templateDetailPageSource).toContain('from "../../data/templates.generated"');
   });
 
-  it("composes the homepage from the shared Snurble Astro primitives", () => {
+  it("composes the homepage from a richer shared Snurble surface", () => {
     expect(indexPageSource).toContain('from "@matt-riley/ui-astro"');
     expect(indexPageSource).toContain("<PageShell>");
     expect(indexPageSource).toContain("<Hero");
     expect(indexPageSource).toContain("<Section");
     expect(indexPageSource).toContain("<DataTable");
+    expect(indexPageSource).toContain("<BentoGrid");
+    expect(indexPageSource).toContain("<StatCard");
+    expect(indexPageSource).toContain("<LinkButton");
+    expect(indexPageSource).toContain("<Callout");
+    expect(indexPageSource).toContain("<EmptyState");
+    expect(indexPageSource).toContain("striped>");
+    expect(indexPageSource).toContain('data-label="Tool"');
+  });
+
+  it("relies on the shared layout for the main landmark", () => {
+    expect(indexPageSource).not.toContain("<main>");
   });
 
   it("does not render the source-of-truth eyebrow on the homepage", () => {
