@@ -69,9 +69,7 @@ describe("renderReadme", () => {
       ],
     });
 
-    expect(html).toContain(
-      'src="/generated/readme-images/matt-riley/slides.nvim/logo.png"',
-    );
+    expect(html).toContain('src="/generated/readme-images/matt-riley/slides.nvim/logo.png"');
   });
 
   it("keeps the synced remote fallback url when mirroring failed", () => {
@@ -105,9 +103,7 @@ describe("renderReadme", () => {
       ],
     });
 
-    expect(html).toContain(
-      'src="/generated/readme-images/matt-riley/slides.nvim/logo.png"',
-    );
+    expect(html).toContain('src="/generated/readme-images/matt-riley/slides.nvim/logo.png"');
   });
 
   it("keeps synced html image tags on the exact remote fallback url when mirroring failed", () => {

@@ -34,7 +34,9 @@
  */
 export function filterPluginRepos(repos) {
   return repos
-    .filter((repo) => repo.name.includes(".nvim") && repo.private !== true && repo.archived !== true)
+    .filter(
+      (repo) => repo.name.includes(".nvim") && repo.private !== true && repo.archived !== true,
+    )
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 

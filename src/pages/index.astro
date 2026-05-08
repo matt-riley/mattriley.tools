@@ -18,15 +18,17 @@ import Layout from "../layouts/Layout.astro";
 import { generatedAt, tools } from "../data/tools.generated";
 import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
 import { templates, templatesGeneratedAt } from "../data/templates.generated";
+import { skills, skillsGeneratedAt } from "../data/skills.generated";
 import { formatUtcTimestamp } from "../utils/date";
 
 const pageUrl = "https://mattriley.tools/";
 const description =
-  "Static catalog of Matt Riley's Homebrew tools, Neovim plugins, and public template repositories.";
+  "Static catalog of Matt Riley's Homebrew tools, Neovim plugins, agent skills, and public template repositories.";
 const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
 const formattedPluginsGeneratedAt = formatUtcTimestamp(pluginsGeneratedAt);
 const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
-const allEntries = [...tools, ...plugins, ...templates];
+const formattedSkillsGeneratedAt = formatUtcTimestamp(skillsGeneratedAt);
+const allEntries = [...tools, ...plugins, ...templates, ...skills];
 const syncedReadmeCount = allEntries.filter((entry) => entry.readme.markdown.trim().length > 0).length;
 const mirroredReadmeAssetCount = allEntries
   .flatMap((entry) => entry.readme.images)
@@ -52,6 +54,12 @@ const jsonld = {
     },
     {
       "@type": "ItemList",
+      name: "Agent skills",
+      numberOfItems: skills.length,
+      url: `${pageUrl}#agent-skills`,
+    },
+    {
+      "@type": "ItemList",
       name: "Public templates",
       numberOfItems: templates.length,
       url: `${pageUrl}#public-templates`,
@@ -64,7 +72,7 @@ const jsonld = {
   title="mattriley.tools"
   description={description}
   agentHint={[
-    "This page is a static catalog of Matt Riley's published Homebrew tools, Neovim plugins, and public template repositories.",
+    "This page is a static catalog of Matt Riley's published Homebrew tools, Neovim plugins, agent skills, and public template repositories.",
     "Catalog entries link to detail pages that include generated metadata and synced README content.",
   ]}
   jsonld={jsonld}
@@ -75,7 +83,7 @@ const jsonld = {
         <Hero
           title="mattriley.tools"
           variant="display"
-          lede="A static catalog of the Homebrew tools, Neovim plugins, and public template repositories Matt ships publicly. Tool data is generated from the tap's formula files; plugin data and template data are generated from public GitHub repositories."
+          lede="A static catalog of the Homebrew tools, Neovim plugins, agent skills, and public template repositories Matt ships publicly. Tool data is generated from the tap's formula files; plugin and template data are generated from public GitHub repositories; skill data is generated from portable SKILL.md files."
         >
           <div class="hero-badges" aria-label="Site highlights">
             <Badge variant="info">Static Astro catalog</Badge>
@@ -86,6 +94,7 @@ const jsonld = {
           <div class="hero-actions">
             <LinkButton href="#homebrew-tools" size="lg">Browse tools</LinkButton>
             <LinkButton href="#neovim-plugins" variant="secondary">Browse plugins</LinkButton>
+            <LinkButton href="#agent-skills" variant="secondary">Browse skills</LinkButton>
             <LinkButton href="#public-templates" variant="secondary">Browse templates</LinkButton>
           </div>
         </Hero>
@@ -112,6 +121,14 @@ const jsonld = {
             </BentoItem>
             <BentoItem>
               <StatCard
+                label="Agent skills"
+                value={skills.length}
+                trendValue={formattedSkillsGeneratedAt}
+                href="#agent-skills"
+              />
+            </BentoItem>
+            <BentoItem>
+              <StatCard
                 label="Public templates"
                 value={templates.length}
                 trendValue={formattedTemplatesGeneratedAt}
@@ -122,7 +139,7 @@ const jsonld = {
               <StatCard
                 label="Mirrored README assets"
                 value={mirroredReadmeAssetCount}
-                trendValue={`${syncedReadmeCount} synced READMEs`}
+                trendValue={`${syncedReadmeCount} synced documents`}
               />
             </BentoItem>
           </BentoGrid>
@@ -130,8 +147,8 @@ const jsonld = {
           <Callout title="Generated, not hand-curated" variant="tip">
             <span slot="icon">✨</span>
             <p>
-              Every catalog on this site is rebuilt from repository metadata, formula files, and synced
-              README content before Astro publishes the final static pages.
+              Every catalog on this site is rebuilt from repository metadata, formula files, portable
+              skill files, and synced README content before Astro publishes the final static pages.
             </p>
           </Callout>
         </Stack>
@@ -222,6 +239,51 @@ const jsonld = {
               <EmptyState
                 title="No public Neovim plugins matched the catalog rules"
                 description="Public, non-archived repositories with .nvim in the name will appear here after the next sync."
+              />
+            )
+          }
+        </Stack>
+      </Section>
+
+      <Section title="Agent skills" headingId="agent-skills" decorated spacing={5}>
+        <Stack space={4}>
+          <Panel variant="glass" class="catalog-intro">
+            <div class="section-copy">
+              <p>
+                Portable agent skills from <code>matt-riley/agent-skills</code>. Each entry links to a
+                static detail page with SKILL.md metadata, compatibility notes, and rendered
+                instruction content.
+              </p>
+              <p>
+                Last synced: <time datetime={skillsGeneratedAt}>{formattedSkillsGeneratedAt}</time>
+              </p>
+            </div>
+          </Panel>
+
+          {
+            skills.length > 0 ? (
+              <DataTable labelledBy="agent-skills" striped>
+                <tr slot="head">
+                  <th scope="col">Skill</th>
+                  <th scope="col">Maturity</th>
+                  <th scope="col">Description</th>
+                </tr>
+                {
+                  skills.map((skill) => (
+                    <tr>
+                      <td data-label="Skill">
+                        <a href={`/skills/${skill.slug}/`}>{skill.name}</a>
+                      </td>
+                      <td data-label="Maturity">{skill.maturity}</td>
+                      <td data-label="Description">{skill.description}</td>
+                    </tr>
+                  ))
+                }
+              </DataTable>
+            ) : (
+              <EmptyState
+                title="No agent skills are published yet"
+                description="Skill directories with SKILL.md files appear here after the generator syncs matt-riley/agent-skills."
               />
             )
           }

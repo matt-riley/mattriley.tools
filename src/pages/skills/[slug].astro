@@ -1,0 +1,176 @@
+---
+import {
+  Badge,
+  BentoGrid,
+  BentoItem,
+  Breadcrumbs,
+  Callout,
+  EmptyState,
+  Hero,
+  LinkButton,
+  MetaList,
+  PageShell,
+  Panel,
+  Section,
+  Stack,
+  StatCard,
+  TableOfContents,
+} from "@matt-riley/ui-astro";
+import Layout from "../../layouts/Layout.astro";
+import { skills, skillsGeneratedAt } from "../../data/skills.generated";
+import { formatUtcTimestamp } from "../../utils/date";
+import { renderReadme } from "../../utils/readme";
+
+interface Props {
+  skill: (typeof skills)[number];
+}
+
+export function getStaticPaths() {
+  return skills.map((skill) => ({
+    params: { slug: skill.slug },
+    props: { skill },
+  }));
+}
+
+const { skill } = Astro.props;
+const formattedSkillsGeneratedAt = formatUtcTimestamp(skillsGeneratedAt);
+const skillHtml = renderReadme(skill.readme);
+const pageUrl = `https://mattriley.tools/skills/${skill.slug}/`;
+const licenseLabel = skill.license ?? "Undeclared";
+const jsonld = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  name: skill.name,
+  description: skill.description,
+  url: pageUrl,
+  isPartOf: {
+    "@type": "SoftwareSourceCode",
+    name: skill.repository,
+    codeRepository: `https://github.com/${skill.repository}`,
+  },
+  version: skill.version,
+  ...(skill.license ? { license: skill.license } : {}),
+};
+const tableOfContents = [
+  { id: "skill-metadata", label: "Skill metadata", level: 2 },
+  { id: "skill-readme", label: "SKILL.md", level: 2 },
+];
+---
+
+<Layout
+  title={skill.name}
+  description={skill.description}
+  agentHint={[
+    `This is the detail page for the ${skill.name} agent skill.`,
+    "Skill metadata and instructions are generated from matt-riley/agent-skills SKILL.md files.",
+    "The website renders skill instructions as inert documentation only; it does not install or run support files.",
+  ]}
+  jsonld={jsonld}
+>
+  <PageShell>
+    <div class="page-stack">
+      <Breadcrumbs items={[{ label: "All catalogs", href: "/" }, { label: skill.name }]} />
+
+      <Panel variant="glass" class="hero-panel">
+        <Hero title={skill.name} lede={skill.description}>
+          <div class="hero-badges" aria-label="Skill highlights">
+            <Badge variant="info">Version {skill.version}</Badge>
+            <Badge variant="success">{skill.maturity}</Badge>
+            <Badge>{licenseLabel}</Badge>
+          </div>
+
+          <p>
+            Last synced: <time datetime={skillsGeneratedAt}>{formattedSkillsGeneratedAt}</time>
+          </p>
+
+          <div class="hero-actions">
+            <LinkButton href={skill.sourceUrl} external size="sm">
+              Open SKILL.md on GitHub
+            </LinkButton>
+          </div>
+        </Hero>
+      </Panel>
+
+      <BentoGrid class="detail-stat-grid" columns={1} columnsMd={2} columnsLg={4} gap={4}>
+        <BentoItem>
+          <StatCard label="Version" value={skill.version} />
+        </BentoItem>
+        <BentoItem>
+          <StatCard label="Maturity" value={skill.maturity} />
+        </BentoItem>
+        <BentoItem>
+          <StatCard label="Repository" value="agent-skills" />
+        </BentoItem>
+        <BentoItem>
+          <StatCard label="License" value={licenseLabel} />
+        </BentoItem>
+      </BentoGrid>
+
+      <BentoGrid columns={1} columnsMd={4} columnsLg={4} gap={5}>
+        <BentoItem colSpan={1} colSpanMd={3} colSpanLg={3}>
+          <Section title="Skill metadata" headingId="skill-metadata" decorated>
+            <Panel variant="elevated">
+              <MetaList>
+                <dt>Repository</dt>
+                <dd>
+                  <a href={`https://github.com/${skill.repository}`}>{skill.repository}</a>
+                </dd>
+
+                <dt>Source file</dt>
+                <dd>
+                  <a href={skill.sourceUrl}>skills/{skill.slug}/SKILL.md</a>
+                </dd>
+
+                <dt>Version</dt>
+                <dd>{skill.version}</dd>
+
+                <dt>Maturity</dt>
+                <dd>{skill.maturity}</dd>
+
+                <dt>Compatibility</dt>
+                <dd>{skill.compatibility}</dd>
+
+                <dt>License</dt>
+                <dd>{licenseLabel}</dd>
+              </MetaList>
+            </Panel>
+          </Section>
+        </BentoItem>
+
+        <BentoItem colSpan={1} colSpanMd={1} colSpanLg={1}>
+          <Stack space={4} class="detail-rail">
+            <TableOfContents headings={tableOfContents} title="On this page" />
+
+            <Panel variant="glass">
+              <Callout title="Documentation only" variant="info">
+                <span slot="icon">🧭</span>
+                <p>
+                  These pages render each portable <code>SKILL.md</code> as static reference material.
+                  Install or inspect skills from the upstream repository before enabling them in an
+                  agent harness.
+                </p>
+              </Callout>
+            </Panel>
+          </Stack>
+        </BentoItem>
+
+        <BentoItem colSpan={1} colSpanMd={4} colSpanLg={4}>
+          <Section title="SKILL.md" headingId="skill-readme" decorated>
+            <Panel variant="bordered">
+              {
+                skill.readme.markdown ? (
+                  <div class="readme-content" set:html={skillHtml} />
+                ) : (
+                  <EmptyState
+                    title="SKILL.md unavailable"
+                    description="This skill does not currently have synced instruction content to display."
+                  />
+                )
+              }
+            </Panel>
+          </Section>
+        </BentoItem>
+      </BentoGrid>
+    </div>
+  </PageShell>
+</Layout>

@@ -4,17 +4,17 @@ on:
   workflow_call:
     inputs:
       app-name:
-        description: 'Catalog app identifier in the infra repo'
+        description: "Catalog app identifier in the infra repo"
         required: true
         type: string
       infra-repo:
-        description: 'Infra repository name or owner/name'
+        description: "Infra repository name or owner/name"
         required: false
-        default: 'infra'
+        default: "infra"
         type: string
     secrets:
       PRIVATE_KEY:
-        description: 'GitHub App private key matching vars.APP_ID'
+        description: "GitHub App private key matching vars.APP_ID"
         required: true
 
 jobs:

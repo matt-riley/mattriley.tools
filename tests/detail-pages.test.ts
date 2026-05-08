@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import pluginDetailPageSource from "../src/pages/plugins/[slug].astro?raw";
+import skillDetailPageSource from "../src/pages/skills/[slug].astro?raw";
 import templateDetailPageSource from "../src/pages/templates/[slug].astro?raw";
 import toolDetailPageSource from "../src/pages/tools/[slug].astro?raw";
 
@@ -35,6 +36,15 @@ describe("detail pages", () => {
     expect(templateDetailPageSource).toContain("<Panel");
     expect(templateDetailPageSource).toContain("<TableOfContents");
     expect(templateDetailPageSource).toContain("<EmptyState");
+
+    expect(skillDetailPageSource).toContain('from "@matt-riley/ui-astro"');
+    expect(skillDetailPageSource).toContain("<Breadcrumbs");
+    expect(skillDetailPageSource).toContain("<Hero");
+    expect(skillDetailPageSource).toContain("<Badge");
+    expect(skillDetailPageSource).toContain("<MetaList>");
+    expect(skillDetailPageSource).toContain("<Panel");
+    expect(skillDetailPageSource).toContain("<TableOfContents");
+    expect(skillDetailPageSource).toContain("<EmptyState");
   });
 
   it("renders a README section on tool detail pages", () => {
@@ -58,6 +68,13 @@ describe("detail pages", () => {
     expect(templateDetailPageSource).toContain("README unavailable");
   });
 
+  it("renders a SKILL.md section on skill detail pages", () => {
+    expect(skillDetailPageSource).toContain(
+      '<Section title="SKILL.md" headingId="skill-readme" decorated>',
+    );
+    expect(skillDetailPageSource).toContain("SKILL.md unavailable");
+  });
+
   it("keeps plugin install snippets inside metadata instead of a separate install section", () => {
     expect(pluginDetailPageSource).not.toContain('aria-labelledby="plugin-install"');
     expect(pluginDetailPageSource).not.toContain('<Section title="Install"');
@@ -70,5 +87,6 @@ describe("detail pages", () => {
     expect(toolDetailPageSource).not.toContain("<main>");
     expect(pluginDetailPageSource).not.toContain("<main>");
     expect(templateDetailPageSource).not.toContain("<main>");
+    expect(skillDetailPageSource).not.toContain("<main>");
   });
 });

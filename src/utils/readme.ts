@@ -73,17 +73,12 @@ export function renderReadme(readme: SyncedReadme) {
       .filter((path): path is string => isMirroredReadmeImagePath(path)),
   );
   const imageMap = new Map<string, string>(
-    readme.images.map(
-      (image): [string, string] => [
-        image.source,
-        isMirroredReadmeImagePath(image.mirroredPath) ? image.mirroredPath : image.source,
-      ],
-    ),
+    readme.images.map((image): [string, string] => [
+      image.source,
+      isMirroredReadmeImagePath(image.mirroredPath) ? image.mirroredPath : image.source,
+    ]),
   );
-  const allowedImageSources = new Set([
-    ...allowedRemoteSources,
-    ...allowedMirroredPaths,
-  ]);
+  const allowedImageSources = new Set([...allowedRemoteSources, ...allowedMirroredPaths]);
 
   const parser = new Marked({
     async: false,
@@ -166,10 +161,7 @@ export function renderReadme(readme: SyncedReadme) {
       }),
     },
     exclusiveFilter(frame) {
-      return (
-        frame.tag === "img" &&
-        !allowedImageSources.has(frame.attribs.src)
-      );
+      return frame.tag === "img" && !allowedImageSources.has(frame.attribs.src);
     },
   });
 }

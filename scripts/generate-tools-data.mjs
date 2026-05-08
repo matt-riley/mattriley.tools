@@ -124,14 +124,163 @@ function stripUrlSearchAndHash(urlString) {
   return url.toString();
 }
 
-function readTapPathFromArgs(argv) {
-  const tapPathIndex = argv.indexOf("--tap-path");
+function readPathFromArgs(argv, optionName) {
+  const optionIndex = argv.indexOf(optionName);
 
-  if (tapPathIndex === -1) {
+  if (optionIndex === -1) {
     return null;
   }
 
-  return argv[tapPathIndex + 1] ?? null;
+  return argv[optionIndex + 1] ?? null;
+}
+
+function readTapPathFromArgs(argv) {
+  return readPathFromArgs(argv, "--tap-path");
+}
+
+function readSkillsPathFromArgs(argv) {
+  return readPathFromArgs(argv, "--skills-path");
+}
+
+function parseYamlScalarValue(rawValue) {
+  const value = rawValue.replace(/\s+#.*$/u, "").trim();
+
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    return value.slice(1, -1);
+  }
+
+  return value;
+}
+
+function appendYamlContinuation(container, key, rawValue) {
+  const previous = typeof container[key] === "string" ? container[key] : "";
+  const next = parseYamlScalarValue(rawValue);
+  container[key] = `${previous} ${next}`.trim();
+}
+
+function parseSimpleYamlFrontmatter(frontmatter) {
+  const parsed = {};
+  let currentTopLevelKey = null;
+  let currentNestedKey = null;
+
+  for (const rawLine of frontmatter.split("\n")) {
+    const line = rawLine.trimEnd();
+
+    if (!line.trim()) {
+      continue;
+    }
+
+    const indent = rawLine.length - rawLine.trimStart().length;
+    const trimmed = line.trim();
+    const pair = /^([A-Za-z0-9_-]+):(.*)$/u.exec(trimmed);
+
+    if (indent === 0 && pair) {
+      const [, key, rawValue] = pair;
+      const value = parseYamlScalarValue(rawValue);
+
+      if (!value) {
+        parsed[key] = {};
+      } else {
+        parsed[key] = value;
+      }
+
+      currentTopLevelKey = key;
+      currentNestedKey = null;
+      continue;
+    }
+
+    const currentValue = currentTopLevelKey ? parsed[currentTopLevelKey] : null;
+
+    if (
+      indent > 0 &&
+      pair &&
+      currentTopLevelKey &&
+      typeof currentValue === "object" &&
+      currentValue !== null
+    ) {
+      const [, key, rawValue] = pair;
+      currentValue[key] = parseYamlScalarValue(rawValue);
+      currentNestedKey = key;
+      continue;
+    }
+
+    if (!currentTopLevelKey) {
+      continue;
+    }
+
+    if (typeof currentValue === "object" && currentValue !== null && currentNestedKey) {
+      appendYamlContinuation(currentValue, currentNestedKey, trimmed);
+    } else {
+      appendYamlContinuation(parsed, currentTopLevelKey, trimmed);
+    }
+  }
+
+  return parsed;
+}
+
+function parseSkillMarkdown(markdown, sourcePath) {
+  const frontmatterMatch = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/u.exec(markdown);
+
+  if (!frontmatterMatch) {
+    throw new Error(`Skill file ${sourcePath} must start with YAML frontmatter`);
+  }
+
+  return {
+    frontmatter: parseSimpleYamlFrontmatter(frontmatterMatch[1]),
+    body: frontmatterMatch[2].trimStart(),
+  };
+}
+
+function readString(value, fallback = null) {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : fallback;
+}
+
+async function readAgentSkills(skillsRootPath) {
+  const skillsDir = join(skillsRootPath, "skills");
+  const entries = await readdir(skillsDir, { withFileTypes: true });
+  const skillDirs = entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+
+  return Promise.all(
+    skillDirs.map(async (slug) => {
+      const skillPath = join(skillsDir, slug, "SKILL.md");
+      const content = await readFile(skillPath, "utf8");
+      const { frontmatter, body } = parseSkillMarkdown(content, skillPath);
+      const metadata =
+        typeof frontmatter.metadata === "object" && frontmatter.metadata !== null
+          ? frontmatter.metadata
+          : {};
+      const sourceUrl = `https://github.com/${GITHUB_OWNER}/agent-skills/blob/main/skills/${slug}/SKILL.md`;
+      const rawUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/agent-skills/main/skills/${slug}/SKILL.md`;
+
+      return {
+        slug,
+        name: readString(frontmatter.name, slug),
+        description: readString(frontmatter.description, "No description provided."),
+        repository: `${GITHUB_OWNER}/agent-skills`,
+        sourceUrl,
+        rawUrl,
+        license: readString(frontmatter.license),
+        compatibility: readString(
+          frontmatter.compatibility,
+          "Agent Skills-compatible coding agents.",
+        ),
+        version: readString(metadata.version, "Unversioned"),
+        maturity: readString(metadata.maturity, "Unknown"),
+        readme: {
+          markdown: body,
+          htmlUrl: sourceUrl,
+          downloadUrl: rawUrl,
+          images: [],
+        },
+      };
+    }),
+  );
 }
 
 export async function filterPublicToolsByRepository(tools, options = {}) {
@@ -150,12 +299,12 @@ export async function filterPublicToolsByRepository(tools, options = {}) {
 
       const visibility = await fetchRepositoryVisibility(repository.owner, repository.repo);
 
-        return {
-          tool,
-          include: visibility.isPublic && visibility.isArchived !== true,
-        };
-      }),
-    );
+      return {
+        tool,
+        include: visibility.isPublic && visibility.isArchived !== true,
+      };
+    }),
+  );
 
   return visibilityResults.filter((result) => result.include).map((result) => result.tool);
 }
@@ -321,16 +470,22 @@ async function writeGeneratedModule(
 
 async function main() {
   const explicitTapPath = readTapPathFromArgs(process.argv);
+  const explicitSkillsPath = readSkillsPathFromArgs(process.argv);
   const configuredTapPath = explicitTapPath ?? process.env.HOMEBREW_TAP_PATH;
+  const configuredSkillsPath = explicitSkillsPath ?? process.env.AGENT_SKILLS_PATH;
   const tapPath = configuredTapPath
     ? resolve(configuredTapPath)
     : resolve(process.cwd(), "../homebrew-tools");
+  const skillsPath = configuredSkillsPath
+    ? resolve(configuredSkillsPath)
+    : resolve(process.cwd(), "../agent-skills");
   const formulaDir = join(tapPath, "Formula");
   const dataDir = resolve(process.cwd(), "src/data");
   const publicReadmeImageDir = resolve(process.cwd(), "public/generated/readme-images");
   const toolsOutputPath = join(dataDir, "tools.generated.ts");
   const pluginsOutputPath = join(dataDir, "plugins.generated.ts");
   const templatesOutputPath = join(dataDir, "templates.generated.ts");
+  const skillsOutputPath = join(dataDir, "skills.generated.ts");
   const parsedTools = await readFormulas(formulaDir);
   const publicTools = await filterPublicToolsByRepository(parsedTools);
   const tools = await Promise.all(
@@ -384,8 +539,9 @@ async function main() {
       ),
     })),
   );
+  const skills = await readAgentSkills(skillsPath);
   const generatedAt = new Date().toISOString();
-  const mirroredPaths = [...tools, ...plugins, ...templates].flatMap((entry) =>
+  const mirroredPaths = [...tools, ...plugins, ...templates, ...skills].flatMap((entry) =>
     entry.readme.images.map((image) => image.mirroredPath),
   );
 
@@ -404,11 +560,15 @@ async function main() {
       templates,
       generatedAt,
     ),
+    writeGeneratedModule(skillsOutputPath, "skillsGeneratedAt", "skills", skills, generatedAt),
   ]);
 
   console.log(`Generated ${tools.length} tools from ${formulaDir}`);
   console.log(`Generated ${plugins.length} plugins from GitHub repositories under ${GITHUB_OWNER}`);
-  console.log(`Generated ${templates.length} templates from GitHub repositories under ${GITHUB_OWNER}`);
+  console.log(
+    `Generated ${templates.length} templates from GitHub repositories under ${GITHUB_OWNER}`,
+  );
+  console.log(`Generated ${skills.length} agent skills from ${join(skillsPath, "skills")}`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

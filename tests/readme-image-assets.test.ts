@@ -139,6 +139,8 @@ describe("syncReadmeImages", () => {
   });
 
   it("removes orphaned empty directories recursively after pruning", () => {
-    expect(readmeImageAssetsSource).toContain("await rm(currentDir, { recursive: true, force: true });");
+    expect(readmeImageAssetsSource).toContain(
+      "await rm(currentDir, { recursive: true, force: true });",
+    );
   });
 });
