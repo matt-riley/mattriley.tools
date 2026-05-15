@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: read
       packages: read
-    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@7f4f0d523d1a7f824fbb101f180bfcb463751b41 # main
+    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@6a54785c3381bfe12b87416b43349cba1b6f6cac # main
     with:
       package-manager: pnpm
       run-lint: true
