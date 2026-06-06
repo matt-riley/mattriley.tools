@@ -25,3 +25,4 @@ pnpm-debug.log*
 
 # local git worktrees
 .worktrees/
+.fallow/
