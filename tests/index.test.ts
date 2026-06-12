@@ -17,6 +17,57 @@ function hasValidReadmeImageShape(image: unknown) {
   );
 }
 
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
+}
+
+function hasSyncedReadmeMetadata(entry: unknown) {
+  const readme = (entry as { readme?: unknown }).readme as {
+    markdown?: unknown;
+    htmlUrl?: unknown;
+    downloadUrl?: unknown;
+    images?: unknown;
+  };
+
+  return (
+    typeof readme === "object" &&
+    readme !== null &&
+    "markdown" in readme &&
+    "htmlUrl" in readme &&
+    "downloadUrl" in readme &&
+    Array.isArray(readme.images) &&
+    readme.images.every(hasValidReadmeImageShape)
+  );
+}
+
+function hasValidSkillMetadata(skill: unknown) {
+  const skillRecord = skill as {
+    slug?: unknown;
+    repository?: unknown;
+    sourceUrl?: unknown;
+    description?: unknown;
+    compatibility?: unknown;
+    version?: unknown;
+    maturity?: unknown;
+    readme?: { markdown?: unknown };
+  };
+  const markdown = skillRecord.readme?.markdown;
+
+  return (
+    skillRecord.repository === "matt-riley/agent-skills" &&
+    isNonEmptyString(skillRecord.slug) &&
+    isNonEmptyString(skillRecord.sourceUrl) &&
+    skillRecord.sourceUrl.endsWith(`/skills/${skillRecord.slug}/SKILL.md`) &&
+    [
+      skillRecord.description,
+      skillRecord.compatibility,
+      skillRecord.version,
+      skillRecord.maturity,
+      markdown,
+    ].every(isNonEmptyString)
+  );
+}
+
 describe("generated site data", () => {
   it("includes at least one tool", () => {
     expect(tools.length).toBeGreaterThan(0);
@@ -69,51 +120,15 @@ describe("generated site data", () => {
   });
 
   it("stores synced README metadata for every tool and plugin", () => {
-    expect(
-      tools.every(
-        (tool) =>
-          typeof tool.readme === "object" &&
-          "markdown" in tool.readme &&
-          "htmlUrl" in tool.readme &&
-          "downloadUrl" in tool.readme &&
-          Array.isArray(tool.readme.images) &&
-          tool.readme.images.every(hasValidReadmeImageShape),
-      ),
-    ).toBe(true);
-    expect(
-      plugins.every(
-        (plugin) =>
-          typeof plugin.readme === "object" &&
-          "markdown" in plugin.readme &&
-          "htmlUrl" in plugin.readme &&
-          "downloadUrl" in plugin.readme &&
-          Array.isArray(plugin.readme.images) &&
-          plugin.readme.images.every(hasValidReadmeImageShape),
-      ),
-    ).toBe(true);
+    expect(tools.every(hasSyncedReadmeMetadata)).toBe(true);
+    expect(plugins.every(hasSyncedReadmeMetadata)).toBe(true);
     expect([...tools, ...plugins].some((entry) => typeof entry.readme.markdown === "string")).toBe(
       true,
     );
   });
 
   it("stores SKILL.md content and metadata for every agent skill", () => {
-    expect(
-      skills.every(
-        (skill) =>
-          skill.repository === "matt-riley/agent-skills" &&
-          skill.sourceUrl.endsWith(`/skills/${skill.slug}/SKILL.md`) &&
-          typeof skill.description === "string" &&
-          skill.description.length > 0 &&
-          typeof skill.compatibility === "string" &&
-          skill.compatibility.length > 0 &&
-          typeof skill.version === "string" &&
-          skill.version.length > 0 &&
-          typeof skill.maturity === "string" &&
-          skill.maturity.length > 0 &&
-          typeof skill.readme.markdown === "string" &&
-          skill.readme.markdown.length > 0,
-      ),
-    ).toBe(true);
+    expect(skills.every(hasValidSkillMetadata)).toBe(true);
   });
 
   it("renders the plugin index table with plugin, version, and description columns only", () => {

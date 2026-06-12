@@ -14,9 +14,6 @@ importers:
       '@matt-riley/ui-astro':
         specifier: 1.21.0
         version: 1.21.0(@matt-riley/design-tokens@1.10.0)(astro@6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3))
-      astro:
-        specifier: ^6.0.0
-        version: 6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3)
       marked:
         specifier: ^18.0.0
         version: 18.0.2
@@ -30,6 +27,9 @@ importers:
       '@types/sanitize-html':
         specifier: ^2.16.1
         version: 2.16.1
+      astro:
+        specifier: ^6.0.0
+        version: 6.1.9(rollup@4.60.2)(typescript@6.0.3)(yaml@2.8.3)
       oxfmt:
         specifier: ^0.51.0
         version: 0.51.0

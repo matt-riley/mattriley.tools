@@ -45,29 +45,20 @@ export function formatGitHubApiError(status, statusText, body) {
   return `GitHub repo fetch failed: ${status} ${statusText}${message}${authHint}`;
 }
 
-export async function fetchGitHubRepositoryVisibility(owner, repoName, token, options = {}) {
-  const { fetchImpl = fetch } = options;
-  const response = await fetchImpl(`${GITHUB_API_BASE_URL}/repos/${owner}/${repoName}`, {
-    headers: buildGitHubHeaders(token),
-  });
-
-  if (response.status === 404) {
-    return { isPublic: false };
-  }
-
+async function readGitHubJson(response, errorPrefix) {
   if (!response.ok) {
     const errorBody = response.headers.get("content-type")?.includes("application/json")
       ? await response.json()
       : null;
     const message = typeof errorBody?.message === "string" ? ` - ${errorBody.message}` : "";
 
-    throw new Error(
-      `GitHub repository visibility fetch failed for ${owner}/${repoName}: ${response.status} ${response.statusText}${message}`,
-    );
+    throw new Error(`${errorPrefix}: ${response.status} ${response.statusText}${message}`);
   }
 
-  const repo = await response.json();
+  return response.json();
+}
 
+function parseGitHubRepositoryVisibility(repo, owner, repoName) {
   if (typeof repo?.private !== "boolean") {
     throw new TypeError(
       `GitHub repository visibility fetch for ${owner}/${repoName} returned no private flag`,
@@ -84,6 +75,24 @@ export async function fetchGitHubRepositoryVisibility(owner, repoName, token, op
     isPublic: repo.private === false,
     isArchived: repo.archived,
   };
+}
+
+export async function fetchGitHubRepositoryVisibility(owner, repoName, token, options = {}) {
+  const { fetchImpl = fetch } = options;
+  const response = await fetchImpl(`${GITHUB_API_BASE_URL}/repos/${owner}/${repoName}`, {
+    headers: buildGitHubHeaders(token),
+  });
+
+  if (response.status === 404) {
+    return { isPublic: false };
+  }
+
+  const repo = await readGitHubJson(
+    response,
+    `GitHub repository visibility fetch failed for ${owner}/${repoName}`,
+  );
+
+  return parseGitHubRepositoryVisibility(repo, owner, repoName);
 }
 
 export function extractGitHubRepository(urlString) {
@@ -161,6 +170,48 @@ function appendYamlContinuation(container, key, rawValue) {
   container[key] = `${previous} ${next}`.trim();
 }
 
+function parseYamlPair(line) {
+  const pair = /^([A-Za-z0-9_-]+):(.*)$/u.exec(line);
+
+  return pair ? { key: pair[1], rawValue: pair[2] } : null;
+}
+
+function setTopLevelYamlValue(parsed, pair) {
+  const value = parseYamlScalarValue(pair.rawValue);
+  parsed[pair.key] = value || {};
+
+  return pair.key;
+}
+
+function canSetNestedYamlValue(indent, pair, currentTopLevelKey, currentValue) {
+  return (
+    indent > 0 &&
+    pair !== null &&
+    currentTopLevelKey !== null &&
+    typeof currentValue === "object" &&
+    currentValue !== null
+  );
+}
+
+function setNestedYamlValue(currentValue, pair) {
+  currentValue[pair.key] = parseYamlScalarValue(pair.rawValue);
+
+  return pair.key;
+}
+
+function appendYamlValue(parsed, currentTopLevelKey, currentValue, currentNestedKey, trimmed) {
+  if (!currentTopLevelKey) {
+    return;
+  }
+
+  if (typeof currentValue === "object" && currentValue !== null && currentNestedKey) {
+    appendYamlContinuation(currentValue, currentNestedKey, trimmed);
+    return;
+  }
+
+  appendYamlContinuation(parsed, currentTopLevelKey, trimmed);
+}
+
 function parseSimpleYamlFrontmatter(frontmatter) {
   const parsed = {};
   let currentTopLevelKey = null;
@@ -168,54 +219,29 @@ function parseSimpleYamlFrontmatter(frontmatter) {
 
   for (const rawLine of frontmatter.split("\n")) {
     const line = rawLine.trimEnd();
+    const trimmed = line.trim();
 
-    if (!line.trim()) {
+    if (!trimmed) {
       continue;
     }
 
     const indent = rawLine.length - rawLine.trimStart().length;
-    const trimmed = line.trim();
-    const pair = /^([A-Za-z0-9_-]+):(.*)$/u.exec(trimmed);
+    const pair = parseYamlPair(trimmed);
 
     if (indent === 0 && pair) {
-      const [, key, rawValue] = pair;
-      const value = parseYamlScalarValue(rawValue);
-
-      if (!value) {
-        parsed[key] = {};
-      } else {
-        parsed[key] = value;
-      }
-
-      currentTopLevelKey = key;
+      currentTopLevelKey = setTopLevelYamlValue(parsed, pair);
       currentNestedKey = null;
       continue;
     }
 
     const currentValue = currentTopLevelKey ? parsed[currentTopLevelKey] : null;
 
-    if (
-      indent > 0 &&
-      pair &&
-      currentTopLevelKey &&
-      typeof currentValue === "object" &&
-      currentValue !== null
-    ) {
-      const [, key, rawValue] = pair;
-      currentValue[key] = parseYamlScalarValue(rawValue);
-      currentNestedKey = key;
+    if (canSetNestedYamlValue(indent, pair, currentTopLevelKey, currentValue)) {
+      currentNestedKey = setNestedYamlValue(currentValue, pair);
       continue;
     }
 
-    if (!currentTopLevelKey) {
-      continue;
-    }
-
-    if (typeof currentValue === "object" && currentValue !== null && currentNestedKey) {
-      appendYamlContinuation(currentValue, currentNestedKey, trimmed);
-    } else {
-      appendYamlContinuation(parsed, currentTopLevelKey, trimmed);
-    }
+    appendYamlValue(parsed, currentTopLevelKey, currentValue, currentNestedKey, trimmed);
   }
 
   return parsed;
@@ -363,6 +389,18 @@ async function fetchGitHubRepos(owner) {
   return repos;
 }
 
+function parseGitHubReadme(readme, owner, repoName) {
+  if (typeof readme?.content !== "string") {
+    throw new TypeError(`GitHub README fetch for ${owner}/${repoName} returned no content`);
+  }
+
+  return {
+    markdown: Buffer.from(readme.content.replace(/\n/g, ""), "base64").toString("utf8"),
+    htmlUrl: typeof readme.html_url === "string" ? readme.html_url : null,
+    downloadUrl: stripUrlSearchAndHash(readme.download_url),
+  };
+}
+
 export async function fetchGitHubReadme(owner, repoName, token, options = {}) {
   const {
     fetchImpl = fetch,
@@ -378,41 +416,33 @@ export async function fetchGitHubReadme(owner, repoName, token, options = {}) {
     return createUnavailableReadme();
   }
 
-  if (!response.ok) {
-    const errorBody = response.headers.get("content-type")?.includes("application/json")
-      ? await response.json()
-      : null;
-    const message = typeof errorBody?.message === "string" ? ` - ${errorBody.message}` : "";
-
-    throw new Error(
-      `GitHub README fetch failed for ${owner}/${repoName}: ${response.status} ${response.statusText}${message}`,
-    );
-  }
-
-  const readme = await response.json();
-
-  if (typeof readme?.content !== "string") {
-    throw new TypeError(`GitHub README fetch for ${owner}/${repoName} returned no content`);
-  }
-
-  const markdown = Buffer.from(readme.content.replace(/\n/g, ""), "base64").toString("utf8");
-  const downloadUrl = stripUrlSearchAndHash(readme.download_url);
+  const readme = parseGitHubReadme(
+    await readGitHubJson(response, `GitHub README fetch failed for ${owner}/${repoName}`),
+    owner,
+    repoName,
+  );
 
   return {
-    markdown,
-    htmlUrl: typeof readme.html_url === "string" ? readme.html_url : null,
-    downloadUrl,
+    ...readme,
     images: await syncReadmeImages({
       owner,
       repo: repoName,
-      markdown,
-      downloadUrl,
+      markdown: readme.markdown,
+      downloadUrl: readme.downloadUrl,
       outputDir,
       fetchImpl,
       headers,
       writeAssetImpl,
     }),
   };
+}
+
+function parseLatestGitHubTag(tags, owner, repoName) {
+  if (!Array.isArray(tags)) {
+    throw new TypeError(`GitHub tag fetch for ${owner}/${repoName} returned a non-array response`);
+  }
+
+  return typeof tags[0]?.name === "string" && tags[0].name.length > 0 ? tags[0].name : "Unreleased";
 }
 
 async function fetchLatestGitHubTag(owner, repoName) {
@@ -423,24 +453,11 @@ async function fetchLatestGitHubTag(owner, repoName) {
     },
   );
 
-  if (!response.ok) {
-    const errorBody = response.headers.get("content-type")?.includes("application/json")
-      ? await response.json()
-      : null;
-    const message = typeof errorBody?.message === "string" ? ` - ${errorBody.message}` : "";
-
-    throw new Error(
-      `GitHub tag fetch failed for ${owner}/${repoName}: ${response.status} ${response.statusText}${message}`,
-    );
-  }
-
-  const tags = await response.json();
-
-  if (!Array.isArray(tags)) {
-    throw new TypeError(`GitHub tag fetch for ${owner}/${repoName} returned a non-array response`);
-  }
-
-  return typeof tags[0]?.name === "string" && tags[0].name.length > 0 ? tags[0].name : "Unreleased";
+  return parseLatestGitHubTag(
+    await readGitHubJson(response, `GitHub tag fetch failed for ${owner}/${repoName}`),
+    owner,
+    repoName,
+  );
 }
 
 async function fetchGitHubReadmeWithFallback(owner, repoName, token, outputDir) {

@@ -6,17 +6,19 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   ci:
-    permissions:
-      contents: read
-      packages: read
-    uses: matt-riley/matt-riley-ci/.github/workflows/node-ci.yml@6a54785c3381bfe12b87416b43349cba1b6f6cac # main
+    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@v2
     with:
-      package-manager: pnpm
-      run-lint: true
-      run-test: true
-      run-build: true
+      install: true
+      lint: true
+      test: true
+      build: true
+      fmt: true
 
   deploy:
     needs: ci

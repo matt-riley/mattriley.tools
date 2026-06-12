@@ -4,6 +4,19 @@ import { createHash } from "node:crypto";
 
 const MARKDOWN_IMAGE_PATTERN = /!\[[^\]]*]\(([^)\s]+)(?:\s+["'][^"']*["'])?\)/g;
 const HTML_IMAGE_PATTERN = /<img\b[^>]*\bsrc=(["'])(.*?)\1[^>]*>/gi;
+const IMAGE_EXTENSION_BY_CONTENT_TYPE = {
+  "image/apng": ".apng",
+  "image/avif": ".avif",
+  "image/bmp": ".bmp",
+  "image/gif": ".gif",
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/svg+xml": ".svg",
+  "image/tiff": ".tiff",
+  "image/vnd.microsoft.icon": ".ico",
+  "image/webp": ".webp",
+  "image/x-icon": ".ico",
+};
 
 /**
  * @param {string} value
@@ -39,31 +52,7 @@ function extensionForContentType(contentType) {
 
   const mimeType = contentType.split(";")[0]?.trim().toLowerCase();
 
-  switch (mimeType) {
-    case "image/apng":
-      return ".apng";
-    case "image/avif":
-      return ".avif";
-    case "image/bmp":
-      return ".bmp";
-    case "image/gif":
-      return ".gif";
-    case "image/jpeg":
-      return ".jpg";
-    case "image/png":
-      return ".png";
-    case "image/svg+xml":
-      return ".svg";
-    case "image/tiff":
-      return ".tiff";
-    case "image/vnd.microsoft.icon":
-    case "image/x-icon":
-      return ".ico";
-    case "image/webp":
-      return ".webp";
-    default:
-      return null;
-  }
+  return mimeType ? (IMAGE_EXTENSION_BY_CONTENT_TYPE[mimeType] ?? null) : null;
 }
 
 /**
@@ -175,6 +164,22 @@ async function writeMirroredAsset(outputPath, bytes) {
   await writeFile(outputPath, bytes);
 }
 
+function isMissingDirectoryError(error) {
+  return !!error && typeof error === "object" && "code" in error && error.code === "ENOENT";
+}
+
+async function readDirectory(path, options) {
+  try {
+    return await readdir(path, options);
+  } catch (error) {
+    if (isMissingDirectoryError(error)) {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
 /**
  * @param {string} outputDir
  * @param {string} currentDir
@@ -182,35 +187,28 @@ async function writeMirroredAsset(outputPath, bytes) {
  * @returns {Promise<string[]>}
  */
 async function listRelativeFiles(outputDir, currentDir = outputDir, prefix = "") {
-  let entries;
+  const entries = await readDirectory(currentDir, { withFileTypes: true });
 
-  try {
-    entries = await readdir(currentDir, { withFileTypes: true });
-  } catch (error) {
-    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
-      return [];
-    }
-
-    throw error;
+  if (!entries) {
+    return [];
   }
 
-  const files = [];
+  const nestedFiles = await Promise.all(
+    entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => {
+        const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
 
-  for (const entry of entries) {
-    const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
-    const entryPath = join(currentDir, entry.name);
+        return listRelativeFiles(outputDir, join(currentDir, entry.name), relativePath);
+      }),
+  );
 
-    if (entry.isDirectory()) {
-      files.push(...(await listRelativeFiles(outputDir, entryPath, relativePath)));
-      continue;
-    }
-
-    if (entry.isFile()) {
-      files.push(relativePath);
-    }
-  }
-
-  return files;
+  return [
+    ...entries
+      .filter((entry) => entry.isFile())
+      .map((entry) => (prefix ? `${prefix}/${entry.name}` : entry.name)),
+    ...nestedFiles.flat(),
+  ];
 }
 
 /**
@@ -219,33 +217,25 @@ async function listRelativeFiles(outputDir, currentDir = outputDir, prefix = "")
  * @returns {Promise<void>}
  */
 async function removeEmptyDirectories(outputDir, currentDir = outputDir) {
-  let entries;
+  const entries = await readDirectory(currentDir, { withFileTypes: true });
 
-  try {
-    entries = await readdir(currentDir, { withFileTypes: true });
-  } catch (error) {
-    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
-      return;
-    }
-
-    throw error;
+  if (!entries) {
+    return;
   }
 
-  for (const entry of entries) {
-    if (!entry.isDirectory()) {
-      continue;
-    }
-
-    await removeEmptyDirectories(outputDir, join(currentDir, entry.name));
-  }
+  await Promise.all(
+    entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => removeEmptyDirectories(outputDir, join(currentDir, entry.name))),
+  );
 
   if (currentDir === outputDir) {
     return;
   }
 
-  const remainingEntries = await readdir(currentDir);
+  const remainingEntries = await readDirectory(currentDir);
 
-  if (remainingEntries.length === 0) {
+  if (!remainingEntries || remainingEntries.length === 0) {
     await rm(currentDir, { recursive: true, force: true });
   }
 }
@@ -281,7 +271,7 @@ function toRelativeMirroredPath(mirroredPath) {
  * }} input
  * @returns {Promise<string | null>}
  */
-export async function mirrorReadmeImage({
+async function mirrorReadmeImage({
   owner,
   repo,
   source,

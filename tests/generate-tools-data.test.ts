@@ -8,6 +8,32 @@ import {
   formatGitHubApiError,
 } from "../scripts/generate-tools-data.mjs";
 
+const GITHUB_README_FIXTURE = {
+  content: "IVtMb2dvXShpbWFnZXMvbG9nby5wbmcpCg==",
+  encoding: "base64",
+  html_url: "https://github.com/matt-riley/newbrew/blob/main/README.md",
+  download_url: "https://raw.githubusercontent.com/matt-riley/newbrew/main/README.md",
+};
+
+function createGitHubReadmeResponse(overrides: Partial<typeof GITHUB_README_FIXTURE> = {}) {
+  return new Response(JSON.stringify({ ...GITHUB_README_FIXTURE, ...overrides }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+function createGitHubReadmeFetch(onOtherUrl: (url: string) => Response | Promise<Response>) {
+  return async (input: unknown) => {
+    const url = String(input);
+
+    if (url.endsWith("/readme")) {
+      return createGitHubReadmeResponse();
+    }
+
+    return onOtherUrl(url);
+  };
+}
+
 describe("generate tools data GitHub helpers", () => {
   it("adds the configured GitHub API version header", () => {
     expect(buildGitHubHeaders()).toMatchObject({
@@ -145,30 +171,13 @@ describe("generate tools data GitHub helpers", () => {
     const outputDir = "test-artifacts/generator-readme-images";
     const writes: Array<{ outputPath: string; bytes: Uint8Array }> = [];
 
-    globalThis.fetch = async (input) => {
-      const url = String(input);
-
-      if (url.endsWith("/readme")) {
-        return new Response(
-          JSON.stringify({
-            content: "IVtMb2dvXShpbWFnZXMvbG9nby5wbmcpCg==",
-            encoding: "base64",
-            html_url: "https://github.com/matt-riley/newbrew/blob/main/README.md",
-            download_url: "https://raw.githubusercontent.com/matt-riley/newbrew/main/README.md",
-          }),
-          {
-            status: 200,
-            headers: { "content-type": "application/json" },
-          },
-        );
-      }
-
+    globalThis.fetch = createGitHubReadmeFetch((url) => {
       if (url === "https://raw.githubusercontent.com/matt-riley/newbrew/main/images/logo.png") {
         return new Response("image-bytes", { status: 200 });
       }
 
       return new Response("not found", { status: 404 });
-    };
+    });
 
     const readme = await fetchGitHubReadme("matt-riley", "newbrew", "tool-token", {
       outputDir,
@@ -199,26 +208,9 @@ describe("generate tools data GitHub helpers", () => {
   it("keeps the README payload when mirroring an image throws", async () => {
     const originalFetch = globalThis.fetch;
 
-    globalThis.fetch = async (input) => {
-      const url = String(input);
-
-      if (url.endsWith("/readme")) {
-        return new Response(
-          JSON.stringify({
-            content: "IVtMb2dvXShpbWFnZXMvbG9nby5wbmcpCg==",
-            encoding: "base64",
-            html_url: "https://github.com/matt-riley/newbrew/blob/main/README.md",
-            download_url: "https://raw.githubusercontent.com/matt-riley/newbrew/main/README.md",
-          }),
-          {
-            status: 200,
-            headers: { "content-type": "application/json" },
-          },
-        );
-      }
-
+    globalThis.fetch = createGitHubReadmeFetch(() => {
       throw new Error("network reset");
-    };
+    });
 
     await expect(fetchGitHubReadme("matt-riley", "newbrew", "tool-token")).resolves.toEqual({
       markdown: "![Logo](images/logo.png)\n",
