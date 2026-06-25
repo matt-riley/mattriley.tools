@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   ci:
-    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@v2
+    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@7fd3aefaab1ae14d063930c85b2d629280c36620 # v2
     with:
       install: true
       lint: true
