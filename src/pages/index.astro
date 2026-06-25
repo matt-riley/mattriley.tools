@@ -20,6 +20,7 @@ import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
 import { templates, templatesGeneratedAt } from "../data/templates.generated";
 import { skills, skillsGeneratedAt } from "../data/skills.generated";
 import { formatUtcTimestamp } from "../utils/date";
+import type { SyncedReadmeImage } from "../utils/readme";
 
 const pageUrl = "https://mattriley.tools/";
 const description =
@@ -30,9 +31,10 @@ const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
 const formattedSkillsGeneratedAt = formatUtcTimestamp(skillsGeneratedAt);
 const allEntries = [...tools, ...plugins, ...templates, ...skills];
 const syncedReadmeCount = allEntries.filter((entry) => entry.readme.markdown.trim().length > 0).length;
-const mirroredReadmeAssetCount = allEntries
-  .flatMap((entry) => entry.readme.images)
-  .filter((image) => image.mirroredPath).length;
+const allReadmeImages: SyncedReadmeImage[] = allEntries.flatMap((entry) => [
+  ...entry.readme.images,
+]) as SyncedReadmeImage[];
+const mirroredReadmeAssetCount = allReadmeImages.filter((image) => image.mirroredPath).length;
 const jsonld = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",

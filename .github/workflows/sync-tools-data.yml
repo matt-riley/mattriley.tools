@@ -53,18 +53,21 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Set up Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - name: Set up mise
+        uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
         with:
-          node-version: 24
-          cache: pnpm
+          install: true
+          cache: true
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        env:
+          MISE_GITHUB_TOKEN: ${{ steps.tool-readme-token.outputs.token }}
+        run: mise run install
 
       - name: Regenerate site data
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ steps.tool-readme-token.outputs.token }}
           TOOL_REPOS_GITHUB_TOKEN: ${{ steps.tool-readme-token.outputs.token }}
         run: |
           pnpm run generate:data -- --tap-path "${{ github.workspace }}/tap-source" --skills-path "${{ github.workspace }}/agent-skills-source"
