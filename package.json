@@ -24,7 +24,7 @@
     "@types/sanitize-html": "^2.16.1",
     "astro": "^6.0.0",
     "oxfmt": "^0.51.0",
-    "oxlint": "^1.0.0",
+    "oxlint": "^1.71.0",
     "typescript": "^6.0.0",
     "vitest": "^4.0.0"
   },
