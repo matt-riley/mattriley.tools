@@ -5,10 +5,11 @@ pnpm = "11.2.0"
 [tasks.install]
 description = "Install dependencies"
 run = """
-if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+auth_token="${NODE_AUTH_TOKEN:-${MISE_GITHUB_TOKEN:-}}"
+if [ -n "$auth_token" ]; then
   touch "$HOME/.npmrc"
   grep -v '^//npm\\.pkg\\.github\\.com/:_authToken=' "$HOME/.npmrc" > "$HOME/.npmrc.tmp" || true
-  printf '%s\n' "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> "$HOME/.npmrc.tmp"
+  printf '%s\n' "//npm.pkg.github.com/:_authToken=${auth_token}" >> "$HOME/.npmrc.tmp"
   mv "$HOME/.npmrc.tmp" "$HOME/.npmrc"
 fi
 pnpm install

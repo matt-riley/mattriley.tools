@@ -98,8 +98,9 @@ pnpm run generate:data -- --tap-path /absolute/path/to/homebrew-tools --skills-p
 The repo now consumes the published Snurble design-system packages from GitHub Packages, so
 fresh installs need `NODE_AUTH_TOKEN` set before `pnpm install`. The committed `.npmrc` keeps only
 the `@matt-riley` scope pointed at `https://npm.pkg.github.com`, and the `mise install` task writes
-the auth token into the user-level `~/.npmrc` at runtime. CI follows the same path by injecting
-`github.token` as `NODE_AUTH_TOKEN` before the install task runs.
+the auth token into the user-level `~/.npmrc` at runtime. The install task prefers
+`NODE_AUTH_TOKEN` and falls back to `MISE_GITHUB_TOKEN`, which is already available in CI via
+`mise-action`.
 
 ## Commands
 
