@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import ciWorkflowSource from "../.github/workflows/ci.yml?raw";
 import miseSource from "../mise.toml?raw";
+import pnpmWorkspaceSource from "../pnpm-workspace.yaml?raw";
 
 describe("CI workflow", () => {
   it("keeps package read permission on the shared workflow job", () => {
@@ -15,5 +16,11 @@ describe("CI workflow", () => {
     expect(miseSource).toContain('touch "$HOME/.npmrc"');
     expect(miseSource).toContain("//npm.pkg.github.com/:_authToken=${auth_token}");
     expect(miseSource).toContain("pnpm install");
+  });
+
+  it("approves the install-time builds required by pnpm", () => {
+    expect(pnpmWorkspaceSource).toContain("allowBuilds:");
+    expect(pnpmWorkspaceSource).toContain("esbuild: true");
+    expect(pnpmWorkspaceSource).toContain("sharp: true");
   });
 });
