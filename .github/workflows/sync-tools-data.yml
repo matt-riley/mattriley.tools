@@ -61,13 +61,13 @@ jobs:
 
       - name: Install dependencies
         env:
-          MISE_GITHUB_TOKEN: ${{ steps.tool-readme-token.outputs.token }}
+          MISE_GITHUB_TOKEN: ${{ github.token }}
         run: mise run install
 
       - name: Regenerate site data
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          NODE_AUTH_TOKEN: ${{ steps.tool-readme-token.outputs.token }}
+          NODE_AUTH_TOKEN: ${{ github.token }}
           TOOL_REPOS_GITHUB_TOKEN: ${{ steps.tool-readme-token.outputs.token }}
         run: |
           pnpm run generate:data -- --tap-path "${{ github.workspace }}/tap-source" --skills-path "${{ github.workspace }}/agent-skills-source"
