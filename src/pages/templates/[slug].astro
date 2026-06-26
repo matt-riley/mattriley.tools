@@ -45,7 +45,7 @@ const jsonld = {
   jsonld={jsonld}
 >
   <div class="vibrant-detail-page vibrant-orange">
-    <a href="/" style="color: #000; font-weight: bold; text-decoration: none; display: inline-block; margin-bottom: 2rem; border-bottom: 4px solid #000;">← Back to Catalog</a>
+    <a href="/" class="back-link">← Back to Catalog</a>
 
     <header>
       <h1>{template.name}</h1>
@@ -54,6 +54,7 @@ const jsonld = {
       <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 4rem; font-weight: bold; font-size: 1.25rem;">
         <div>Language: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{languageLabel}</span></div>
         <div>Topics: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{topicCount}</span></div>
+        {template.homepage && <div>Homepage: <a href={template.homepage} target="_blank" rel="noopener noreferrer" style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem; text-decoration: none;">Link ↗</a></div>}
       </div>
     </header>
 

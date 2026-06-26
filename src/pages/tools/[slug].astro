@@ -46,7 +46,7 @@ const jsonld = {
   jsonld={jsonld}
 >
   <div class="vibrant-detail-page vibrant-cyan">
-    <a href="/" style="color: #000; font-weight: bold; text-decoration: none; display: inline-block; margin-bottom: 2rem; border-bottom: 4px solid #000;">← Back to Catalog</a>
+    <a href="/" class="back-link">← Back to Catalog</a>
 
     <header>
       <h1>{tool.name}</h1>
@@ -57,6 +57,7 @@ const jsonld = {
         <div>Binaries: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{binaryCount}</span></div>
         <div>Platforms: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{platformCount}</span></div>
         <div>License: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{tool.license ?? "Undeclared"}</span></div>
+        {tool.homepage && <div>Homepage: <a href={tool.homepage} target="_blank" rel="noopener noreferrer" style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem; text-decoration: none;">Link ↗</a></div>}
       </div>
       
       <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4rem;">

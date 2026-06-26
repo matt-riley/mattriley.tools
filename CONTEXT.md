@@ -18,7 +18,7 @@ A public GitHub repository marked as a template for scaffolding new projects.
 
 ## Visual Language
 
-Each domain has a distinct visual identity rather than being merged into a generic "Project" abstraction. The items are presented as massive, typography-driven cards on the catalog, and their detail pages are intensely vibrant. 
+Each domain has a distinct visual identity rather than being merged into a generic "Project" abstraction. The items are presented as massive, typography-driven cards on the catalog, and their detail pages are intensely vibrant.
 
 **Critical constraint**: No gradients. All colors must be solid, unapologetic blocks of color to maintain a bold, brutalist/modern edge.
 

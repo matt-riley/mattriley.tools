@@ -47,7 +47,7 @@ const jsonld = {
   jsonld={jsonld}
 >
   <div class="vibrant-detail-page vibrant-magenta">
-    <a href="/" style="color: #000; font-weight: bold; text-decoration: none; display: inline-block; margin-bottom: 2rem; border-bottom: 4px solid #000;">← Back to Catalog</a>
+    <a href="/" class="back-link">← Back to Catalog</a>
 
     <header>
       <h1>{skill.name}</h1>
@@ -58,6 +58,7 @@ const jsonld = {
         <div>Maturity: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.maturity}</span></div>
         <div>Repository: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.repository}</span></div>
         <div>License: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{licenseLabel}</span></div>
+        {skill.homepage && <div>Homepage: <a href={skill.homepage} target="_blank" rel="noopener noreferrer" style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem; text-decoration: none;">Link ↗</a></div>}
       </div>
       
       <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4rem;">

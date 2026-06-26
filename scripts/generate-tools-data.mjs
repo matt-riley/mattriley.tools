@@ -505,12 +505,15 @@ async function main() {
   const skillsOutputPath = join(dataDir, "skills.generated.ts");
   const parsedTools = await readFormulas(formulaDir);
   const publicTools = await filterPublicToolsByRepository(parsedTools);
+  const githubRepos = await fetchGitHubRepos(GITHUB_OWNER);
   const tools = await Promise.all(
     publicTools.map(async (tool) => {
       const repository = extractGitHubRepository(tool.homepage);
+      const repoData = repository ? githubRepos.find((r) => r.name === repository.repo) : null;
 
       return {
         ...tool,
+        homepage: repoData?.homepage || tool.homepage,
         readme: repository
           ? await fetchGitHubReadmeWithFallback(
               repository.owner,
@@ -522,7 +525,6 @@ async function main() {
       };
     }),
   );
-  const githubRepos = await fetchGitHubRepos(GITHUB_OWNER);
   const pluginRepos = filterPluginRepos(githubRepos);
   const plugins = await Promise.all(
     pluginRepos.map(async (repo) => ({
@@ -544,7 +546,7 @@ async function main() {
       name: repo.name,
       description: repo.description ?? "No description provided.",
       repository: repo.full_name,
-      homepage: repo.html_url,
+      homepage: repo.homepage || repo.html_url,
       updatedAt: repo.pushed_at,
       language: repo.language,
       topics: repo.topics ?? [],

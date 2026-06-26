@@ -51,7 +51,7 @@ export function toPluginRecord(repo, version) {
     name: repo.name,
     description: repo.description ?? "No description provided.",
     repository: repo.full_name,
-    homepage: repo.html_url,
+    homepage: repo.homepage || repo.html_url,
     version,
     updatedAt: repo.pushed_at,
     language: repo.language,
