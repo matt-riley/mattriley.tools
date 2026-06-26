@@ -64,8 +64,15 @@ jobs:
 
       - name: Assert generated data is up to date
         run: |
-          if [ -n "$(git status --porcelain -- src/data/*.generated.ts)" ]; then
-            echo "Generated data files are out of date. Run 'pnpm run generate:data' and commit the changes." >&2
+          nonTimestampDiff=$(
+            git diff -- src/data/*.generated.ts \
+              | grep -vE '^([+-])export const .*GeneratedAt = ' \
+              | grep -E '^([+-])' \
+              || true
+          )
+
+          if [ -n "$nonTimestampDiff" ]; then
+            echo "Generated data files are out of date (ignoring timestamp changes). Run 'pnpm run generate:data' and commit the changes." >&2
             git diff -- src/data/*.generated.ts
             exit 1
           fi
