@@ -119,6 +119,11 @@ describe("generated site data", () => {
     ).toBe(true);
   });
 
+  it("stores bare version strings (no leading v) so cards never render vv0.1", () => {
+    const all = [...tools, ...plugins, ...skills];
+    expect(all.every((entry) => !/^v/i.test(entry.version))).toBe(true);
+  });
+
   it("stores synced README metadata for every tool and plugin", () => {
     expect(tools.every(hasSyncedReadmeMetadata)).toBe(true);
     expect(plugins.every(hasSyncedReadmeMetadata)).toBe(true);

@@ -13,15 +13,28 @@ if [ -n "$auth_token" ]; then
   mv "$HOME/.npmrc.tmp" "$HOME/.npmrc"
 fi
 pnpm install
+# Playwright browser binaries (mobile-layout tests). Idempotent on reruns.
+# ponytail: --with-deps installs OS libs needed headless on Linux CI runners.
+if [ "$CI" = "true" ]; then
+  pnpm exec playwright install --with-deps chromium webkit
+else
+  pnpm exec playwright install chromium webkit
+fi
 """
 
 [tasks.build]
 description = "Build the app"
 run = "pnpm run build"
 
+# Run both suites: vitest (data/source contracts) then Playwright (mobile layout).
+# CI runs this single `mise run test`; it builds + serves dist for Playwright itself.
 [tasks.test]
-description = "Run tests"
-run = "pnpm run test"
+description = "Run unit (vitest) and mobile-layout (Playwright) tests"
+run = "pnpm run test && pnpm run test:mobile"
+
+[tasks.test-mobile]
+description = "Run only the Playwright mobile-layout tests (builds + serves dist first)"
+run = "pnpm run test:mobile"
 
 [tasks.lint]
 description = "Run linter"

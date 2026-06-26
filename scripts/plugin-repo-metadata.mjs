@@ -46,13 +46,17 @@ export function filterPluginRepos(repos) {
  * @returns {PluginRecord}
  */
 export function toPluginRecord(repo, version) {
+  // ponytail: GitHub tag names carry a leading "v" (e.g. "v0.1.2"). The card
+  // template prepends its own "v", so strip it here to keep versions bare
+  // and consistent with tools/skills data.
+  const bareVersion = version.replace(/^v+/, "");
   return {
     slug: repo.name,
     name: repo.name,
     description: repo.description ?? "No description provided.",
     repository: repo.full_name,
     homepage: repo.homepage || repo.html_url,
-    version,
+    version: bareVersion,
     updatedAt: repo.pushed_at,
     language: repo.language,
     topics: repo.topics ?? [],
