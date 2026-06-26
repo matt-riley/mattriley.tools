@@ -292,6 +292,7 @@ async function readAgentSkills(skillsRootPath) {
         sourceUrl,
         rawUrl,
         license: readString(frontmatter.license),
+        homepage: readString(frontmatter.homepage),
         compatibility: readString(
           frontmatter.compatibility,
           "Agent Skills-compatible coding agents.",

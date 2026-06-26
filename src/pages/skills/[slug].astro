@@ -5,7 +5,7 @@ import { formatUtcTimestamp } from "../../utils/date";
 import { renderReadme } from "../../utils/readme";
 
 interface Props {
-  skill: (typeof skills)[number] & { homepage?: string | null };
+  skill: (typeof skills)[number];
 }
 
 export function getStaticPaths() {

@@ -5,45 +5,46 @@ import skillDetailPageSource from "../src/pages/skills/[slug].astro?raw";
 import templateDetailPageSource from "../src/pages/templates/[slug].astro?raw";
 import toolDetailPageSource from "../src/pages/tools/[slug].astro?raw";
 
+const detailPages = [
+  {
+    name: "tool",
+    source: toolDetailPageSource,
+    title: "README",
+    fallback: "This tool does not currently have synced README content to display.",
+  },
+  {
+    name: "plugin",
+    source: pluginDetailPageSource,
+    title: "README",
+    fallback: "This plugin does not currently have synced README content to display.",
+  },
+  {
+    name: "template",
+    source: templateDetailPageSource,
+    title: "README",
+    fallback: "This template does not currently have synced README content to display.",
+  },
+  {
+    name: "skill",
+    source: skillDetailPageSource,
+    title: "SKILL.md",
+    fallback: "This skill does not currently have synced instruction content to display.",
+  },
+];
+
 describe("detail pages", () => {
   it("uses the site Layout wrapper on all detail pages", () => {
-    expect(toolDetailPageSource).toContain('import Layout from "../../layouts/Layout.astro"');
-    expect(pluginDetailPageSource).toContain('import Layout from "../../layouts/Layout.astro"');
-    expect(templateDetailPageSource).toContain('import Layout from "../../layouts/Layout.astro"');
-    expect(skillDetailPageSource).toContain('import Layout from "../../layouts/Layout.astro"');
-
-    expect(toolDetailPageSource).toContain("<h1>{tool.name}</h1>");
-    expect(pluginDetailPageSource).toContain("<h1>{plugin.name}</h1>");
-    expect(templateDetailPageSource).toContain("<h1>{template.name}</h1>");
-    expect(skillDetailPageSource).toContain("<h1>{skill.name}</h1>");
+    for (const { name, source } of detailPages) {
+      expect(source).toContain('import Layout from "../../layouts/Layout.astro"');
+      expect(source).toContain(`<h1>{${name}.name}</h1>`);
+    }
   });
 
-  it("renders a README section on tool detail pages", () => {
-    expect(toolDetailPageSource).toContain("<h2>README</h2>");
-    expect(toolDetailPageSource).toContain(
-      "This tool does not currently have synced README content to display.",
-    );
-  });
-
-  it("renders a README section on plugin detail pages", () => {
-    expect(pluginDetailPageSource).toContain("<h2>README</h2>");
-    expect(pluginDetailPageSource).toContain(
-      "This plugin does not currently have synced README content to display.",
-    );
-  });
-
-  it("renders a README section on template detail pages", () => {
-    expect(templateDetailPageSource).toContain("<h2>README</h2>");
-    expect(templateDetailPageSource).toContain(
-      "This template does not currently have synced README content to display.",
-    );
-  });
-
-  it("renders a SKILL.md section on skill detail pages", () => {
-    expect(skillDetailPageSource).toContain("<h2>SKILL.md</h2>");
-    expect(skillDetailPageSource).toContain(
-      "This skill does not currently have synced instruction content to display.",
-    );
+  it("renders a README or SKILL.md section on every detail page", () => {
+    for (const { source, title, fallback } of detailPages) {
+      expect(source).toContain(`<h2>${title}</h2>`);
+      expect(source).toContain(fallback);
+    }
   });
 
   it("renders install snippets for lazy.nvim and vim.pack on plugin detail pages", () => {
@@ -54,9 +55,8 @@ describe("detail pages", () => {
   });
 
   it("renders a main content landmark on detail pages", () => {
-    expect(toolDetailPageSource).toContain("<main>");
-    expect(pluginDetailPageSource).toContain("<main>");
-    expect(templateDetailPageSource).toContain("<main>");
-    expect(skillDetailPageSource).toContain("<main>");
+    for (const { source } of detailPages) {
+      expect(source).toContain("<main>");
+    }
   });
 });

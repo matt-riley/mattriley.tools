@@ -20,7 +20,6 @@ const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
 const readmeHtml = renderReadme(template.readme);
 const pageUrl = `https://mattriley.tools/templates/${template.slug}/`;
 const topicCount = Number(template.topics.length);
-const topicLabel = topicCount === 1 ? "topic" : "topics";
 const languageLabel = template.language ?? "Unknown";
 const jsonld = {
   "@context": "https://schema.org",
