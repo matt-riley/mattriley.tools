@@ -515,6 +515,7 @@ async function main() {
       return {
         ...tool,
         homepage: repoData?.homepage || tool.homepage,
+        license: tool.license || repoData?.license?.spdx_id || null,
         readme: repository
           ? await fetchGitHubReadmeWithFallback(
               repository.owner,
