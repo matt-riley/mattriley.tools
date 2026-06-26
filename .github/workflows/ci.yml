@@ -62,7 +62,7 @@ jobs:
         run: |
           pnpm run generate:data -- --tap-path "${{ github.workspace }}/homebrew-tools-source" --skills-path "${{ github.workspace }}/agent-skills-source"
 
-      - name: Assert generated data is up to date
+      - name: Report generated data drift
         run: |
           nonTimestampDiff=$(
             git diff -- src/data/*.generated.ts \
@@ -72,9 +72,9 @@ jobs:
           )
 
           if [ -n "$nonTimestampDiff" ]; then
-            echo "Generated data files are out of date (ignoring timestamp changes). Run 'pnpm run generate:data' and commit the changes." >&2
-            git diff -- src/data/*.generated.ts
-            exit 1
+            echo "::warning::Generated data files are out of date with live sources (ignoring timestamp changes). Run 'pnpm run generate:data' and commit, or wait for the scheduled sync."
+          else
+            echo "Generated data files are up to date (ignoring timestamp changes)."
           fi
 
   deploy:
