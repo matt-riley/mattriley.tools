@@ -1,0 +1,73 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { formatUtcTimestamp } from "../utils/date";
+import { renderReadme, type SyncedReadme } from "../utils/readme";
+
+interface Props {
+  title: string;
+  description: string;
+  agentHint: string[];
+  jsonld: unknown;
+  domainClass: string;
+  name: string;
+  subtitle: string;
+  generatedAt: string;
+  sourceHref: string;
+  sourceLabel: string;
+  sectionTitle: string;
+  fallbackText: string;
+  readme: SyncedReadme;
+}
+
+const {
+  title,
+  description,
+  agentHint,
+  jsonld,
+  domainClass,
+  name,
+  subtitle,
+  generatedAt,
+  sourceHref,
+  sourceLabel,
+  sectionTitle,
+  fallbackText,
+  readme,
+} = Astro.props;
+
+const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
+const readmeHtml = renderReadme(readme);
+---
+
+<Layout title={title} description={description} agentHint={agentHint} jsonld={jsonld}>
+  <div class={`vibrant-detail-page ${domainClass}`}>
+    <a href="/" class="back-link">← Back to Catalog</a>
+
+    <header>
+      <h1>{name}</h1>
+      <p style="font-size: 2rem; font-weight: bold; margin-bottom: 2rem;">{subtitle}</p>
+
+      <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; font-weight: bold; font-size: 1.25rem;">
+        <slot name="metadata" />
+      </div>
+
+      <slot name="extra" />
+    </header>
+
+    <main>
+      <h2>{sectionTitle}</h2>
+      <div style="border-top: 8px solid #000; padding-top: 2rem; margin-top: 1rem;">
+        {readme.markdown ? (
+          <div class="readme-content" set:html={readmeHtml} />
+        ) : (
+          <p style="font-weight: bold; font-size: 1.5rem;">{fallbackText}</p>
+        )}
+      </div>
+    </main>
+
+    <footer style="margin-top: 4rem; border-top: 4px solid #000; padding-top: 2rem; font-weight: bold;">
+      <p>Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time></p>
+      <p><a href={sourceHref} target="_blank" rel="noopener noreferrer">{sourceLabel}</a></p>
+    </footer>
+  </div>
+</Layout>

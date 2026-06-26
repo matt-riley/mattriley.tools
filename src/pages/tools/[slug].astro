@@ -1,13 +1,7 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import CatalogDetail from "../../components/CatalogDetail.astro";
 import { generatedAt, tools } from "../../data/tools.generated";
-import { formatUtcTimestamp } from "../../utils/date";
-import { renderReadme } from "../../utils/readme";
 import { formatSeoDescription, formatSeoTitle } from "../../utils/seo";
-
-interface Props {
-  tool: (typeof tools)[number];
-}
 
 export function getStaticPaths() {
   return tools.map((tool) => ({
@@ -17,17 +11,12 @@ export function getStaticPaths() {
 }
 
 const { tool } = Astro.props;
-const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
-const readmeHtml = renderReadme(tool.readme);
-const pageUrl = `https://mattriley.tools/tools/${tool.slug}/`;
-const binaryCount = Number(tool.binaryNames.length);
-const platformCount = Number(tool.platforms.length);
 const jsonld = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   name: tool.name,
   description: tool.description,
-  url: pageUrl,
+  url: `https://mattriley.tools/tools/${tool.slug}/`,
   sameAs: tool.homepage,
   softwareVersion: tool.version,
   applicationCategory: "DeveloperApplication",
@@ -36,7 +25,7 @@ const jsonld = {
 };
 ---
 
-<Layout
+<CatalogDetail
   title={formatSeoTitle(tool.name, "Homebrew Tool")}
   description={formatSeoDescription(tool.description, `Install ${tool.name} with ${tool.installCommand}.`)}
   agentHint={[
@@ -45,44 +34,30 @@ const jsonld = {
     "README content is synced from the linked GitHub repository when available.",
   ]}
   jsonld={jsonld}
+  domainClass="vibrant-cyan"
+  name={tool.name}
+  subtitle={tool.description}
+  generatedAt={generatedAt}
+  sourceHref={tool.homepage}
+  sourceLabel="Open source repository"
+  sectionTitle="README"
+  fallbackText="This tool does not currently have synced README content to display."
+  readme={tool.readme}
 >
-  <div class="vibrant-detail-page vibrant-cyan">
-    <a href="/" class="back-link">← Back to Catalog</a>
+  <Fragment slot="metadata">
+    <div>Version: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{tool.version}</span></div>
+    <div>Binaries: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{Number(tool.binaryNames.length)}</span></div>
+    <div>Platforms: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{Number(tool.platforms.length)}</span></div>
+    <div>License: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{tool.license ?? "Undeclared"}</span></div>
+    {tool.homepage && <div>Homepage: <a href={tool.homepage} target="_blank" rel="noopener noreferrer" style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem; text-decoration: none;">Link ↗</a></div>}
+  </Fragment>
 
-    <header>
-      <h1>{tool.name}</h1>
-      <p style="font-size: 2rem; font-weight: bold; margin-bottom: 2rem;">{tool.description}</p>
-      
-      <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; font-weight: bold; font-size: 1.25rem;">
-        <div>Version: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{tool.version}</span></div>
-        <div>Binaries: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{binaryCount}</span></div>
-        <div>Platforms: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{platformCount}</span></div>
-        <div>License: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{tool.license ?? "Undeclared"}</span></div>
-        {tool.homepage && <div>Homepage: <a href={tool.homepage} target="_blank" rel="noopener noreferrer" style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem; text-decoration: none;">Link ↗</a></div>}
-      </div>
-      
-      <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4rem;">
-        <p style="margin-bottom: 1rem;">Install:</p>
-        <code style="background: #000; color: #00E5FF; padding: 1rem 1.5rem; display: block; border: 4px solid #000;">
-          {tool.installCommand}
-        </code>
-      </div>
-    </header>
-
-    <main>
-      <h2>README</h2>
-      <div style="border-top: 8px solid #000; padding-top: 2rem; margin-top: 1rem;">
-        {tool.readme.markdown ? (
-          <div class="readme-content" set:html={readmeHtml} />
-        ) : (
-          <p style="font-weight: bold; font-size: 1.5rem;">This tool does not currently have synced README content to display.</p>
-        )}
-      </div>
-    </main>
-
-    <footer style="margin-top: 4rem; border-top: 4px solid #000; padding-top: 2rem; font-weight: bold;">
-      <p>Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time></p>
-      <p><a href={tool.homepage} target="_blank" rel="noopener noreferrer">Open source repository</a></p>
-    </footer>
-  </div>
-</Layout>
+  <Fragment slot="extra">
+    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4rem;">
+      <p style="margin-bottom: 1rem;">Install:</p>
+      <code style="background: #000; color: #00E5FF; padding: 1rem 1.5rem; display: block; border: 4px solid #000;">
+        {tool.installCommand}
+      </code>
+    </div>
+  </Fragment>
+</CatalogDetail>

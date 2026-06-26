@@ -1,13 +1,7 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import CatalogDetail from "../../components/CatalogDetail.astro";
 import { skills, skillsGeneratedAt } from "../../data/skills.generated";
-import { formatUtcTimestamp } from "../../utils/date";
-import { renderReadme } from "../../utils/readme";
 import { formatSeoDescription, formatSeoTitle } from "../../utils/seo";
-
-interface Props {
-  skill: (typeof skills)[number];
-}
 
 export function getStaticPaths() {
   return skills.map((skill) => ({
@@ -17,16 +11,12 @@ export function getStaticPaths() {
 }
 
 const { skill } = Astro.props;
-const formattedSkillsGeneratedAt = formatUtcTimestamp(skillsGeneratedAt);
-const skillHtml = renderReadme(skill.readme);
-const pageUrl = `https://mattriley.tools/skills/${skill.slug}/`;
-const licenseLabel = skill.license ?? "Undeclared";
 const jsonld = {
   "@context": "https://schema.org",
   "@type": "CreativeWork",
   name: skill.name,
   description: skill.description,
-  url: pageUrl,
+  url: `https://mattriley.tools/skills/${skill.slug}/`,
   isPartOf: {
     "@type": "SoftwareSourceCode",
     name: skill.repository,
@@ -37,7 +27,7 @@ const jsonld = {
 };
 ---
 
-<Layout
+<CatalogDetail
   title={formatSeoTitle(skill.name, "Agent Skill")}
   description={formatSeoDescription(skill.description, `Explore the ${skill.name} agent skill on mattriley.tools.`)}
   agentHint={[
@@ -46,44 +36,30 @@ const jsonld = {
     "The website renders skill instructions as inert documentation only; it does not install or run support files.",
   ]}
   jsonld={jsonld}
+  domainClass="vibrant-magenta"
+  name={skill.name}
+  subtitle={skill.description}
+  generatedAt={skillsGeneratedAt}
+  sourceHref={skill.sourceUrl}
+  sourceLabel="Open SKILL.md on GitHub"
+  sectionTitle="SKILL.md"
+  fallbackText="This skill does not currently have synced instruction content to display."
+  readme={skill.readme}
 >
-  <div class="vibrant-detail-page vibrant-magenta">
-    <a href="/" class="back-link">← Back to Catalog</a>
+  <Fragment slot="metadata">
+    <div>Version: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.version}</span></div>
+    <div>Maturity: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.maturity}</span></div>
+    <div>Repository: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.repository}</span></div>
+    <div>License: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.license ?? "Undeclared"}</span></div>
+    {skill.homepage && <div>Homepage: <a href={skill.homepage} target="_blank" rel="noopener noreferrer" style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem; text-decoration: none;">Link ↗</a></div>}
+  </Fragment>
 
-    <header>
-      <h1>{skill.name}</h1>
-      <p style="font-size: 2rem; font-weight: bold; margin-bottom: 2rem;">{skill.description}</p>
-      
-      <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; font-weight: bold; font-size: 1.25rem;">
-        <div>Version: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.version}</span></div>
-        <div>Maturity: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.maturity}</span></div>
-        <div>Repository: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.repository}</span></div>
-        <div>License: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{licenseLabel}</span></div>
-        {skill.homepage && <div>Homepage: <a href={skill.homepage} target="_blank" rel="noopener noreferrer" style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem; text-decoration: none;">Link ↗</a></div>}
+  <Fragment slot="extra">
+    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4rem;">
+      <p style="margin-bottom: 1rem;">Compatibility:</p>
+      <div style="background: #000; color: var(--accent-color); padding: 1rem 1.5rem; border: 4px solid #000;">
+        {skill.compatibility}
       </div>
-      
-      <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4rem;">
-        <p style="margin-bottom: 1rem;">Compatibility:</p>
-        <div style="background: #000; color: var(--accent-color); padding: 1rem 1.5rem; border: 4px solid #000;">
-          {skill.compatibility}
-        </div>
-      </div>
-    </header>
-
-    <main>
-      <h2>SKILL.md</h2>
-      <div style="border-top: 8px solid #000; padding-top: 2rem; margin-top: 1rem;">
-        {skill.readme.markdown ? (
-          <div class="readme-content" set:html={skillHtml} />
-        ) : (
-          <p style="font-weight: bold; font-size: 1.5rem;">This skill does not currently have synced instruction content to display.</p>
-        )}
-      </div>
-    </main>
-
-    <footer style="margin-top: 4rem; border-top: 4px solid #000; padding-top: 2rem; font-weight: bold;">
-      <p>Last synced: <time datetime={skillsGeneratedAt}>{formattedSkillsGeneratedAt}</time></p>
-      <p><a href={skill.sourceUrl} target="_blank" rel="noopener noreferrer">Open SKILL.md on GitHub</a></p>
-    </footer>
-  </div>
-</Layout>
+    </div>
+  </Fragment>
+</CatalogDetail>
