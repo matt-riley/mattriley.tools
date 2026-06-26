@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import { generatedAt, tools } from "../../data/tools.generated";
 import { formatUtcTimestamp } from "../../utils/date";
 import { renderReadme } from "../../utils/readme";
+import { formatSeoDescription, formatSeoTitle } from "../../utils/seo";
 
 interface Props {
   tool: (typeof tools)[number];
@@ -36,8 +37,8 @@ const jsonld = {
 ---
 
 <Layout
-  title={tool.name}
-  description={tool.description}
+  title={formatSeoTitle(tool.name, "Homebrew Tool")}
+  description={formatSeoDescription(tool.description, `Install ${tool.name} with ${tool.installCommand}.`)}
   agentHint={[
     `This is the detail page for the ${tool.name} Homebrew tool.`,
     "Formula metadata is the source of truth for version, install command, binaries, and platform support.",

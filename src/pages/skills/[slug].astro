@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import { skills, skillsGeneratedAt } from "../../data/skills.generated";
 import { formatUtcTimestamp } from "../../utils/date";
 import { renderReadme } from "../../utils/readme";
+import { formatSeoDescription, formatSeoTitle } from "../../utils/seo";
 
 interface Props {
   skill: (typeof skills)[number];
@@ -37,8 +38,8 @@ const jsonld = {
 ---
 
 <Layout
-  title={skill.name}
-  description={skill.description}
+  title={formatSeoTitle(skill.name, "Agent Skill")}
+  description={formatSeoDescription(skill.description, `Explore the ${skill.name} agent skill on mattriley.tools.`)}
   agentHint={[
     `This is the detail page for the ${skill.name} agent skill.`,
     "Skill metadata and instructions are generated from matt-riley/agent-skills SKILL.md files.",

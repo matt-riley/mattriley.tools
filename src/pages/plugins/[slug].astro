@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import { plugins, pluginsGeneratedAt } from "../../data/plugins.generated";
 import { formatUtcTimestamp } from "../../utils/date";
 import { renderReadme } from "../../utils/readme";
+import { formatSeoDescription, formatSeoTitle } from "../../utils/seo";
 
 interface Props {
   plugin: (typeof plugins)[number];
@@ -35,8 +36,8 @@ const jsonld = {
 ---
 
 <Layout
-  title={plugin.name}
-  description={plugin.description}
+  title={formatSeoTitle(plugin.name, "Neovim Plugin")}
+  description={formatSeoDescription(plugin.description, `${plugin.name} ${plugin.version} — Neovim plugin on mattriley.tools.`)}
   agentHint={[
     `This is the detail page for the ${plugin.name} Neovim plugin.`,
     "Repository metadata comes from GitHub and install snippets are generated for lazy.nvim and vim.pack.",

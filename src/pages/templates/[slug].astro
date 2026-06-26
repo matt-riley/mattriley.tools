@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import { templates, templatesGeneratedAt } from "../../data/templates.generated";
 import { formatUtcTimestamp } from "../../utils/date";
 import { renderReadme } from "../../utils/readme";
+import { formatSeoDescription, formatSeoTitle } from "../../utils/seo";
 
 interface Props {
   template: (typeof templates)[number];
@@ -34,8 +35,8 @@ const jsonld = {
 ---
 
 <Layout
-  title={template.name}
-  description={template.description}
+  title={formatSeoTitle(template.name, "Public Template")}
+  description={formatSeoDescription(template.description, `Use ${template.name} as a starting point for your next project on mattriley.tools.`)}
   agentHint={[
     `This is the detail page for the ${template.name} public template repository.`,
     "Repository metadata comes from GitHub and the README is synced into this static site when available.",
