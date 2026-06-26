@@ -1,21 +1,4 @@
 ---
-import {
-  Badge,
-  BentoGrid,
-  BentoItem,
-  Breadcrumbs,
-  Callout,
-  EmptyState,
-  Hero,
-  LinkButton,
-  MetaList,
-  PageShell,
-  Panel,
-  Section,
-  Stack,
-  StatCard,
-  TableOfContents,
-} from "@matt-riley/ui-astro";
 import Layout from "../../layouts/Layout.astro";
 import { templates, templatesGeneratedAt } from "../../data/templates.generated";
 import { formatUtcTimestamp } from "../../utils/date";
@@ -49,10 +32,6 @@ const jsonld = {
   ...(template.language ? { programmingLanguage: template.language } : {}),
   ...(template.topics.length > 0 ? { keywords: template.topics.join(", ") } : {}),
 };
-const tableOfContents = [
-  { id: "template-metadata", label: "Template metadata", level: 2 },
-  { id: "template-readme", label: "README", level: 2 },
-];
 ---
 
 <Layout
@@ -65,105 +44,33 @@ const tableOfContents = [
   ]}
   jsonld={jsonld}
 >
-  <PageShell>
-    <div class="page-stack">
-      <Breadcrumbs items={[{ label: "All catalogs", href: "/" }, { label: template.name }]} />
+  <div class="vibrant-detail-page vibrant-orange">
+    <a href="/" style="color: #000; font-weight: bold; text-decoration: none; display: inline-block; margin-bottom: 2rem; border-bottom: 4px solid #000;">← Back to Catalog</a>
 
-      <Panel variant="glass" class="hero-panel">
-        <Hero title={template.name} lede={template.description}>
-          <div class="hero-badges" aria-label="Template highlights">
-            <Badge>Template repository</Badge>
-            <Badge variant="info">{template.language ?? "Unknown language"}</Badge>
-            <Badge variant="success">
-              {topicCount} {topicLabel}
-            </Badge>
-          </div>
+    <header>
+      <h1>{template.name}</h1>
+      <p style="font-size: 2rem; font-weight: bold; margin-bottom: 2rem;">{template.description}</p>
+      
+      <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 4rem; font-weight: bold; font-size: 1.25rem;">
+        <div>Language: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{languageLabel}</span></div>
+        <div>Topics: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{topicCount}</span></div>
+      </div>
+    </header>
 
-          <p>
-            Last synced: <time datetime={templatesGeneratedAt}>{formattedTemplatesGeneratedAt}</time>
-          </p>
+    <main>
+      <h2>README</h2>
+      <div style="border-top: 8px solid #000; padding-top: 2rem; margin-top: 1rem;">
+        {template.readme.markdown ? (
+          <div class="readme-content" set:html={readmeHtml} />
+        ) : (
+          <p style="font-weight: bold; font-size: 1.5rem;">This template does not currently have synced README content to display.</p>
+        )}
+      </div>
+    </main>
 
-          <div class="hero-actions">
-            <LinkButton href={template.homepage} external size="sm">
-              Open on GitHub
-            </LinkButton>
-          </div>
-        </Hero>
-      </Panel>
-
-      <BentoGrid class="detail-stat-grid" columns={1} columnsMd={2} columnsLg={4} gap={4}>
-        <BentoItem>
-          <StatCard label="Type" value="Template" />
-        </BentoItem>
-        <BentoItem>
-          <StatCard label="Language" value={languageLabel} />
-        </BentoItem>
-        <BentoItem>
-          <StatCard label="Topics" value={topicCount} />
-        </BentoItem>
-        <BentoItem>
-          <StatCard label="Updated" value={template.updatedAt.slice(0, 10)} />
-        </BentoItem>
-      </BentoGrid>
-
-      <BentoGrid columns={1} columnsMd={4} columnsLg={4} gap={5}>
-        <BentoItem colSpan={1} colSpanMd={3} colSpanLg={3}>
-          <Section title="Template metadata" headingId="template-metadata" decorated>
-            <Panel variant="elevated">
-              <MetaList>
-                <dt>Repository</dt>
-                <dd>
-                  <a href={template.homepage}>{template.repository}</a>
-                </dd>
-
-                <dt>Language</dt>
-                <dd>{template.language ?? "Unknown"}</dd>
-
-                <dt>Topics</dt>
-                <dd>{template.topics.length > 0 ? template.topics.join(", ") : "No topics set"}</dd>
-
-                <dt>Last updated</dt>
-                <dd>
-                  <time datetime={template.updatedAt}>{template.updatedAt}</time>
-                </dd>
-              </MetaList>
-            </Panel>
-          </Section>
-        </BentoItem>
-
-        <BentoItem colSpan={1} colSpanMd={1} colSpanLg={1}>
-          <Stack space={4} class="detail-rail">
-            <TableOfContents headings={tableOfContents} title="On this page" />
-
-            <Panel variant="glass">
-              <Callout title="Start from GitHub" variant="tip">
-                <span slot="icon">🚀</span>
-                <p>
-                  Use the linked repository's <strong>Use this template</strong> action on GitHub to spin
-                  up a new project from this starter.
-                </p>
-              </Callout>
-            </Panel>
-          </Stack>
-        </BentoItem>
-
-        <BentoItem colSpan={1} colSpanMd={4} colSpanLg={4}>
-          <Section title="README" headingId="template-readme" decorated>
-            <Panel variant="bordered">
-              {
-                template.readme.markdown ? (
-                  <div class="readme-content" set:html={readmeHtml} />
-                ) : (
-                  <EmptyState
-                    title="README unavailable"
-                    description="This template does not currently have synced README content to display."
-                  />
-                )
-              }
-            </Panel>
-          </Section>
-        </BentoItem>
-      </BentoGrid>
-    </div>
-  </PageShell>
+    <footer style="margin-top: 4rem; border-top: 4px solid #000; padding-top: 2rem; font-weight: bold;">
+      <p>Last synced: <time datetime={templatesGeneratedAt}>{formattedTemplatesGeneratedAt}</time></p>
+      <p><a href={template.homepage} target="_blank" rel="noopener">Open on GitHub</a></p>
+    </footer>
+  </div>
 </Layout>

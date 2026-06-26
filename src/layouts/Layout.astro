@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import { AgentDiscoveryHint, JsonLd } from "@matt-riley/ui-astro";
 
 interface Props {
   title: string;
@@ -11,6 +10,7 @@ interface Props {
 
 const { title, description, agentHint, jsonld } = Astro.props;
 const pageTitle = title === "mattriley.tools" ? title : `${title} | mattriley.tools`;
+const agentHintHtml = agentHint ? `<!-- AGENT DISCOVERY HINT:\n${Array.isArray(agentHint) ? agentHint.join("\n") : agentHint}\n-->` : "";
 ---
 
 <!doctype html>
@@ -23,10 +23,10 @@ const pageTitle = title === "mattriley.tools" ? title : `${title} | mattriley.to
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
     {description && <meta name="description" content={description} />}
-    {jsonld && <JsonLd jsonld={jsonld} />}
+    {jsonld && <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />}
   </head>
   <body>
     <slot />
-    {agentHint && <AgentDiscoveryHint hint={agentHint} />}
+    {agentHint && <Fragment set:html={agentHintHtml} />}
   </body>
 </html>

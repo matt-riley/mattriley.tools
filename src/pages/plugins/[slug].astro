@@ -1,23 +1,4 @@
 ---
-import {
-  Badge,
-  BentoGrid,
-  BentoItem,
-  Breadcrumbs,
-  Callout,
-  CodeSnippet,
-  EmptyState,
-  Hero,
-  LinkButton,
-  MetaList,
-  PageShell,
-  Panel,
-  Section,
-  Stack,
-  StatCard,
-  TableOfContents,
-  Tabs,
-} from "@matt-riley/ui-astro";
 import Layout from "../../layouts/Layout.astro";
 import { plugins, pluginsGeneratedAt } from "../../data/plugins.generated";
 import { formatUtcTimestamp } from "../../utils/date";
@@ -52,11 +33,6 @@ const jsonld = {
   ...(plugin.language ? { programmingLanguage: plugin.language } : {}),
   ...(plugin.topics.length > 0 ? { keywords: plugin.topics.join(", ") } : {}),
 };
-const tableOfContents = [
-  { id: "plugin-metadata", label: "Plugin metadata", level: 2 },
-  { id: "plugin-install-snippets", label: "Install snippets", level: 3 },
-  { id: "plugin-readme", label: "README", level: 2 },
-];
 ---
 
 <Layout
@@ -69,137 +45,48 @@ const tableOfContents = [
   ]}
   jsonld={jsonld}
 >
-  <PageShell>
-    <div class="page-stack">
-      <Breadcrumbs items={[{ label: "All catalogs", href: "/" }, { label: plugin.name }]} />
+  <div class="vibrant-detail-page vibrant-green">
+    <a href="/" style="color: #000; font-weight: bold; text-decoration: none; display: inline-block; margin-bottom: 2rem; border-bottom: 4px solid #000;">← Back to Catalog</a>
 
-      <Panel variant="glass" class="hero-panel">
-        <Hero title={plugin.name} lede={plugin.description}>
-          <div class="hero-badges" aria-label="Plugin highlights">
-            <Badge variant="info">Version {plugin.version}</Badge>
-            <Badge>{plugin.language ?? "Unknown language"}</Badge>
-            <Badge variant="success">
-              {topicCount} {topicLabel}
-            </Badge>
-          </div>
+    <header>
+      <h1>{plugin.name}</h1>
+      <p style="font-size: 2rem; font-weight: bold; margin-bottom: 2rem;">{plugin.description}</p>
+      
+      <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; font-weight: bold; font-size: 1.25rem;">
+        <div>Version: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{plugin.version}</span></div>
+        <div>Language: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{languageLabel}</span></div>
+        <div>Topics: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{topicCount}</span></div>
+      </div>
 
-          <p>
-            Last synced: <time datetime={pluginsGeneratedAt}>{formattedPluginsGeneratedAt}</time>
-          </p>
+      <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem;">
+        <p style="margin-bottom: 1rem;">Install (lazy.nvim):</p>
+        <code style="background: #000; color: var(--accent-color); padding: 1rem 1.5rem; display: block; border: 4px solid #000;">
+          {plugin.lazyInstallSnippet}
+        </code>
+      </div>
+      
+      <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4rem;">
+        <p style="margin-bottom: 1rem;">Install (vim.pack):</p>
+        <code style="background: #000; color: var(--accent-color); padding: 1rem 1.5rem; display: block; border: 4px solid #000;">
+          {plugin.vimPackInstallSnippet}
+        </code>
+      </div>
+    </header>
 
-          <div class="hero-actions">
-            <LinkButton href={plugin.homepage} external size="sm">
-              Open GitHub repository
-            </LinkButton>
-          </div>
-        </Hero>
-      </Panel>
+    <main>
+      <h2>README</h2>
+      <div style="border-top: 8px solid #000; padding-top: 2rem; margin-top: 1rem;">
+        {plugin.readme.markdown ? (
+          <div class="readme-content" set:html={readmeHtml} />
+        ) : (
+          <p style="font-weight: bold; font-size: 1.5rem;">This plugin does not currently have synced README content to display.</p>
+        )}
+      </div>
+    </main>
 
-      <BentoGrid class="detail-stat-grid" columns={1} columnsMd={2} columnsLg={4} gap={4}>
-        <BentoItem>
-          <StatCard label="Version" value={plugin.version} />
-        </BentoItem>
-        <BentoItem>
-          <StatCard label="Language" value={languageLabel} />
-        </BentoItem>
-        <BentoItem>
-          <StatCard label="Topics" value={topicCount} />
-        </BentoItem>
-        <BentoItem>
-          <StatCard label="Updated" value={plugin.updatedAt.slice(0, 10)} />
-        </BentoItem>
-      </BentoGrid>
-
-      <BentoGrid columns={1} columnsMd={4} columnsLg={4} gap={5}>
-        <BentoItem colSpan={1} colSpanMd={3} colSpanLg={3}>
-          <Section title="Plugin metadata" headingId="plugin-metadata" decorated>
-            <Panel variant="elevated">
-              <Stack space={5}>
-                <MetaList>
-                  <dt>Repository</dt>
-                  <dd>
-                    <a href={plugin.homepage}>{plugin.repository}</a>
-                  </dd>
-
-                  <dt>Language</dt>
-                  <dd>{plugin.language ?? "Unknown"}</dd>
-
-                  <dt>Topics</dt>
-                  <dd>{plugin.topics.length > 0 ? plugin.topics.join(", ") : "No topics set"}</dd>
-
-                  <dt>Last updated</dt>
-                  <dd>
-                    <time datetime={plugin.updatedAt}>{plugin.updatedAt}</time>
-                  </dd>
-                </MetaList>
-
-                <div class="tab-stack">
-                  <h3 id="plugin-install-snippets" class="detail-subheading">
-                    Install snippets
-                  </h3>
-                  <Tabs
-                    tabs={[
-                      { id: "lazy-install", label: "lazy.nvim" },
-                      { id: "vim-pack-install", label: "vim.pack" },
-                    ]}
-                    defaultTab="lazy-install"
-                  >
-                    <div slot="lazy-install">
-                      <CodeSnippet
-                        variant="block"
-                        label="lazy.nvim"
-                        code={plugin.lazyInstallSnippet}
-                        language="lua"
-                      />
-                    </div>
-                    <div slot="vim-pack-install">
-                      <CodeSnippet
-                        variant="block"
-                        label="vim.pack"
-                        code={plugin.vimPackInstallSnippet}
-                        language="lua"
-                      />
-                    </div>
-                  </Tabs>
-                </div>
-              </Stack>
-            </Panel>
-          </Section>
-        </BentoItem>
-
-        <BentoItem colSpan={1} colSpanMd={1} colSpanLg={1}>
-          <Stack space={4} class="detail-rail">
-            <TableOfContents headings={tableOfContents} title="On this page" />
-
-            <Panel variant="glass">
-              <Callout title="Install whichever way you work" variant="tip">
-                <span slot="icon">⚡</span>
-                <p>
-                  This page keeps plugin installation lightweight by surfacing both generated snippets
-                  inside the metadata section instead of a separate install page block.
-                </p>
-              </Callout>
-            </Panel>
-          </Stack>
-        </BentoItem>
-
-        <BentoItem colSpan={1} colSpanMd={4} colSpanLg={4}>
-          <Section title="README" headingId="plugin-readme" decorated>
-            <Panel variant="bordered">
-              {
-                plugin.readme.markdown ? (
-                  <div class="readme-content" set:html={readmeHtml} />
-                ) : (
-                  <EmptyState
-                    title="README unavailable"
-                    description="This plugin does not currently have synced README content to display."
-                  />
-                )
-              }
-            </Panel>
-          </Section>
-        </BentoItem>
-      </BentoGrid>
-    </div>
-  </PageShell>
+    <footer style="margin-top: 4rem; border-top: 4px solid #000; padding-top: 2rem; font-weight: bold;">
+      <p>Last synced: <time datetime={pluginsGeneratedAt}>{formattedPluginsGeneratedAt}</time></p>
+      <p><a href={plugin.homepage} target="_blank" rel="noopener">Open GitHub repository</a></p>
+    </footer>
+  </div>
 </Layout>
