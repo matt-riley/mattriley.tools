@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import { AgentDiscoveryHint, JsonLd, Layout as SnurbleLayout } from "@matt-riley/ui-astro";
+import { AgentDiscoveryHint, JsonLd } from "@matt-riley/ui-astro";
 
 interface Props {
   title: string;
@@ -13,11 +13,20 @@ const { title, description, agentHint, jsonld } = Astro.props;
 const pageTitle = title === "mattriley.tools" ? title : `${title} | mattriley.tools`;
 ---
 
-<SnurbleLayout title={pageTitle} description={description}>
-  <link slot="head" rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link slot="head" rel="icon" href="/favicon.ico" />
-  <meta slot="head" name="generator" content={Astro.generator} />
-  {jsonld && <JsonLd slot="head" jsonld={jsonld} />}
-  <slot />
-  {agentHint && <AgentDiscoveryHint hint={agentHint} />}
-</SnurbleLayout>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    {description && <meta name="description" content={description} />}
+    {jsonld && <JsonLd jsonld={jsonld} />}
+  </head>
+  <body>
+    <slot />
+    {agentHint && <AgentDiscoveryHint hint={agentHint} />}
+  </body>
+</html>

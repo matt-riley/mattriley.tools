@@ -170,28 +170,20 @@ const jsonld = {
 
           {
             tools.length > 0 ? (
-              <DataTable labelledBy="homebrew-tools" striped>
-                <tr slot="head">
-                  <th scope="col">Tool</th>
-                  <th scope="col">Version</th>
-                  <th scope="col">Description</th>
-                  <th scope="col">Install</th>
-                </tr>
+              <div class="domain-grid">
                 {
                   tools.map((tool) => (
-                    <tr>
-                      <td data-label="Tool">
-                        <a href={`/tools/${tool.slug}/`}>{tool.name}</a>
-                      </td>
-                      <td data-label="Version">{tool.version}</td>
-                      <td data-label="Description">{tool.description}</td>
-                      <td data-label="Install">
-                        <code>{tool.installCommand}</code>
-                      </td>
-                    </tr>
+                    <a href={`/tools/${tool.slug}/`} class="catalog-card cyan-card">
+                      <h3 class="card-title">{tool.name}</h3>
+                      <p class="card-desc">{tool.description}</p>
+                      <div class="card-meta">
+                        <span class="version">v{tool.version}</span>
+                        <code class="install-cmd">{tool.installCommand}</code>
+                      </div>
+                    </a>
                   ))
                 }
-              </DataTable>
+              </div>
             ) : (
               <EmptyState
                 title="No Homebrew tools are published yet"

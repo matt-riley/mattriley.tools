@@ -16,10 +16,7 @@
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at top left, var(--snurble-highlight-medium) 0%, transparent 32%),
-    radial-gradient(circle at top right, var(--snurble-highlight-subtle) 0%, transparent 26%),
-    var(--snurble-background);
+  background: var(--snurble-background);
   background-attachment: fixed;
 }
 
@@ -197,3 +194,129 @@ time {
     outline: 1px solid rgba(255, 255, 255, 0.1);
   }
 }
+
+/* Vibrant Redesign Baseline */
+
+.vibrant-cyan {
+  background-color: #00E5FF !important;
+  color: #000000 !important;
+}
+
+.domain-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.catalog-card {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  text-decoration: none;
+  border: 4px solid #000;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+  box-shadow: 8px 8px 0px #000;
+}
+
+.catalog-card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 12px 12px 0px #000;
+}
+
+.cyan-card {
+  background-color: #00E5FF;
+  color: #000;
+}
+
+.cyan-card * {
+  color: #000;
+}
+
+.card-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+  margin: 0 0 1rem 0;
+}
+
+.card-desc {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 2rem 0;
+  flex-grow: 1;
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  border-top: 4px solid #000;
+  padding-top: 1rem;
+}
+
+.install-cmd {
+  background: #000;
+  color: #00E5FF;
+  padding: 0.25rem 0.5rem;
+  font-weight: bold;
+}
+
+/* Detail page overrides */
+.vibrant-detail-page {
+  min-height: 100vh;
+  padding: 4rem 2rem;
+  font-family: system-ui, sans-serif;
+}
+
+.vibrant-detail-page h1 {
+  font-size: 5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  border-bottom: 8px solid #000;
+  margin-bottom: 2rem;
+}
+
+.vibrant-detail-page h2, .vibrant-detail-page h3, .vibrant-detail-page h4 {
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.vibrant-detail-page .readme-content {
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.vibrant-detail-page .readme-content pre {
+  background: #000;
+  color: #00E5FF;
+  padding: 1.5rem;
+  border: 4px solid #000;
+  border-radius: 0;
+  box-shadow: 8px 8px 0px rgba(0,0,0,0.5);
+}
+
+.vibrant-detail-page .readme-content code {
+  font-weight: bold;
+}
+
+.vibrant-detail-page .readme-content img {
+  border: 4px solid #000;
+  border-radius: 0;
+  box-shadow: 8px 8px 0px #000;
+}
+
+.vibrant-detail-page .readme-content a {
+  color: #000;
+  text-decoration: underline;
+  text-decoration-thickness: 4px;
+}
+
+.vibrant-detail-page .readme-content a:hover {
+  background: #000;
+  color: #00E5FF;
+}
+

@@ -1,24 +1,6 @@
 ---
-import {
-  Badge,
-  BentoGrid,
-  BentoItem,
-  Breadcrumbs,
-  Callout,
-  CodeSnippet,
-  EmptyState,
-  Hero,
-  LinkButton,
-  MetaList,
-  PageShell,
-  Panel,
-  Section,
-  Stack,
-  StatCard,
-  TableOfContents,
-} from "@matt-riley/ui-astro";
-import { generatedAt, tools } from "../../data/tools.generated";
 import Layout from "../../layouts/Layout.astro";
+import { generatedAt, tools } from "../../data/tools.generated";
 import { formatUtcTimestamp } from "../../utils/date";
 import { renderReadme } from "../../utils/readme";
 
@@ -39,7 +21,6 @@ const readmeHtml = renderReadme(tool.readme);
 const pageUrl = `https://mattriley.tools/tools/${tool.slug}/`;
 const binaryCount = Number(tool.binaryNames.length);
 const platformCount = Number(tool.platforms.length);
-const licenseBadgeVariant = tool.license ? "success" : "warning";
 const jsonld = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -52,10 +33,6 @@ const jsonld = {
   operatingSystem: tool.platforms.join(", "),
   ...(tool.license ? { license: tool.license } : {}),
 };
-const tableOfContents = [
-  { id: "tool-metadata", label: "Formula metadata", level: 2 },
-  { id: "tool-readme", label: "README", level: 2 },
-];
 ---
 
 <Layout
@@ -68,114 +45,42 @@ const tableOfContents = [
   ]}
   jsonld={jsonld}
 >
-  <PageShell>
-    <div class="page-stack">
-      <Breadcrumbs items={[{ label: "All catalogs", href: "/" }, { label: tool.name }]} />
+  <div class="vibrant-detail-page vibrant-cyan">
+    <a href="/" style="color: #000; font-weight: bold; text-decoration: none; display: inline-block; margin-bottom: 2rem; border-bottom: 4px solid #000;">← Back to Catalog</a>
 
-      <Panel variant="glass" class="hero-panel">
-        <Hero title={tool.name} lede={tool.description}>
-          <div class="hero-badges" aria-label="Tool highlights">
-            <Badge variant="info">Version {tool.version}</Badge>
-            <Badge>{binaryCount} {binaryCount === 1 ? "binary" : "binaries"}</Badge>
-            <Badge variant={licenseBadgeVariant}>
-              {tool.license ? `License ${tool.license}` : "License undeclared"}
-            </Badge>
-          </div>
+    <header>
+      <h1>{tool.name}</h1>
+      <p style="font-size: 2rem; font-weight: bold; margin-bottom: 2rem;">{tool.description}</p>
+      
+      <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; font-weight: bold; font-size: 1.25rem;">
+        <div>Version: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{tool.version}</span></div>
+        <div>Binaries: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{binaryCount}</span></div>
+        <div>Platforms: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{platformCount}</span></div>
+        <div>License: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{tool.license ?? "Undeclared"}</span></div>
+      </div>
+      
+      <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4rem;">
+        <p style="margin-bottom: 1rem;">Install:</p>
+        <code style="background: #000; color: #00E5FF; padding: 1rem 1.5rem; display: block; border: 4px solid #000;">
+          {tool.installCommand}
+        </code>
+      </div>
+    </header>
 
-          <p>Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time></p>
+    <main>
+      <h2>README</h2>
+      <div style="border-top: 8px solid #000; padding-top: 2rem; margin-top: 1rem;">
+        {tool.readme.markdown ? (
+          <div class="readme-content" set:html={readmeHtml} />
+        ) : (
+          <p style="font-weight: bold; font-size: 1.5rem;">This tool does not currently have synced README content to display.</p>
+        )}
+      </div>
+    </main>
 
-          <div class="hero-actions">
-            <LinkButton href={tool.homepage} external size="sm">
-              Open source repository
-            </LinkButton>
-          </div>
-        </Hero>
-      </Panel>
-
-      <BentoGrid class="detail-stat-grid" columns={1} columnsMd={2} columnsLg={4} gap={4}>
-        <BentoItem>
-          <StatCard label="Version" value={tool.version} />
-        </BentoItem>
-        <BentoItem>
-          <StatCard label="Binaries" value={binaryCount} />
-        </BentoItem>
-        <BentoItem>
-          <StatCard label="Platforms" value={platformCount} />
-        </BentoItem>
-        <BentoItem>
-          <StatCard label="License" value={tool.license ?? "Undeclared"} />
-        </BentoItem>
-      </BentoGrid>
-
-      <BentoGrid columns={1} columnsMd={4} columnsLg={4} gap={5}>
-        <BentoItem colSpan={1} colSpanMd={3} colSpanLg={3}>
-          <Section title="Formula metadata" headingId="tool-metadata" decorated>
-            <Panel variant="elevated">
-              <MetaList>
-                <dt>Version</dt>
-                <dd>{tool.version}</dd>
-
-                <dt>Homepage</dt>
-                <dd>
-                  <a href={tool.homepage}>{tool.homepage}</a>
-                </dd>
-
-                <dt>Formula file</dt>
-                <dd>
-                  <code>{tool.formulaFile}</code>
-                </dd>
-
-                <dt>Install</dt>
-                <dd>
-                  <CodeSnippet variant="inline" code={tool.installCommand} />
-                </dd>
-
-                <dt>Binary name{tool.binaryNames.length === 1 ? "" : "s"}</dt>
-                <dd>{tool.binaryNames.join(", ")}</dd>
-
-                <dt>Platforms</dt>
-                <dd>{tool.platforms.join(", ")}</dd>
-
-                <dt>License</dt>
-                <dd>{tool.license ?? "Not declared in the formula"}</dd>
-              </MetaList>
-            </Panel>
-          </Section>
-        </BentoItem>
-
-        <BentoItem colSpan={1} colSpanMd={1} colSpanLg={1}>
-          <Stack space={4} class="detail-rail">
-            <TableOfContents headings={tableOfContents} title="On this page" />
-
-            <Panel variant="glass">
-              <Callout title="Source of truth" variant="info">
-                <span slot="icon">📦</span>
-                <p>
-                  Version, binaries, and install metadata come from the tap formula. README content is
-                  synced separately from the linked repository homepage.
-                </p>
-              </Callout>
-            </Panel>
-          </Stack>
-        </BentoItem>
-
-        <BentoItem colSpan={1} colSpanMd={4} colSpanLg={4}>
-          <Section title="README" headingId="tool-readme" decorated>
-            <Panel variant="bordered">
-              {
-                tool.readme.markdown ? (
-                  <div class="readme-content" set:html={readmeHtml} />
-                ) : (
-                  <EmptyState
-                    title="README unavailable"
-                    description="This tool does not currently have synced README content to display."
-                  />
-                )
-              }
-            </Panel>
-          </Section>
-        </BentoItem>
-      </BentoGrid>
-    </div>
-  </PageShell>
+    <footer style="margin-top: 4rem; border-top: 4px solid #000; padding-top: 2rem; font-weight: bold;">
+      <p>Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time></p>
+      <p><a href={tool.homepage} target="_blank" rel="noopener">Open source repository</a></p>
+    </footer>
+  </div>
 </Layout>
