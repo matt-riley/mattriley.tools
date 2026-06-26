@@ -84,6 +84,10 @@ export function renderReadme(readme: SyncedReadme) {
     async: false,
     gfm: true,
     walkTokens(token) {
+      if (token.type === "heading" && token.depth < 6) {
+        token.depth = (token.depth + 1) as 2 | 3 | 4 | 5 | 6;
+      }
+
       if (token.type === "link") {
         token.href = resolveReadmeUrl(token.href, readme.htmlUrl);
       }
@@ -157,6 +161,7 @@ export function renderReadme(readme: SyncedReadme) {
               allowedRemoteSources,
               allowedMirroredPaths,
             ) ?? attribs.src,
+          alt: attribs.alt ?? "",
         },
       }),
     },

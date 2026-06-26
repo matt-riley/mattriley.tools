@@ -7,10 +7,11 @@ interface Props {
   description?: string;
   agentHint?: string | readonly string[];
   jsonld?: unknown;
+  pageTitle?: string;
 }
 
-const { title, description, agentHint, jsonld } = Astro.props;
-const pageTitle = title === "mattriley.tools" ? title : `${title} | mattriley.tools`;
+const { title, description, agentHint, jsonld, pageTitle } = Astro.props;
+const resolvedPageTitle = pageTitle ?? (title === "mattriley.tools" ? title : `${title} | mattriley.tools`);
 const agentHintHtml = agentHint ? `<!-- AGENT DISCOVERY HINT:\n${Array.isArray(agentHint) ? agentHint.join("\n") : agentHint}\n-->` : "";
 ---
 
@@ -23,7 +24,7 @@ const agentHintHtml = agentHint ? `<!-- AGENT DISCOVERY HINT:\n${Array.isArray(a
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
     <Seo 
-      title={pageTitle} 
+      title={resolvedPageTitle} 
       description={description || 'Curated tools, plugins, skills, and templates for modern development.'} 
       canonicalUrl={new URL(Astro.url.pathname, Astro.site).href} 
     />
