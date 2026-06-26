@@ -11,24 +11,28 @@ const detailPages = [
     source: toolDetailPageSource,
     title: "README",
     fallback: "This tool does not currently have synced README content to display.",
+    footerLinkLabel: "Open source repository",
   },
   {
     name: "plugin",
     source: pluginDetailPageSource,
     title: "README",
     fallback: "This plugin does not currently have synced README content to display.",
+    footerLinkLabel: "Open GitHub repository",
   },
   {
     name: "template",
     source: templateDetailPageSource,
     title: "README",
     fallback: "This template does not currently have synced README content to display.",
+    footerLinkLabel: "Open on GitHub",
   },
   {
     name: "skill",
     source: skillDetailPageSource,
     title: "SKILL.md",
     fallback: "This skill does not currently have synced instruction content to display.",
+    footerLinkLabel: "Open SKILL.md on GitHub",
   },
 ];
 
@@ -57,6 +61,12 @@ describe("detail pages", () => {
   it("renders a main content landmark on detail pages", () => {
     for (const { source } of detailPages) {
       expect(source).toContain("<main>");
+    }
+  });
+
+  it("uses noopener noreferrer on footer external links", () => {
+    for (const { source, footerLinkLabel } of detailPages) {
+      expect(source).toContain(`rel="noopener noreferrer">${footerLinkLabel}</a>`);
     }
   });
 });
