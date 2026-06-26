@@ -27,3 +27,7 @@ package-lock.json
 # local git worktrees
 .worktrees/
 .fallow/
+
+# Playwright artifacts (browser binaries live in caches, not the repo)
+playwright-report/
+test-results/

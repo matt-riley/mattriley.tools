@@ -249,3 +249,31 @@ pre {
   background: #000;
   color: var(--accent-color);
 }
+
+/* Mobile: clamp oversized type so titles stay on-screen at narrow widths. */
+@media (max-width: 480px) {
+  .card-title {
+    font-size: 1.6rem;
+  }
+
+  .card-desc {
+    font-size: 1rem;
+  }
+
+  .catalog-card {
+    padding: 1.25rem;
+  }
+
+  .domain-grid {
+    gap: 1.25rem;
+    margin: 1.25rem 0;
+  }
+
+  .vibrant-detail-page {
+    padding: 2rem 1rem;
+  }
+
+  .vibrant-detail-page h1 {
+    font-size: 2.5rem;
+  }
+}

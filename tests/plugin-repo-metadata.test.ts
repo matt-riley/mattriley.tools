@@ -59,7 +59,7 @@ describe("plugin repo metadata", () => {
       description: "Neovim plugin for presenting Markdown slides in a full-screen floating window.",
       repository: "matt-riley/slides.nvim",
       homepage: "https://github.com/matt-riley/slides.nvim",
-      version: "v0.1.4",
+      version: "0.1.4",
       updatedAt: "2026-04-08T01:02:03Z",
       language: "Lua",
       topics: ["neovim", "slides"],
@@ -93,5 +93,22 @@ describe("plugin repo metadata", () => {
     };
 
     expect(toPluginRecord(repo, "v0.1.4").lazyInstallSnippet).toBe('{ "acme/slides.nvim" }');
+  });
+
+  it('strips a leading v from the GitHub tag so the card does not render "vv0.1"', () => {
+    const repo = {
+      name: "slides.nvim",
+      full_name: "matt-riley/slides.nvim",
+      html_url: "https://github.com/matt-riley/slides.nvim",
+      description: "d",
+      pushed_at: "2026-04-08T01:02:03Z",
+      language: "Lua",
+      topics: [],
+    };
+
+    expect(toPluginRecord(repo, "v0.1.4").version).toBe("0.1.4");
+    expect(toPluginRecord(repo, "0.1.4").version).toBe("0.1.4");
+    expect(toPluginRecord(repo, "vv0.1.4").version).toBe("0.1.4");
+    expect(toPluginRecord(repo, "Unreleased").version).toBe("Unreleased");
   });
 });
