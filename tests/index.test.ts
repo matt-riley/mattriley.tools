@@ -131,46 +131,34 @@ describe("generated site data", () => {
     expect(skills.every(hasValidSkillMetadata)).toBe(true);
   });
 
-  it("renders the plugin index table with plugin, version, and description columns only", () => {
+  it("renders plugin cards with version and description on the homepage", () => {
     const pluginSection =
-      indexPageSource
-        .split('headingId="neovim-plugins"')[1]
-        ?.split('headingId="agent-skills"')[0] ?? "";
+      indexPageSource.split('id="neovim-plugins"')[1]?.split('id="agent-skills"')[0] ?? "";
 
-    const pluginHeader = pluginSection.match(/<tr slot="head">[\s\S]*?<\/tr>/)?.[0] ?? "";
-
-    expect(pluginHeader).toContain('<th scope="col">Plugin</th>');
-    expect(pluginHeader).toContain('<th scope="col">Version</th>');
-    expect(pluginHeader).toContain('<th scope="col">Description</th>');
-    expect(pluginHeader.indexOf('<th scope="col">Plugin</th>')).toBeLessThan(
-      pluginHeader.indexOf('<th scope="col">Version</th>'),
-    );
-    expect(pluginHeader.indexOf('<th scope="col">Version</th>')).toBeLessThan(
-      pluginHeader.indexOf('<th scope="col">Description</th>'),
-    );
-    expect(pluginSection).not.toContain('<th scope="col">Language</th>');
-    expect(pluginSection).not.toContain('<th scope="col">Install</th>');
+    expect(pluginSection).toContain("Neovim Plugins");
+    expect(pluginSection).toContain("catalog-card green-card");
+    expect(pluginSection).toContain("{plugin.description}");
+    expect(pluginSection).toContain("v{plugin.version}");
   });
 
   it("renders an agent skills section on the homepage", () => {
     const skillsSection =
-      indexPageSource
-        .split('headingId="agent-skills"')[1]
-        ?.split('headingId="public-templates"')[0] ?? "";
+      indexPageSource.split('id="agent-skills"')[1]?.split('id="public-templates"')[0] ?? "";
 
-    expect(indexPageSource).toContain('Section title="Agent skills"');
-    expect(skillsSection).toContain('<th scope="col">Skill</th>');
-    expect(skillsSection).toContain('<th scope="col">Maturity</th>');
-    expect(skillsSection).toContain('<th scope="col">Description</th>');
+    expect(indexPageSource).toContain('id="agent-skills"');
+    expect(skillsSection).toContain("Agent Skills");
+    expect(skillsSection).toContain("catalog-card magenta-card");
+    expect(skillsSection).toContain("v{skill.version}");
+    expect(skillsSection).toContain("{skill.maturity}");
   });
 
   it("renders a templates section on the homepage", () => {
-    const templatesSection = indexPageSource.split('headingId="public-templates"')[1] ?? "";
+    const templatesSection = indexPageSource.split('id="public-templates"')[1] ?? "";
 
-    expect(indexPageSource).toContain('Section title="Public templates"');
-    expect(templatesSection).toContain('<th scope="col">Template</th>');
-    expect(templatesSection).toContain('<th scope="col">Language</th>');
-    expect(templatesSection).toContain('<th scope="col">Description</th>');
+    expect(indexPageSource).toContain('id="public-templates"');
+    expect(templatesSection).toContain("Public Templates");
+    expect(templatesSection).toContain("catalog-card orange-card");
+    expect(templatesSection).toContain('{template.language ?? "Unknown"}');
   });
 
   it("includes template data in the generator contract", () => {
@@ -195,19 +183,14 @@ describe("generated site data", () => {
     expect(skillDetailPageSource).toContain('from "../../data/skills.generated"');
   });
 
-  it("composes the homepage from a richer shared Snurble surface", () => {
-    expect(indexPageSource).toContain('from "@matt-riley/ui-astro"');
-    expect(indexPageSource).toContain("<PageShell>");
-    expect(indexPageSource).toContain("<Hero");
-    expect(indexPageSource).toContain("<Section");
-    expect(indexPageSource).toContain("<DataTable");
-    expect(indexPageSource).toContain("<BentoGrid");
-    expect(indexPageSource).toContain("<StatCard");
-    expect(indexPageSource).toContain("<LinkButton");
-    expect(indexPageSource).toContain("<Callout");
-    expect(indexPageSource).toContain("<EmptyState");
-    expect(indexPageSource).toContain("striped>");
-    expect(indexPageSource).toContain('data-label="Tool"');
+  it("composes the homepage from the site layout and catalog sections", () => {
+    expect(indexPageSource).toContain('import Layout from "../layouts/Layout.astro"');
+    expect(indexPageSource).toContain('id="homebrew-tools"');
+    expect(indexPageSource).toContain('id="neovim-plugins"');
+    expect(indexPageSource).toContain('id="agent-skills"');
+    expect(indexPageSource).toContain('id="public-templates"');
+    expect(indexPageSource).toContain("domain-grid");
+    expect(indexPageSource).toContain("catalog-card");
   });
 
   it("relies on the shared layout for the main landmark", () => {
