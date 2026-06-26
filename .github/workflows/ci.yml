@@ -66,7 +66,7 @@ jobs:
         run: |
           nonTimestampDiff=$(
             git diff -- src/data/*.generated.ts \
-              | grep -vE '^([+-])export const .*GeneratedAt = ' \
+              | grep -vE '^([+-])export const .*[Gg]eneratedAt = ' \
               | grep -E '^([+-])' \
               || true
           )
