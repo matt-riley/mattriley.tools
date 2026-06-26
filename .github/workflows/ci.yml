@@ -20,8 +20,58 @@ jobs:
       build: true
       fmt: true
 
+  generated-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Check out site repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Check out Homebrew tap
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          repository: matt-riley/homebrew-tools
+          path: homebrew-tools-source
+
+      - name: Check out agent skills catalog
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          repository: matt-riley/agent-skills
+          path: agent-skills-source
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up mise
+        uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
+        with:
+          install: true
+          cache: true
+
+      - name: Install dependencies
+        env:
+          MISE_GITHUB_TOKEN: ${{ github.token }}
+        run: mise run install
+
+      - name: Regenerate site data
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ github.token }}
+        run: |
+          pnpm run generate:data -- --tap-path "${{ github.workspace }}/homebrew-tools-source" --skills-path "${{ github.workspace }}/agent-skills-source"
+
+      - name: Assert generated data is up to date
+        run: |
+          if [ -n "$(git status --porcelain -- src/data/*.generated.ts)" ]; then
+            echo "Generated data files are out of date. Run 'pnpm run generate:data' and commit the changes." >&2
+            git diff -- src/data/*.generated.ts
+            exit 1
+          fi
+
   deploy:
-    needs: ci
+    needs: [ci, generated-data]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     uses: ./.github/workflows/request-infra-deploy.yml
     with:
