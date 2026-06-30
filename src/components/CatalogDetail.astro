@@ -15,8 +15,10 @@ interface Props {
   sourceHref: string;
   sourceLabel: string;
   sectionTitle: string;
+  sectionAnchor: string;
   fallbackText: string;
   readme: SyncedReadme;
+  ogType?: string;
 }
 
 const {
@@ -31,15 +33,46 @@ const {
   sourceHref,
   sourceLabel,
   sectionTitle,
+  sectionAnchor,
   fallbackText,
   readme,
+  ogType,
 } = Astro.props;
 
 const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
 const readmeHtml = renderReadme(readme);
+
+const breadcrumbList = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://mattriley.tools/",
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": sectionTitle,
+      "item": `https://mattriley.tools/${sectionAnchor}/`,
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": name,
+    },
+  ],
+};
+
+const combinedJsonld = {
+  ...(typeof jsonld === "object" && jsonld !== null ? jsonld : {}),
+  mainEntity: breadcrumbList,
+};
 ---
 
-<Layout title={title} description={description} agentHint={agentHint} jsonld={jsonld}>
+<Layout title={title} description={description} agentHint={agentHint} jsonld={combinedJsonld} ogType={ogType}>
   <div class={`vibrant-detail-page ${domainClass}`}>
     <a href="/" class="back-link">← Back to Catalog</a>
 
