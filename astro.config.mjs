@@ -13,6 +13,19 @@ export default defineConfig({
       validateImageAlt: true,
       validateMetadataLength: true,
     }),
-    sitemap(),
+    sitemap({
+      serialize(item) {
+        const url = new URL(item.url);
+        const priority = url.pathname === "/" ? 1.0
+          : url.pathname.split("/").length <= 3 ? 0.8
+          : 0.5;
+        return {
+          ...item,
+          lastmod: new Date().toISOString().split("T")[0],
+          changefreq: url.pathname === "/" ? "daily" : "weekly",
+          priority,
+        };
+      },
+    }),
   ],
 });

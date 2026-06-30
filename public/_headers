@@ -1,0 +1,30 @@
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'self'
+
+/*.html
+  Cache-Control: public, max-age=3600
+
+/*.css
+  Cache-Control: public, max-age=604800, immutable
+
+/*.js
+  Cache-Control: public, max-age=604800, immutable
+
+/*.png
+  Cache-Control: public, max-age=604800, immutable
+
+/*.jpg
+  Cache-Control: public, max-age=604800, immutable
+
+/*.svg
+  Cache-Control: public, max-age=604800, immutable
+
+/*.ico
+  Cache-Control: public, max-age=604800, immutable
+
+/*.json
+  Cache-Control: public, max-age=604800, immutable
