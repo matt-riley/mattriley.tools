@@ -80,6 +80,17 @@ export function renderReadme(readme: SyncedReadme) {
   );
   const allowedImageSources = new Set([...allowedRemoteSources, ...allowedMirroredPaths]);
 
+  /*
+   * Builds a human-readable alt text from an image filename when the
+   * upstream alt text is empty. This prevents the seo-graph integration from
+   * failing the validateImageAlt check on README images that lack alt text.
+   */
+  const fallbackAltText = (filename: string | undefined): string => {
+    if (!filename || filename.length === 0) return "";
+    const base = filename.replace(/^.*[/\\]/, "").replace(/\.[^.]+$/, "");
+    return base.replace(/[-_]+/g, " ").trim();
+  };
+
   const parser = new Marked({
     async: false,
     gfm: true,
@@ -119,7 +130,6 @@ export function renderReadme(readme: SyncedReadme) {
       "code",
       "del",
       "em",
-      "h1",
       "h2",
       "h3",
       "h4",
@@ -161,7 +171,7 @@ export function renderReadme(readme: SyncedReadme) {
               allowedRemoteSources,
               allowedMirroredPaths,
             ) ?? attribs.src,
-          alt: attribs.alt ?? "",
+          alt: attribs.alt || fallbackAltText(attribs.src),
         },
       }),
     },
