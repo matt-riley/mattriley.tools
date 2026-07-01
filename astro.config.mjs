@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import seoGraph from "@jdevalk/astro-seo-graph/integration";
-import sitemap from "@astrojs/sitemap";
+import sitemap, { ChangeFreqEnum } from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
@@ -22,7 +22,7 @@ export default defineConfig({
         return {
           ...item,
           lastmod: new Date().toISOString().split("T")[0],
-          changefreq: url.pathname === "/" ? "daily" : "weekly",
+          changefreq: url.pathname === "/" ? ChangeFreqEnum.DAILY : ChangeFreqEnum.WEEKLY,
           priority,
         };
       },
