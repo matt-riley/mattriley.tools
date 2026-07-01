@@ -45,7 +45,7 @@ jobs:
         run: corepack enable
 
       - name: Set up mise
-        uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
+        uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4
         with:
           install: true
           cache: true
@@ -54,7 +54,7 @@ jobs:
         # Shares the same key as the reusable ci job so both jobs warm each
         # other's cache; restores before `mise run install` links the store.
         if: ${{ hashFiles('pnpm-lock.yaml') != '' }}
-        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: |
             ~/.local/share/pnpm/store
