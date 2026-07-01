@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -272,17 +272,18 @@ async function readAgentSkills(skillsRootPath) {
     .map((entry) => entry.name)
     .sort();
 
-  return Promise.all(
+  const skillEntries = await Promise.all(
     skillDirs.map(async (slug) => {
       const skillPath = join(skillsDir, slug, "SKILL.md");
 
-      let content;
+      // Skip directories that don't contain a SKILL.md (e.g. archived/)
       try {
-        content = await readFile(skillPath, "utf8");
-      } catch (error) {
-        if (error?.code === "ENOENT") return null;
-        throw error;
+        await stat(skillPath);
+      } catch {
+        return null;
       }
+
+      const content = await readFile(skillPath, "utf8");
       const { frontmatter, body } = parseSkillMarkdown(content, skillPath);
       const metadata =
         typeof frontmatter.metadata === "object" && frontmatter.metadata !== null
@@ -314,7 +315,9 @@ async function readAgentSkills(skillsRootPath) {
         },
       };
     }),
-  ).then((results) => results.filter(Boolean));
+  );
+
+  return skillEntries.filter((entry) => entry !== null);
 }
 
 export async function filterPublicToolsByRepository(tools, options = {}) {
