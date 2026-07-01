@@ -275,7 +275,14 @@ async function readAgentSkills(skillsRootPath) {
   return Promise.all(
     skillDirs.map(async (slug) => {
       const skillPath = join(skillsDir, slug, "SKILL.md");
-      const content = await readFile(skillPath, "utf8");
+
+      let content;
+      try {
+        content = await readFile(skillPath, "utf8");
+      } catch (error) {
+        if (error?.code === "ENOENT") return null;
+        throw error;
+      }
       const { frontmatter, body } = parseSkillMarkdown(content, skillPath);
       const metadata =
         typeof frontmatter.metadata === "object" && frontmatter.metadata !== null
@@ -307,7 +314,7 @@ async function readAgentSkills(skillsRootPath) {
         },
       };
     }),
-  );
+  ).then((results) => results.filter(Boolean));
 }
 
 export async function filterPublicToolsByRepository(tools, options = {}) {
