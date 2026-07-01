@@ -38,7 +38,7 @@ describe("formatSeoDescription", () => {
     const raw = "This description is intentionally long enough to land inside the valid band.";
     const result = formatSeoDescription(raw, "tagline");
 
-    expect(result).toBe(`${raw} tagline`);
+    expect(result).toBe(`${raw}. tagline`);
     expect(result.length).toBeGreaterThanOrEqual(70);
     expect(result.length).toBeLessThanOrEqual(200);
   });
