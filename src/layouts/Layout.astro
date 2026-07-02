@@ -8,9 +8,27 @@ interface Props {
   agentHint?: string | readonly string[];
   jsonld?: unknown;
   pageTitle?: string;
+  ogImage?: string;
+  ogImageWidth?: number;
+  ogImageHeight?: number;
+  ogImageAlt?: string;
+  siteName?: string;
+  ogType?: string;
 }
 
-const { title, description, agentHint, jsonld, pageTitle } = Astro.props;
+const {
+  title,
+  description,
+  agentHint,
+  jsonld,
+  pageTitle,
+  ogImage = "https://mattriley.tools/og-default.png",
+  ogImageWidth = 1200,
+  ogImageHeight = 630,
+  ogImageAlt = "mattriley.tools",
+  siteName = "mattriley.tools",
+  ogType = "website",
+} = Astro.props;
 const resolvedPageTitle = pageTitle ?? (title === "mattriley.tools" ? title : `${title} | mattriley.tools`);
 const agentHintHtml = agentHint ? `<!-- AGENT DISCOVERY HINT:\n${Array.isArray(agentHint) ? agentHint.join("\n") : agentHint}\n-->` : "";
 ---
@@ -19,14 +37,23 @@ const agentHintHtml = agentHint ? `<!-- AGENT DISCOVERY HINT:\n${Array.isArray(a
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
     <meta name="generator" content={Astro.generator} />
     <Seo 
       title={resolvedPageTitle} 
       description={description || 'Curated tools, plugins, skills, and templates for modern development.'} 
-      canonicalUrl={new URL(Astro.url.pathname, Astro.site).href} 
+      canonicalUrl={new URL(Astro.url.pathname, Astro.site).href}
+      ogImage={ogImage}
+      ogImageWidth={ogImageWidth}
+      ogImageHeight={ogImageHeight}
+      ogImageAlt={ogImageAlt}
+      siteName={siteName}
+      ogType={ogType}
+      twitter={{ site: "@mattriley" }}
     />
     {jsonld && <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />}
   </head>

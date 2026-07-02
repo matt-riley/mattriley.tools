@@ -19,7 +19,7 @@ export function formatSeoDescription(raw: string | null | undefined, tagline: st
     return `${description.slice(0, 197)}...`;
   }
 
-  const combined = `${description} ${tagline}`;
+  const combined = `${description}. ${tagline}`;
 
   if (combined.length > 200) {
     return `${description.slice(0, 197)}...`;
