@@ -6,7 +6,7 @@ import { templates, templatesGeneratedAt } from "../data/templates.generated";
 import { skills, skillsGeneratedAt } from "../data/skills.generated";
 import { formatUtcTimestamp } from "../utils/date";
 
-const pageUrl = "https://mattriley.tools/";
+const pageUrl = new URL("/", Astro.site ?? Astro.url).toString();
 const description =
   "Static catalog of Matt Riley's Homebrew tools, Neovim plugins, agent skills, and public template repositories.";
 const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
@@ -16,34 +16,61 @@ const formattedSkillsGeneratedAt = formatUtcTimestamp(skillsGeneratedAt);
 
 const jsonld = {
   "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  name: "mattriley.tools",
-  description,
-  url: pageUrl,
-  hasPart: [
+  "@graph": [
     {
-      "@type": "ItemList",
-      name: "Homebrew tools",
-      numberOfItems: tools.length,
-      url: `${pageUrl}#homebrew-tools`,
+      "@type": "Organization",
+      name: "mattriley.tools",
+      url: pageUrl,
+      description,
     },
     {
-      "@type": "ItemList",
-      name: "Neovim plugins",
-      numberOfItems: plugins.length,
-      url: `${pageUrl}#neovim-plugins`,
+      "@type": "WebSite",
+      name: "mattriley.tools",
+      url: pageUrl,
+      description,
     },
     {
-      "@type": "ItemList",
-      name: "Agent skills",
-      numberOfItems: skills.length,
-      url: `${pageUrl}#agent-skills`,
+      "@type": "CollectionPage",
+      name: "mattriley.tools",
+      description,
+      url: pageUrl,
+      hasPart: [
+        {
+          "@type": "ItemList",
+          name: "Homebrew tools",
+          numberOfItems: tools.length,
+          url: `${pageUrl}#homebrew-tools`,
+        },
+        {
+          "@type": "ItemList",
+          name: "Neovim plugins",
+          numberOfItems: plugins.length,
+          url: `${pageUrl}#neovim-plugins`,
+        },
+        {
+          "@type": "ItemList",
+          name: "Agent skills",
+          numberOfItems: skills.length,
+          url: `${pageUrl}#agent-skills`,
+        },
+        {
+          "@type": "ItemList",
+          name: "Public templates",
+          numberOfItems: templates.length,
+          url: `${pageUrl}#public-templates`,
+        },
+      ],
     },
     {
-      "@type": "ItemList",
-      name: "Public templates",
-      numberOfItems: templates.length,
-      url: `${pageUrl}#public-templates`,
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: pageUrl,
+        },
+      ],
     },
   ],
 };

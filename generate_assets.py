@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Generate og-default.png (1200x630) and apple-touch-icon.png (180x180) efficiently."""
-import struct, zlib, os, sys
+import os
+import struct
+import sys
+from pathlib import Path
+import zlib
 
 def create_png(width, height, r, g, b, a=255):
     """Create a solid-color PNG efficiently."""
@@ -18,14 +22,14 @@ def create_png(width, height, r, g, b, a=255):
     iend = chunk(b'IEND', b'')
     return header + ihdr + idat + iend
 
-outdir = '/home/hermes/.hermes/kanban/workspaces/t_66f048eb/public'
+outdir = Path(__file__).resolve().parent / "public"
 os.makedirs(outdir, exist_ok=True)
 
 # Generate og-default.png - 1200x630, black background
 sys.stdout.write("Generating og-default.png...")
 sys.stdout.flush()
 og_bytes = create_png(1200, 630, 0, 0, 0)
-with open(os.path.join(outdir, 'og-default.png'), 'wb') as f:
+with open(outdir / 'og-default.png', 'wb') as f:
     f.write(og_bytes)
 print(f" {len(og_bytes)} bytes")
 
@@ -33,7 +37,7 @@ print(f" {len(og_bytes)} bytes")
 sys.stdout.write("Generating apple-touch-icon.png...")
 sys.stdout.flush()
 icon_bytes = create_png(180, 180, 0, 0, 0)
-with open(os.path.join(outdir, 'apple-touch-icon.png'), 'wb') as f:
+with open(outdir / 'apple-touch-icon.png', 'wb') as f:
     f.write(icon_bytes)
 print(f" {len(icon_bytes)} bytes")
 

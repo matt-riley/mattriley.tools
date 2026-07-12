@@ -14,15 +14,19 @@ export default defineConfig({
       validateMetadataLength: true,
     }),
     sitemap({
+      /**
+       * @param {import("@astrojs/sitemap").SitemapItem} item
+       * @returns {import("@astrojs/sitemap").SitemapItem}
+       */
       serialize(item) {
         const url = new URL(item.url);
-        const priority =
-          url.pathname === "/" ? 1.0 : url.pathname.split("/").length <= 3 ? 0.8 : 0.5;
+        const isHome = url.pathname === "/";
+        const isListing = !isHome && url.pathname.split("/").filter(Boolean).length === 1;
         return {
           ...item,
           lastmod: new Date().toISOString().split("T")[0],
-          changefreq: url.pathname === "/" ? ChangeFreqEnum.DAILY : ChangeFreqEnum.WEEKLY,
-          priority,
+          changefreq: isHome ? ChangeFreqEnum.DAILY : ChangeFreqEnum.WEEKLY,
+          priority: isHome ? 1.0 : isListing ? 0.8 : 0.5,
         };
       },
     }),

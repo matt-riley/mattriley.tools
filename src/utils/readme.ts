@@ -130,7 +130,6 @@ export function renderReadme(readme: SyncedReadme) {
       "code",
       "del",
       "em",
-      "h1",
       "h2",
       "h3",
       "h4",
