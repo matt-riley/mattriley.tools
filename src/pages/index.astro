@@ -6,7 +6,7 @@ import { templates, templatesGeneratedAt } from "../data/templates.generated";
 import { skills, skillsGeneratedAt } from "../data/skills.generated";
 import { formatUtcTimestamp } from "../utils/date";
 
-const pageUrl = "https://mattriley.tools/";
+const pageUrl = new URL("/", Astro.site ?? Astro.url).toString();
 const description =
   "Static catalog of Matt Riley's Homebrew tools, Neovim plugins, agent skills, and public template repositories.";
 const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
