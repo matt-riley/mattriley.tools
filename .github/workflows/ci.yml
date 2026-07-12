@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   ci:
-    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@bcaf4ae43edf7d26421741424b82c842c83e55ce # v2.1.0
+    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@071c2c2 # v2.1.0
     with:
       install: true
       lint: true
@@ -54,7 +54,7 @@ jobs:
         # Shares the same key as the reusable ci job so both jobs warm each
         # other's cache; restores before `mise run install` links the store.
         if: ${{ hashFiles('pnpm-lock.yaml') != '' }}
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
             ~/.local/share/pnpm/store

@@ -72,7 +72,7 @@ export function renderReadme(readme: SyncedReadme) {
       .map((image) => image.mirroredPath)
       .filter((path): path is string => isMirroredReadmeImagePath(path)),
   );
-  const imageMap = new Map<string, string>(
+  const imageMap = new Map(
     readme.images.map((image): [string, string] => [
       image.source,
       isMirroredReadmeImagePath(image.mirroredPath) ? image.mirroredPath : image.source,

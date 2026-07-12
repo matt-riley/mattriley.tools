@@ -39,10 +39,12 @@ const agentHintHtml = agentHint ? `<!-- AGENT DISCOVERY HINT:\n${Array.isArray(a
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
+    <meta name="generator" content={Astro.generator} />
     <Seo
       title={resolvedPageTitle}
       description={description || 'Curated tools, plugins, skills, and templates for modern development.'}
@@ -56,8 +58,6 @@ const agentHintHtml = agentHint ? `<!-- AGENT DISCOVERY HINT:\n${Array.isArray(a
       twitter={{ site: "@mattriley" }}
       noindex={noindex}
     />
-    <!-- Ensure viewport includes initial-scale — placed after Seo to override its default -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {jsonld && <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />}
   </head>
   <body>

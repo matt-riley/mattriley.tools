@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import seoGraph from "@jdevalk/astro-seo-graph/integration";
-import sitemap from "@astrojs/sitemap";
+import sitemap, { ChangeFreqEnum } from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,20 +14,14 @@ export default defineConfig({
       validateMetadataLength: true,
     }),
     sitemap({
-      /**
-       * @param {import("@astrojs/sitemap").SitemapItem} item
-       * @returns {import("@astrojs/sitemap").SitemapItem}
-       */
       serialize(item) {
         const url = new URL(item.url);
-        const lastmod = new Date().toISOString().split("T")[0];
         const isHome = url.pathname === "/";
         const isListing = !isHome && url.pathname.split("/").filter(Boolean).length === 1;
         return {
           ...item,
-          lastmod,
-          // @ts-ignore — string literals are valid EnumChangefreq values at runtime
-          changefreq: isHome ? "daily" : "weekly",
+          lastmod: new Date().toISOString().split("T")[0],
+          changefreq: isHome ? ChangeFreqEnum.DAILY : ChangeFreqEnum.WEEKLY,
           priority: isHome ? 1.0 : isListing ? 0.8 : 0.5,
         };
       },
