@@ -14,6 +14,10 @@ export default defineConfig({
       validateMetadataLength: true,
     }),
     sitemap({
+      /**
+       * @param {import("@astrojs/sitemap").SitemapItem} item
+       * @returns {import("@astrojs/sitemap").SitemapItem}
+       */
       serialize(item) {
         const url = new URL(item.url);
         const isHome = url.pathname === "/";
