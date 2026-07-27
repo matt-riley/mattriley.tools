@@ -1,6 +1,6 @@
 [tools]
 node = "24"
-pnpm = "11.13.1"
+pnpm = "11.15.1"
 
 [tasks.install]
 description = "Install dependencies"
