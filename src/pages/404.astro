@@ -88,10 +88,10 @@ const chapters = [
 
   const jumpTo = (id: string) => {
     window.setTimeout(() => {
-      // Synthetic click on an anchor reaches the global smooth-scroll handler
-      // when Lenis is running; without it the browser jumps natively.
+      // Absolute path + hash: the target only exists on the homepage, so
+      // the browser navigates there and lands on the anchor natively.
       const link = document.createElement("a");
-      link.href = `#${id}`;
+      link.href = `/#${id}`;
       link.click();
     }, 400);
   };

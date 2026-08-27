@@ -56,6 +56,12 @@ const navIndex = [
     <meta name="theme-color" content="#0b0b0e" />
     <script is:inline>
       document.documentElement.classList.add("js");
+      // Edge (Windows) already applies OS-level smooth scrolling; running
+      // Lenis on top of it double-smooths the wheel and feels rubber-band
+      // janky. Native scroll + CSS smooth anchors under .no-lenis instead.
+      if (/Edg\//.test(navigator.userAgent)) {
+        document.documentElement.classList.add("no-lenis");
+      }
     </script>
     <Seo
       title={resolvedPageTitle}
@@ -81,12 +87,12 @@ const navIndex = [
         </a>
         <nav class="site-nav" aria-label="Catalog sections">
           {navIndex.map(entry => (
-            <a class="nav-link" href={`#${entry.id}`}>
+            <a class="nav-link" href={`/#${entry.id}`}>
               <span class="num" aria-hidden="true">{entry.num}</span>
               {entry.label}
             </a>
           ))}
-          <a class="nav-cta" href="#homebrew-tools">Index ↓</a>
+          <a class="nav-cta" href="/#homebrew-tools">Index ↓</a>
         </nav>
       </div>
     </header>
@@ -101,7 +107,7 @@ const navIndex = [
           </p>
           <nav class="footer-index" aria-label="Footer navigation">
             {navIndex.map(entry => (
-              <a href={`#${entry.id}`}>
+              <a href={`/#${entry.id}`}>
                 <span class="num" aria-hidden="true">{entry.num}</span>
                 {entry.label}
               </a>
@@ -123,12 +129,17 @@ const navIndex = [
       gsap.registerPlugin(ScrollTrigger);
 
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const lenis = reduceMotion
+      const isEdge = /Edg\//.test(navigator.userAgent);
+      const lenis = reduceMotion || isEdge
         ? null
         : new Lenis({
             lerp: 0.1,
             wheelMultiplier: 1,
           });
+
+      if (!lenis) {
+        document.documentElement.classList.add("no-lenis");
+      }
 
       if (lenis) {
         lenis.on("scroll", ScrollTrigger.update);
@@ -137,11 +148,13 @@ const navIndex = [
       }
 
       // Give anchor navigation the smooth-scroll treatment when Lenis is
-      // running; native jump remains the fallback everywhere else.
+      // running and the target exists on THIS page (homepage chapter links).
+      // On other pages the link is absolute (/#chapter) so the browser
+      // navigates home and lands on the anchor natively.
       if (lenis) {
-        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        document.querySelectorAll('a[href^="#"], a[href^="/#"]').forEach((anchor) => {
           anchor.addEventListener("click", (event) => {
-            const id = anchor.getAttribute("href")?.slice(1);
+            const id = anchor.getAttribute("href")?.split("#")[1];
             if (!id) return;
             const target = document.getElementById(id);
             if (!target) return;

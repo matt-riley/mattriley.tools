@@ -151,8 +151,10 @@ p {
   top: 0;
   z-index: 50;
   height: var(--header-h);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(12px);
+  /* No backdrop-filter: blurred sticky headers repaint every scroll frame
+     on Windows/Edge compositors and are the classic jank source. A near-
+     opaque solid reads the same and stays compositor-cheap everywhere. */
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
   border-bottom: 1px solid var(--line);
 }
 
@@ -1365,6 +1367,12 @@ p {
   border: 0;
 }
 
+/* Scroll contexts without Lenis (Edge, reduced motion, no JS hook):
+   CSS smooth scrolling keeps anchor jumps pleasant without a JS engine. */
+html.no-lenis {
+  scroll-behavior: smooth;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 1024px) {
   .hero .container {
@@ -1473,7 +1481,8 @@ p {
     transition: none;
   }
 
-  html {
+  html,
+  html.no-lenis {
     scroll-behavior: auto;
   }
 }

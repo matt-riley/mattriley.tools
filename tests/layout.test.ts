@@ -9,4 +9,9 @@ describe("shared layout wrapper", () => {
     expect(layoutSource).toContain("jsonld?: unknown");
     expect(layoutSource).toContain("agentHint?: string | readonly string[]");
   });
+
+  it("uses absolute /#chapter links so chrome navigation works from detail pages", () => {
+    expect(layoutSource).toContain("/#${entry.id}");
+    expect(layoutSource).toContain('a[href^="/#"]');
+  });
 });
