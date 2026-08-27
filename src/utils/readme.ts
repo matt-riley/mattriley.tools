@@ -1,5 +1,27 @@
 import { Marked } from "marked";
 import sanitizeHtml from "sanitize-html";
+import { getSingletonHighlighter } from "shiki";
+import bashLang from "shiki/langs/bash.mjs";
+import cssLang from "shiki/langs/css.mjs";
+import diffLang from "shiki/langs/diff.mjs";
+import dockerLang from "shiki/langs/docker.mjs";
+import fishLang from "shiki/langs/fish.mjs";
+import goLang from "shiki/langs/go.mjs";
+import htmlLang from "shiki/langs/html.mjs";
+import iniLang from "shiki/langs/ini.mjs";
+import jsLang from "shiki/langs/javascript.mjs";
+import jsonLang from "shiki/langs/json.mjs";
+import luaLang from "shiki/langs/lua.mjs";
+import makefileLang from "shiki/langs/makefile.mjs";
+import markdownLang from "shiki/langs/markdown.mjs";
+import pythonLang from "shiki/langs/python.mjs";
+import rustLang from "shiki/langs/rust.mjs";
+import sqlLang from "shiki/langs/sql.mjs";
+import tomlLang from "shiki/langs/toml.mjs";
+import tsLang from "shiki/langs/typescript.mjs";
+import yamlLang from "shiki/langs/yaml.mjs";
+import zigLang from "shiki/langs/zig.mjs";
+import tokyoNightTheme from "shiki/themes/tokyo-night.mjs";
 
 export interface SyncedReadmeImage {
   source: string;
@@ -59,6 +81,95 @@ function rewriteReadmeImageSource(
   }
 
   return resolvedSrc;
+}
+
+/*
+ * Build-time syntax highlighting. The highlighter loads once at module
+ * init (static site generation runs in Node) and colors are baked into
+ * the HTML — no client-side highlighting script is shipped.
+ *
+ * Highlighting runs AFTER sanitize-html so token <span style=...>
+ * markup cannot be smuggled in by README content.
+ */
+const highlighter = await getSingletonHighlighter({
+  themes: [tokyoNightTheme],
+  langs: [
+    bashLang,
+    cssLang,
+    diffLang,
+    dockerLang,
+    fishLang,
+    goLang,
+    htmlLang,
+    iniLang,
+    jsLang,
+    jsonLang,
+    luaLang,
+    makefileLang,
+    markdownLang,
+    pythonLang,
+    rustLang,
+    sqlLang,
+    tomlLang,
+    tsLang,
+    yamlLang,
+    zigLang,
+  ],
+});
+
+const languageAliases: Record<string, string> = {
+  sh: "bash",
+  shell: "bash",
+  zsh: "bash",
+  console: "bash",
+  py: "python",
+  js: "javascript",
+  ts: "typescript",
+  jsonc: "json",
+  yml: "yaml",
+  md: "markdown",
+  dockerfile: "docker",
+};
+
+const highlightCache = new Map<string, string>();
+
+/* marked escapes code content; shiki needs the raw text. */
+function decodeCodeEntities(code: string): string {
+  return code
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&");
+}
+
+function highlightCodeBlocks(html: string): string {
+  return html.replace(
+    /<pre><code class="language-([a-z0-9]+)">([\s\S]*?)<\/code><\/pre>/g,
+    (whole, rawLang: string, code: string) => {
+      const lang = languageAliases[rawLang] ?? rawLang;
+      const cacheKey = `${lang}\u0000${code}`;
+      const cached = highlightCache.get(cacheKey);
+      if (cached) return cached;
+
+      try {
+        const highlighted = highlighter.codeToHtml(decodeCodeEntities(code), {
+          lang,
+          theme: "tokyo-night",
+        });
+        // The site owns the pre styling; drop shiki's background/foreground.
+        const cleaned = highlighted.replace(
+          /<pre class="shiki[^"]*" style="[^"]*" tabindex="0">/,
+          '<pre class="shiki">',
+        );
+        highlightCache.set(cacheKey, cleaned);
+        return cleaned;
+      } catch {
+        // Unregistered language or unparsable payload: keep the plain block.
+        return whole;
+      }
+    },
+  );
 }
 
 export function renderReadme(readme: SyncedReadme) {
@@ -122,61 +233,65 @@ export function renderReadme(readme: SyncedReadme) {
     throw new TypeError("README rendering unexpectedly returned a promise");
   }
 
-  return sanitizeHtml(rendered, {
-    allowedTags: [
-      "a",
-      "blockquote",
-      "br",
-      "code",
-      "del",
-      "em",
-      "h2",
-      "h3",
-      "h4",
-      "h5",
-      "h6",
-      "hr",
-      "img",
-      "li",
-      "ol",
-      "p",
-      "pre",
-      "strong",
-      "table",
-      "tbody",
-      "td",
-      "th",
-      "thead",
-      "tr",
-      "ul",
-    ],
-    allowedAttributes: {
-      a: ["href", "title"],
-      img: ["alt", "src", "title"],
-      th: ["align"],
-      td: ["align"],
-    },
-    allowedSchemes: ["http", "https", "mailto"],
-    allowProtocolRelative: false,
-    transformTags: {
-      img: (tagName, attribs) => ({
-        tagName,
-        attribs: {
-          ...attribs,
-          src:
-            rewriteReadmeImageSource(
-              attribs.src,
-              readme.downloadUrl,
-              imageMap,
-              allowedRemoteSources,
-              allowedMirroredPaths,
-            ) ?? attribs.src,
-          alt: attribs.alt || fallbackAltText(attribs.src),
-        },
-      }),
-    },
-    exclusiveFilter(frame) {
-      return frame.tag === "img" && !allowedImageSources.has(frame.attribs.src);
-    },
-  });
+  return highlightCodeBlocks(
+    sanitizeHtml(rendered, {
+      allowedTags: [
+        "a",
+        "blockquote",
+        "br",
+        "code",
+        "del",
+        "em",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "hr",
+        "img",
+        "li",
+        "ol",
+        "p",
+        "pre",
+        "strong",
+        "table",
+        "tbody",
+        "td",
+        "th",
+        "thead",
+        "tr",
+        "ul",
+      ],
+      allowedAttributes: {
+        a: ["href", "title"],
+        code: ["class"],
+        img: ["alt", "src", "title"],
+        pre: ["class"],
+        th: ["align"],
+        td: ["align"],
+      },
+      allowedSchemes: ["http", "https", "mailto"],
+      allowProtocolRelative: false,
+      transformTags: {
+        img: (tagName, attribs) => ({
+          tagName,
+          attribs: {
+            ...attribs,
+            src:
+              rewriteReadmeImageSource(
+                attribs.src,
+                readme.downloadUrl,
+                imageMap,
+                allowedRemoteSources,
+                allowedMirroredPaths,
+              ) ?? attribs.src,
+            alt: attribs.alt || fallbackAltText(attribs.src),
+          },
+        }),
+      },
+      exclusiveFilter(frame) {
+        return frame.tag === "img" && !allowedImageSources.has(frame.attribs.src);
+      },
+    }),
+  );
 }

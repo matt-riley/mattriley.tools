@@ -136,4 +136,42 @@ describe("renderReadme", () => {
     expect(html).not.toContain("/generated/readme-images/matt-riley/slides.nvim/unsynced.png");
     expect(html).not.toContain("<img");
   });
+
+  it("highlights fenced code blocks with shiki token colors", () => {
+    const html = renderReadme({
+      markdown: '```json\n{ "version": 1, "enabled": true }\n```',
+      htmlUrl: null,
+      downloadUrl: null,
+      images: [],
+    });
+
+    expect(html).toContain('<pre class="shiki">');
+    expect(html).toContain('<span style="color:');
+    expect(html).not.toContain('style="background-color:');
+  });
+
+  it("decodes marked entities before highlighting without double-escaping", () => {
+    const html = renderReadme({
+      markdown: "```zig\nconst result: bool = a < b;\n```",
+      htmlUrl: null,
+      downloadUrl: null,
+      images: [],
+    });
+
+    // Shiki escapes the decoded `<` once as a hex entity — never twice.
+    expect(html).toContain("&#x3C;");
+    expect(html).not.toContain("&amp;lt;");
+  });
+
+  it("leaves unknown language blocks plain instead of failing", () => {
+    const html = renderReadme({
+      markdown: "```nginx\nserver { listen 80; }\n```",
+      htmlUrl: null,
+      downloadUrl: null,
+      images: [],
+    });
+
+    expect(html).toContain('<pre><code class="language-nginx">');
+    expect(html).not.toContain('<span style="color:');
+  });
 });
