@@ -1,9 +1,20 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { splitWords } from "../utils/text";
+import { tools } from "../data/tools.generated";
+import { plugins } from "../data/plugins.generated";
+import { skills } from "../data/skills.generated";
+import { templates } from "../data/templates.generated";
 
 const title = "Page not found";
 const description = "The page you're looking for doesn't exist on mattriley.tools. Return to the catalog to browse available tools, plugins, skills, and templates.";
+
+const chapters = [
+  { id: "homebrew-tools", label: "homebrew-tools", count: tools.length, unit: "formulas" },
+  { id: "neovim-plugins", label: "neovim-plugins", count: plugins.length, unit: "repos" },
+  { id: "agent-skills", label: "agent-skills", count: skills.length, unit: "skills" },
+  { id: "public-templates", label: "public-templates", count: templates.length, unit: "repos" },
+];
 ---
 
 <Layout title={title} description={description} noindex={true}>
@@ -13,13 +24,160 @@ const description = "The page you're looking for doesn't exist on mattriley.tool
         <h1 data-reveal aria-label="Page not found" set:html={splitWords("Page not found.")}></h1>
         <p>
           The page you're looking for doesn't exist or has been moved. The index is
-          still fully stocked.
+          still fully stocked — and the debugger below knows the way back.
         </p>
         <a class="btn-primary" href="/">
           <span>Back to the catalog</span>
           <span class="arrow" aria-hidden="true">↓</span>
         </a>
+
+        <section
+          class="terminal term-404"
+          data-chapters={JSON.stringify(chapters)}
+          aria-label="404 debug terminal — type help for commands"
+        >
+          <div class="terminal-bar">
+            <span class="term-title mono"><span class="dot" aria-hidden="true"></span>404-debugger</span>
+            <span class="mono">.agit/404.log</span>
+          </div>
+          <div class="terminal-body">
+            <div class="term-output" id="term-output" aria-live="polite">
+              <div class="term-line" data-reveal-fade>$ agit debug --lost-route</div>
+              <div class="term-line" data-reveal-fade>[12:10:42] index lookup failed — this route was never indexed</div>
+              <div class="term-line" data-reveal-fade>[12:10:43] no snapshot to restore. nothing to show.</div>
+              <div class="term-line term-line--dim" data-reveal-fade>debugger attached — type 'help' and press enter</div>
+            </div>
+            <div class="term-input-row">
+              <span class="prompt" aria-hidden="true">matt@index:~$</span>
+              <label class="sr-only" for="debug-input">Debug terminal. Type help and press enter, or return to the catalog.</label>
+              <input
+                id="debug-input"
+                class="term-input"
+                type="text"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="help"
+              />
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   </div>
 </Layout>
+
+<script>
+  (() => {
+    const input = document.querySelector<HTMLInputElement>("#debug-input");
+  const output = document.querySelector<HTMLElement>("#term-output");
+  if (!input || !output) return;
+
+  const terminal = output.closest<HTMLElement>("[data-chapters]");
+  const chapters: { id: string; label: string; count: number; unit: string }[] = JSON.parse(
+    terminal?.getAttribute("data-chapters") ?? "[]",
+  );
+
+  const print = (text: string, kind = "") => {
+    const line = document.createElement("div");
+    line.className = `term-line ${kind}`.trim();
+    line.textContent = text;
+    output.appendChild(line);
+    output.scrollTop = output.scrollHeight;
+  };
+
+  const jumpTo = (id: string) => {
+    window.setTimeout(() => {
+      // Synthetic click on an anchor reaches the global smooth-scroll handler
+      // when Lenis is running; without it the browser jumps natively.
+      const link = document.createElement("a");
+      link.href = `#${id}`;
+      link.click();
+    }, 400);
+  };
+
+  const respond = (raw: string) => {
+    const line = raw.trim().toLowerCase();
+    if (!line) return;
+    const [cmd, ...rest] = line.split(/\s+/);
+    const arg = rest.join(" ");
+
+    switch (cmd) {
+      case "help":
+        print("commands: help · ls · open <chapter> · cd <chapter> · home · clear · sudo · pwd · whoami · date · agit", "term-line--ok");
+        print("chapters: homebrew-tools · neovim-plugins · agent-skills · public-templates", "term-line--dim");
+        break;
+      case "ls":
+        chapters.forEach((chapter) => {
+          print(`${chapter.label.padEnd(20)} ${String(chapter.count).padStart(3)}  ${chapter.unit}`, "term-line--ok");
+        });
+        const total = chapters.reduce((sum, chapter) => sum + chapter.count, 0);
+        print(`${total} entries total — run 'open <chapter>' to visit one`, "term-line--dim");
+        break;
+      case "open":
+      case "cd": {
+        if (!arg || arg === "/") {
+          print("usage: open <chapter> — or 'home' to return", "term-line--err");
+          break;
+        }
+        if (arg === "..") {
+          print("..: there is no up — only the index.", "term-line--err");
+          break;
+        }
+        const chapter = chapters.find((candidate) => candidate.label === arg);
+        if (!chapter) {
+          print(`open: '${arg}': no such chapter. try 'ls'`, "term-line--err");
+          break;
+        }
+        print(`route /#${chapter.id} resolved — taking you there…`, "term-line--ok");
+        jumpTo(chapter.id);
+        break;
+      }
+      case "home":
+      case "exit":
+        print("closing debug session — see you in the index.");
+        window.setTimeout(() => {
+          window.location.href = "/";
+        }, 400);
+        break;
+      case "clear":
+        output.replaceChildren();
+        break;
+      case "sudo":
+        print("sudo: permission denied — you are not in the sudoers file.", "term-line--err");
+        print("this incident will be mentioned in the changelog.", "term-line--dim");
+        break;
+      case "rm":
+        print("rm: refusing to remove the site you are stranded on.", "term-line--err");
+        break;
+      case "pwd":
+        print("/");
+        break;
+      case "whoami":
+        print("visitor at the edge of the index");
+        break;
+      case "date":
+        print(new Date().toUTCString());
+        break;
+      case "agit":
+        print("agit: no agent sessions recorded on this route. yet.", "term-line--ok");
+        print("install: brew install matt-riley/tools/agit", "term-line--dim");
+        break;
+      case "vim":
+        print("vim: wrong editor for escaping. try 'exit'", "term-line--err");
+        break;
+      default:
+        print(`sh: '${cmd}': command not found. type 'help'`, "term-line--err");
+    }
+  };
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      const value = input.value;
+      input.value = "";
+      if (!value.trim()) return;
+      print(`matt@index:~$ ${value}`, "term-line--acc");
+      respond(value);
+    });
+  })();
+</script>
