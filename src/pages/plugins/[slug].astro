@@ -46,25 +46,45 @@ const jsonld = {
   ogType="article"
 >
   <Fragment slot="metadata">
-    <div>Version: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{plugin.version}</span></div>
-    <div>Language: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{plugin.language ?? "Unknown"}</span></div>
-    <div>Topics: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{Number(plugin.topics.length)}</span></div>
-    {plugin.homepage && <div>Homepage: <a href={plugin.homepage} target="_blank" rel="noopener noreferrer" style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem; text-decoration: none;">Link ↗</a></div>}
+    <div><span class="key">Version:</span> <span class="value">{plugin.version}</span></div>
+    <div><span class="key">Language:</span> <span class="value">{plugin.language ?? "Unknown"}</span></div>
+    <div><span class="key">Topics:</span> <span class="value">{Number(plugin.topics.length)}</span></div>
+    {plugin.homepage && (
+      <div><a href={plugin.homepage} target="_blank" rel="noopener noreferrer">Homepage ↗</a></div>
+    )}
   </Fragment>
 
   <Fragment slot="extra">
-    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem;">
-      <p style="margin-bottom: 1rem;">Install (lazy.nvim):</p>
-      <code style="background: #000; color: var(--accent-color); padding: 1rem 1.5rem; display: block; border: 4px solid #000;">
-        {plugin.lazyInstallSnippet}
-      </code>
+    <div class="install-panel">
+      <p class="install-label">Install (lazy.nvim):</p>
+      <div class="install-block">
+        <span class="prompt" aria-hidden="true">$</span>
+        <code>{plugin.lazyInstallSnippet}</code>
+        <button
+          class="copy-btn"
+          type="button"
+          data-copy={plugin.lazyInstallSnippet}
+          aria-label={`Copy lazy.nvim install snippet for ${plugin.name}`}
+        >
+          <span data-copy-label>Copy</span>
+        </button>
+      </div>
     </div>
 
-    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4rem;">
-      <p style="margin-bottom: 1rem;">Install (vim.pack):</p>
-      <code style="background: #000; color: var(--accent-color); padding: 1rem 1.5rem; display: block; border: 4px solid #000;">
-        {plugin.vimPackInstallSnippet}
-      </code>
+    <div class="install-panel">
+      <p class="install-label">Install (vim.pack):</p>
+      <div class="install-block">
+        <span class="prompt" aria-hidden="true">$</span>
+        <code>{plugin.vimPackInstallSnippet}</code>
+        <button
+          class="copy-btn"
+          type="button"
+          data-copy={plugin.vimPackInstallSnippet}
+          aria-label={`Copy vim.pack install snippet for ${plugin.name}`}
+        >
+          <span data-copy-label>Copy</span>
+        </button>
+      </div>
     </div>
   </Fragment>
 </CatalogDetail>

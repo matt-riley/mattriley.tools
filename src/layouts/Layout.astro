@@ -1,5 +1,7 @@
 ---
 import Seo from '@jdevalk/astro-seo-graph/Seo.astro';
+import "@fontsource-variable/space-grotesk";
+import "@fontsource-variable/jetbrains-mono";
 import "../styles/global.css";
 
 interface Props {
@@ -33,6 +35,12 @@ const {
 } = Astro.props;
 const resolvedPageTitle = pageTitle ?? (title === "mattriley.tools" ? title : `${title} | mattriley.tools`);
 const agentHintHtml = agentHint ? `<!-- AGENT DISCOVERY HINT:\n${Array.isArray(agentHint) ? agentHint.join("\n") : agentHint}\n-->` : "";
+const navIndex = [
+  { id: "homebrew-tools", num: "01", label: "Tools" },
+  { id: "neovim-plugins", num: "02", label: "Plugins" },
+  { id: "agent-skills", num: "03", label: "Skills" },
+  { id: "public-templates", num: "04", label: "Templates" },
+];
 ---
 
 <!doctype html>
@@ -45,6 +53,10 @@ const agentHintHtml = agentHint ? `<!-- AGENT DISCOVERY HINT:\n${Array.isArray(a
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#0b0b0e" />
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
     <Seo
       title={resolvedPageTitle}
       description={description || 'Curated tools, plugins, skills, and templates for modern development.'}
@@ -61,7 +73,197 @@ const agentHintHtml = agentHint ? `<!-- AGENT DISCOVERY HINT:\n${Array.isArray(a
     {jsonld && <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />}
   </head>
   <body>
+    <header class="site-header">
+      <div class="container">
+        <a class="wordmark" href="/" aria-label="mattriley.tools — home">
+          <span class="mark" aria-hidden="true">◆</span>
+          mattriley.tools
+        </a>
+        <nav class="site-nav" aria-label="Catalog sections">
+          {navIndex.map(entry => (
+            <a class="nav-link" href={`#${entry.id}`}>
+              <span class="num" aria-hidden="true">{entry.num}</span>
+              {entry.label}
+            </a>
+          ))}
+          <a class="nav-cta" href="#homebrew-tools">Index ↓</a>
+        </nav>
+      </div>
+    </header>
     <slot />
+    <footer class="site-footer">
+      <div class="container">
+        <span class="footer-mark">mattriley.tools<span class="dot" aria-hidden="true">.</span></span>
+        <div class="footer-grid">
+          <p class="footer-blurb">
+            A static catalog of Homebrew tools, Neovim plugins, agent skills, and public
+            template repositories — generated from source repositories and synced on a schedule.
+          </p>
+          <nav class="footer-index" aria-label="Footer navigation">
+            {navIndex.map(entry => (
+              <a href={`#${entry.id}`}>
+                <span class="num" aria-hidden="true">{entry.num}</span>
+                {entry.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+        <div class="footer-legal">
+          <span>© {new Date().getFullYear()} Matt Riley · MIT License</span>
+          <span>Static Astro · Lenis + GSAP · data synced from source</span>
+        </div>
+      </div>
+    </footer>
     {agentHint && <Fragment set:html={agentHintHtml} />}
+    <script>
+      import Lenis from "lenis";
+      import { gsap } from "gsap";
+      import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const lenis = reduceMotion
+        ? null
+        : new Lenis({
+            lerp: 0.1,
+            wheelMultiplier: 1,
+          });
+
+      if (lenis) {
+        lenis.on("scroll", ScrollTrigger.update);
+        gsap.ticker.add((time) => lenis.raf(time * 1000));
+        gsap.ticker.lagSmoothing(0);
+      }
+
+      // Give anchor navigation the smooth-scroll treatment when Lenis is
+      // running; native jump remains the fallback everywhere else.
+      if (lenis) {
+        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+          anchor.addEventListener("click", (event) => {
+            const id = anchor.getAttribute("href")?.slice(1);
+            if (!id) return;
+            const target = document.getElementById(id);
+            if (!target) return;
+            event.preventDefault();
+            lenis.scrollTo(target, { offset: -76 });
+          });
+        });
+      }
+
+      // Count-up readouts: markup already holds the final value so no-JS
+      // and reduced-motion users see the finished number immediately.
+      document.querySelectorAll<HTMLElement>("[data-count]").forEach((el) => {
+        const end = Number(el.dataset.count ?? 0);
+        if (reduceMotion || Number.isNaN(end)) return;
+        const state = { value: 0 };
+        gsap.to(state, {
+          value: end,
+          duration: 1.4,
+          ease: "power3.out",
+          onUpdate: () => {
+            el.textContent = String(Math.round(state.value));
+          },
+        });
+      });
+
+      // Scroll reveals. Only nodes inside data-reveal-scope are touched, so
+      // the homepage/detail scripts stay independent of each other.
+      const scopedReveals = () => {
+        const root = document.querySelector<HTMLElement>("[data-reveal-scope]");
+        if (!root || reduceMotion) return;
+
+        root.querySelectorAll<HTMLElement>("[data-reveal]").forEach((heading) => {
+          const words = heading.querySelectorAll<HTMLElement>(".split-word");
+          if (words.length === 0) return;
+          gsap.fromTo(
+            words,
+            { yPercent: 120, y: 0, opacity: 0 },
+            {
+              yPercent: 0,
+              y: 0,
+              opacity: 1,
+              duration: 1.05,
+              ease: "power4.out",
+              stagger: 0.05,
+              scrollTrigger: {
+                trigger: heading,
+                start: "top 86%",
+                once: true,
+              },
+            },
+          );
+        });
+
+        ScrollTrigger.batch(root.querySelectorAll<HTMLElement>("[data-reveal-card]"), {
+          start: "top 92%",
+          once: true,
+          onEnter: (batch) =>
+            gsap.to(batch, {
+              opacity: 1,
+              y: 0,
+              duration: 0.7,
+              ease: "power3.out",
+              stagger: 0.055,
+              overwrite: true,
+            }),
+        });
+
+        root.querySelectorAll<HTMLElement>("[data-reveal-fade]").forEach((el) => {
+          gsap.fromTo(
+            el,
+            { opacity: 0, y: 22 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.85,
+              ease: "power3.out",
+              scrollTrigger: { trigger: el, start: "top 88%", once: true },
+            },
+          );
+        });
+      };
+
+      if (!reduceMotion && document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () => {
+          scopedReveals();
+          window.addEventListener("load", () => ScrollTrigger.refresh());
+        });
+      } else {
+        scopedReveals();
+      }
+
+      // Copy-to-clipboard for install commands.
+      document.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach((button) => {
+        const label = button.querySelector<HTMLElement>("[data-copy-label]");
+        const flash = () => {
+          if (!label) return;
+          const original = label.textContent;
+          label.textContent = "Copied";
+          window.setTimeout(() => {
+            label.textContent = original;
+          }, 1600);
+        };
+        button.addEventListener("click", async () => {
+          const text = button.dataset.copy ?? "";
+          try {
+            await navigator.clipboard.writeText(text);
+            flash();
+          } catch {
+            // Fallback for contexts where the async clipboard API is blocked.
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.appendChild(textarea);
+            textarea.select();
+            const ok = document.execCommand("copy");
+            textarea.remove();
+            if (ok) flash();
+          }
+        });
+      });
+    </script>
   </body>
 </html>

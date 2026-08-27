@@ -45,8 +45,11 @@ const jsonld = {
   ogType="article"
 >
   <Fragment slot="metadata">
-    <div>Language: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{template.language ?? "Unknown"}</span></div>
-    <div>Topics: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{Number(template.topics.length)}</span></div>
-    {template.homepage && <div>Homepage: <a href={template.homepage} target="_blank" rel="noopener noreferrer" style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem; text-decoration: none;">Link ↗</a></div>}
+    <div><span class="key">Language:</span> <span class="value">{template.language ?? "Unknown"}</span></div>
+    <div><span class="key">Topics:</span> <span class="value">{Number(template.topics.length)}</span></div>
+    <div><span class="key">Repository:</span> <span class="value">{template.repository}</span></div>
+    {template.homepage && (
+      <div><a href={template.homepage} target="_blank" rel="noopener noreferrer">Homepage ↗</a></div>
+    )}
   </Fragment>
 </CatalogDetail>

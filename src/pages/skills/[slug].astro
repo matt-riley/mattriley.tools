@@ -49,18 +49,21 @@ const jsonld = {
   ogType="article"
 >
   <Fragment slot="metadata">
-    <div>Version: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.version}</span></div>
-    <div>Maturity: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.maturity}</span></div>
-    <div>Repository: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.repository}</span></div>
-    <div>License: <span style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem;">{skill.license ?? "Undeclared"}</span></div>
-    {skill.homepage && <div>Homepage: <a href={skill.homepage} target="_blank" rel="noopener noreferrer" style="background: #000; color: var(--accent-color); padding: 0.25rem 0.5rem; text-decoration: none;">Link ↗</a></div>}
+    <div><span class="key">Version:</span> <span class="value">{skill.version}</span></div>
+    <div><span class="key">Maturity:</span> <span class="value">{skill.maturity}</span></div>
+    <div><span class="key">Repository:</span> <span class="value">{skill.repository}</span></div>
+    <div><span class="key">License:</span> <span class="value">{skill.license ?? "Undeclared"}</span></div>
+    {skill.homepage && (
+      <div><a href={skill.homepage} target="_blank" rel="noopener noreferrer">Homepage ↗</a></div>
+    )}
   </Fragment>
 
   <Fragment slot="extra">
-    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4rem;">
-      <p style="margin-bottom: 1rem;">Compatibility:</p>
-      <div style="background: #000; color: var(--accent-color); padding: 1rem 1.5rem; border: 4px solid #000;">
-        {skill.compatibility}
+    <div class="install-panel">
+      <p class="install-label">Compatibility</p>
+      <div class="install-block">
+        <span class="prompt" aria-hidden="true">◆</span>
+        <code>{skill.compatibility}</code>
       </div>
     </div>
   </Fragment>

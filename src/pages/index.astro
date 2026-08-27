@@ -1,10 +1,12 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import SectionHeader from "../components/SectionHeader.astro";
 import { generatedAt, tools } from "../data/tools.generated";
 import { plugins, pluginsGeneratedAt } from "../data/plugins.generated";
 import { templates, templatesGeneratedAt } from "../data/templates.generated";
 import { skills, skillsGeneratedAt } from "../data/skills.generated";
 import { formatUtcTimestamp } from "../utils/date";
+import { padIndex, splitWords } from "../utils/text";
 
 const pageUrl = new URL("/", Astro.site ?? Astro.url).toString();
 const description =
@@ -13,6 +15,14 @@ const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
 const formattedPluginsGeneratedAt = formatUtcTimestamp(pluginsGeneratedAt);
 const formattedTemplatesGeneratedAt = formatUtcTimestamp(templatesGeneratedAt);
 const formattedSkillsGeneratedAt = formatUtcTimestamp(skillsGeneratedAt);
+const totalEntries = tools.length + plugins.length + skills.length + templates.length;
+
+const marqueeItems = [
+  ...tools.slice(0, 5).map((tool) => ({ tone: "item-cyan", text: `brew install matt-riley/tools/${tool.name}` })),
+  ...plugins.slice(0, 3).map((plugin) => ({ tone: "item-green", text: `${plugin.repository} v${plugin.version}` })),
+  ...skills.slice(0, 4).map((skill) => ({ tone: "item-magenta", text: `skill — ${skill.slug}` })),
+  ...templates.slice(0, 4).map((template) => ({ tone: "item-orange", text: `${template.repository} · ${template.language}` })),
+];
 
 const jsonld = {
   "@context": "https://schema.org",
@@ -86,104 +96,224 @@ const jsonld = {
   ]}
   jsonld={jsonld}
 >
-  <div class="vibrant-detail-page">
-    <header style="margin-bottom: 6rem;">
-      <h1 style="font-size: clamp(2.5rem, 16vw, 8rem); border-bottom: none; margin-bottom: 1rem;">MATTRILEY.TOOLS</h1>
-      <p style="font-size: clamp(1.1rem, 5vw, 2.5rem); font-weight: 900; text-transform: uppercase;">A static catalog of Homebrew tools, Neovim plugins, agent skills, and public template repositories.</p>
-      <nav aria-label="Section navigation">
-        <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
-          <a href="#homebrew-tools" style="background: #000; color: #FFF; padding: 1rem 2rem; font-weight: bold; text-decoration: none; text-transform: uppercase; border: 4px solid #000; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0px #000';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">Tools</a>
-          <a href="#neovim-plugins" style="background: #000; color: #FFF; padding: 1rem 2rem; font-weight: bold; text-decoration: none; text-transform: uppercase; border: 4px solid #000; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0px #000';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">Plugins</a>
-          <a href="#agent-skills" style="background: #000; color: #FFF; padding: 1rem 2rem; font-weight: bold; text-decoration: none; text-transform: uppercase; border: 4px solid #000; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0px #000';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">Skills</a>
-          <a href="#public-templates" style="background: #000; color: #FFF; padding: 1rem 2rem; font-weight: bold; text-decoration: none; text-transform: uppercase; border: 4px solid #000; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0px #000';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">Templates</a>
-        </div>
-      </nav>
-    </header>
-
-    <section id="homebrew-tools" style="margin-bottom: 6rem;">
-      <h2 style="font-size: clamp(1.75rem, 8vw, 4rem); border-bottom: 8px solid #000; padding-bottom: 1rem; margin-bottom: 1rem;">Homebrew Tools</h2>
-      <p style="font-size: 1.5rem; font-weight: bold;">Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time></p>
-      {tools.length > 0 ? (
-        <div class="domain-grid">
-          {tools.map(tool => (
-            <a href={`/tools/${tool.slug}/`} class="catalog-card cyan-card">
-              <h3 class="card-title">{tool.name}</h3>
-              <p class="card-desc">{tool.description}</p>
-              <div class="card-meta">
-                <span class="version">v{tool.version}</span>
-                <code class="install-cmd">{tool.installCommand}</code>
+  <div data-reveal-scope>
+    <div class="page" role="main">
+      <div class="page-stack">
+        <header class="hero">
+          <div class="container">
+            <div class="hero-head">
+              <p class="hero-meta mono">
+                <span>mattriley.tools</span>
+                <span class="dot" aria-hidden="true">◆</span>
+                <span>public catalog</span>
+                <span class="dot" aria-hidden="true">◆</span>
+                <span>synced {formattedGeneratedAt}</span>
+              </p>
+              <h1 data-reveal aria-label="Built. Published. Versioned.">
+                <span class="split-line" set:html={splitWords("Built.")}></span>
+                <span class="split-line" set:html={splitWords("Published.")}></span>
+                <span class="split-line" set:html={splitWords("Versioned.")}></span>
+              </h1>
+            </div>
+            <div class="hero-foot">
+              <p class="hero-sub">
+                A static catalog of <strong>Homebrew tools</strong>, <strong>Neovim plugins</strong>,
+                <strong>agent skills</strong>, and <strong>template repositories</strong> — generated
+                from source repositories and synced on a schedule.
+              </p>
+              <div class="hero-actions">
+                <a class="btn-primary" href="#homebrew-tools">
+                  <span>Browse the index</span>
+                  <span class="arrow" aria-hidden="true">↓</span>
+                </a>
+                <a class="btn-ghost" href="#agent-skills">
+                  <span>Agent skills</span>
+                  <span class="arrow" aria-hidden="true">→</span>
+                </a>
               </div>
-            </a>
-          ))}
-        </div>
-      ) : (
-        <p style="font-size: 2rem; font-weight: bold; margin-top: 2rem;">No Homebrew tools are published yet</p>
-      )}
-    </section>
-
-    <!-- Plugins -->
-    <section id="neovim-plugins" style="margin-bottom: 6rem;">
-      <h2 style="font-size: clamp(1.75rem, 8vw, 4rem); border-bottom: 8px solid #000; padding-bottom: 1rem; margin-bottom: 1rem;">Neovim Plugins</h2>
-      <p style="font-size: 1.5rem; font-weight: bold;">Last synced: <time datetime={pluginsGeneratedAt}>{formattedPluginsGeneratedAt}</time></p>
-      {plugins.length > 0 ? (
-        <div class="domain-grid">
-          {plugins.map(plugin => (
-            <a href={`/plugins/${plugin.slug}/`} class="catalog-card green-card">
-              <h3 class="card-title">{plugin.name}</h3>
-              <p class="card-desc">{plugin.description}</p>
-              <div class="card-meta">
-                <span class="version">v{plugin.version}</span>
-                <span style="background: #000; padding: 0.25rem 0.5rem; color: var(--accent-color);">{plugin.language ?? "Unknown"}</span>
+            </div>
+            <aside class="terminal" data-reveal-fade aria-label="Catalog sync pipeline">
+              <div class="terminal-bar">
+                <span class="term-title mono"><span class="dot" aria-hidden="true"></span>sync-pipeline</span>
+                <span class="mono">bash — 80×24</span>
               </div>
-            </a>
-          ))}
-        </div>
-      ) : (
-        <p style="font-size: 2rem; font-weight: bold; margin-top: 2rem;">No Neovim plugins matched the catalog rules</p>
-      )}
-    </section>
-
-    <!-- Skills -->
-    <section id="agent-skills" style="margin-bottom: 6rem;">
-      <h2 style="font-size: clamp(1.75rem, 8vw, 4rem); border-bottom: 8px solid #000; padding-bottom: 1rem; margin-bottom: 1rem;">Agent Skills</h2>
-      <p style="font-size: 1.5rem; font-weight: bold;">Last synced: <time datetime={skillsGeneratedAt}>{formattedSkillsGeneratedAt}</time></p>
-      {skills.length > 0 ? (
-        <div class="domain-grid">
-          {skills.map(skill => (
-            <a href={`/skills/${skill.slug}/`} class="catalog-card magenta-card">
-              <h3 class="card-title">{skill.name}</h3>
-              <p class="card-desc">{skill.description}</p>
-              <div class="card-meta">
-                <span class="version">v{skill.version}</span>
-                <span style="background: #000; padding: 0.25rem 0.5rem; color: var(--accent-color);">{skill.maturity}</span>
+              <div class="terminal-body">
+                <div class="line">
+                  <span class="prompt">$</span><span class="cmd">pnpm run generate:data</span>
+                </div>
+                <div class="line">
+                  <span class="ok">✓</span><span>homebrew-tools</span>
+                  <span class="count" data-count={tools.length}>{tools.length}</span><span class="unit">formulas</span>
+                  <span class="unit">captured</span>
+                </div>
+                <div class="line">
+                  <span class="ok">✓</span><span>neovim-plugins</span>
+                  <span class="count" data-count={plugins.length}>{plugins.length}</span><span class="unit">repos</span>
+                  <span class="unit">captured</span>
+                </div>
+                <div class="line">
+                  <span class="ok">✓</span><span>agent-skills</span>
+                  <span class="count" data-count={skills.length}>{skills.length}</span><span class="unit">skills</span>
+                  <span class="unit">captured</span>
+                </div>
+                <div class="line">
+                  <span class="ok">✓</span><span>public-templates</span>
+                  <span class="count" data-count={templates.length}>{templates.length}</span><span class="unit">repos</span>
+                  <span class="unit">captured</span>
+                </div>
+                <div class="summary">
+                  <span class="prompt">→</span>
+                  <span>{totalEntries} entries catalogued · no drift detected</span>
+                  <span class="cursor" aria-hidden="true"></span>
+                </div>
               </div>
-            </a>
-          ))}
-        </div>
-      ) : (
-        <p style="font-size: 2rem; font-weight: bold; margin-top: 2rem;">No agent skills are published yet</p>
-      )}
-    </section>
+            </aside>
+          </div>
+        </header>
 
-    <!-- Templates -->
-    <section id="public-templates" style="margin-bottom: 6rem;">
-      <h2 style="font-size: clamp(1.75rem, 8vw, 4rem); border-bottom: 8px solid #000; padding-bottom: 1rem; margin-bottom: 1rem;">Public Templates</h2>
-      <p style="font-size: 1.5rem; font-weight: bold;">Last synced: <time datetime={templatesGeneratedAt}>{formattedTemplatesGeneratedAt}</time></p>
-      {templates.length > 0 ? (
-        <div class="domain-grid">
-          {templates.map(template => (
-            <a href={`/templates/${template.slug}/`} class="catalog-card orange-card">
-              <h3 class="card-title">{template.name}</h3>
-              <p class="card-desc">{template.description}</p>
-              <div class="card-meta">
-                <span class="version">{template.language ?? "Unknown"}</span>
+        <div class="marquee" aria-hidden="true">
+          <div class="marquee-track">
+            {[0, 1].map((copy) => (
+              <div class="marquee-group">
+                {marqueeItems.map((item) => (
+                  <>
+                    <span class={item.tone}>{item.text}</span>
+                    <span class="sep">◆</span>
+                  </>
+                ))}
               </div>
-            </a>
-          ))}
+            ))}
+          </div>
         </div>
-      ) : (
-        <p style="font-size: 2rem; font-weight: bold; margin-top: 2rem;">No public templates matched the current GitHub filters</p>
-      )}
-    </section>
+
+        <section id="homebrew-tools" class="chapter domain--tools" aria-label="Homebrew tools">
+          <div class="container">
+            <SectionHeader
+              chapter="01"
+              title="Homebrew Tools"
+              subtitle="Command-line instruments, packaged for Homebrew — installed straight from the tap."
+              count={tools.length}
+              syncLabel={`synced ${formattedGeneratedAt}`}
+            />
+            {tools.length > 0 ? (
+              <div class="domain-grid">
+                {tools.map((tool, i) => (
+                  <a href={`/tools/${tool.slug}/`} class="catalog-card cyan-card" data-reveal-card>
+                    <div class="card-top">
+                      <span class="card-index">{padIndex(i + 1)}</span>
+                      <span class="card-arrow" aria-hidden="true">↗</span>
+                    </div>
+                    <h3 class="card-title">{tool.name}</h3>
+                    <p class="card-desc">{tool.description}</p>
+                    <div class="card-meta">
+                      <span class="version">v{tool.version}</span>
+                      <code class="card-install">{tool.installCommand}</code>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p class="mono">No Homebrew tools are published yet.</p>
+            )}
+          </div>
+        </section>
+
+        <section id="neovim-plugins" class="chapter domain--plugins" aria-label="Neovim plugins">
+          <div class="container">
+            <SectionHeader
+              chapter="02"
+              title="Neovim Plugins"
+              subtitle="Small measures of UI and behaviour for Neovim, installable with lazy.nvim or vim.pack."
+              count={plugins.length}
+              syncLabel={`synced ${formattedPluginsGeneratedAt}`}
+            />
+            {plugins.length > 0 ? (
+              <div class="domain-grid">
+                {plugins.map((plugin, i) => (
+                  <a href={`/plugins/${plugin.slug}/`} class="catalog-card green-card" data-reveal-card>
+                    <div class="card-top">
+                      <span class="card-index">{padIndex(i + 1)}</span>
+                      <span class="card-arrow" aria-hidden="true">↗</span>
+                    </div>
+                    <h3 class="card-title">{plugin.name}</h3>
+                    <p class="card-desc">{plugin.description}</p>
+                    <div class="card-meta">
+                      <span class="version">v{plugin.version}</span>
+                      <span class="card-badge">{plugin.language ?? "Unknown"}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p class="mono">No Neovim plugins matched the catalog rules yet.</p>
+            )}
+          </div>
+        </section>
+
+        <section id="agent-skills" class="chapter domain--skills" aria-label="Agent skills">
+          <div class="container">
+            <SectionHeader
+              chapter="03"
+              title="Agent Skills"
+              subtitle="Portable instruction sets for coding agents — generated from the upstream SKILL.md sources."
+              count={skills.length}
+              syncLabel={`synced ${formattedSkillsGeneratedAt}`}
+            />
+            {skills.length > 0 ? (
+              <div class="domain-grid domain-grid--dense">
+                {skills.map((skill, i) => (
+                  <a href={`/skills/${skill.slug}/`} class="catalog-card magenta-card" data-reveal-card>
+                    <div class="card-top">
+                      <span class="card-index">{padIndex(i + 1)}</span>
+                      <span class="card-arrow" aria-hidden="true">↗</span>
+                    </div>
+                    <h3 class="card-title">{skill.name}</h3>
+                    <p class="card-desc">{skill.description}</p>
+                    <div class="card-meta">
+                      <span class="version">v{skill.version}</span>
+                      <span class="card-badge">{skill.maturity}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p class="mono">No agent skills are published yet.</p>
+            )}
+          </div>
+        </section>
+
+        <section id="public-templates" class="chapter domain--templates" aria-label="Public templates">
+          <div class="container">
+            <SectionHeader
+              chapter="04"
+              title="Public Templates"
+              subtitle="Public GitHub repositories marked as templates — scaffolding for your next project."
+              count={templates.length}
+              syncLabel={`synced ${formattedTemplatesGeneratedAt}`}
+            />
+            {templates.length > 0 ? (
+              <div class="domain-grid">
+                {templates.map((template, i) => (
+                  <a href={`/templates/${template.slug}/`} class="catalog-card orange-card" data-reveal-card>
+                    <div class="card-top">
+                      <span class="card-index">{padIndex(i + 1)}</span>
+                      <span class="card-arrow" aria-hidden="true">↗</span>
+                    </div>
+                    <h3 class="card-title">{template.name}</h3>
+                    <p class="card-desc">{template.description}</p>
+                    <div class="card-meta">
+                      <span class="version">{template.repository}</span>
+                      <span class="card-badge">{template.language ?? "Unknown"}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p class="mono">No public templates matched the current GitHub filters yet.</p>
+            )}
+          </div>
+        </section>
+      </div>
+    </div>
   </div>
 </Layout>

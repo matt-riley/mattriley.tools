@@ -31,3 +31,6 @@ package-lock.json
 # Playwright artifacts (browser binaries live in caches, not the repo)
 playwright-report/
 test-results/
+
+# local pnpm store cache
+.pnpm-store/

@@ -1,19 +1,25 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { splitWords } from "../utils/text";
 
 const title = "Page not found";
 const description = "The page you're looking for doesn't exist on mattriley.tools. Return to the catalog to browse available tools, plugins, skills, and templates.";
 ---
 
 <Layout title={title} description={description} noindex={true}>
-  <main class="not-found-page vibrant-detail-page">
-    <h1>Page not found</h1>
-    <p style="font-size: 2rem; font-weight: 900; text-transform: uppercase; max-width: 40rem; margin: 0 auto 2rem;">
-      The page you're looking for doesn't exist or has been moved.
-    </p>
-    <p style="font-size: 1.25rem; font-weight: 600; max-width: 40rem;">
-      Try browsing the catalog below or head back to the homepage.
-    </p>
-    <a href="/" class="home-link">← Back to Catalog</a>
-  </main>
+  <div data-reveal-scope>
+    <main class="not-found">
+      <div class="container">
+        <h1 data-reveal aria-label="Page not found" set:html={splitWords("Page not found.")}></h1>
+        <p>
+          The page you're looking for doesn't exist or has been moved. The index is
+          still fully stocked.
+        </p>
+        <a class="btn-primary" href="/">
+          <span>Back to the catalog</span>
+          <span class="arrow" aria-hidden="true">↓</span>
+        </a>
+      </div>
+    </main>
+  </div>
 </Layout>

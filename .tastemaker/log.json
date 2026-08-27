@@ -1,0 +1,18 @@
+[
+  {
+    "date": "2026-08-26",
+    "project": "mattriley.tools redesign",
+    "macrostructure": "Editorial Index (chapter-anchored catalog)",
+    "archetypes": {
+      "nav": "sparse top bar — mono wordmark, numbered chapter links, hairline bottom border",
+      "hero": "split editorial hero — stacked display headline (3 lines) + data terminal panel + 2 CTAs",
+      "sections": "ruled chapter headers with mono counters (01–04)",
+      "cards": "hairline catalog cards, accent tick on hover, index numbers",
+      "cta": "text-on-ink primary + bordered ghost",
+      "footer": "giant wordmark + index + mono legal line"
+    },
+    "rotation": "previous build was neon-brutalist single-column; now dark editorial-technical with asymmetrical hero and 4 ruled chapters",
+    "mood": "technical",
+    "mode": "dark"
+  }
+]

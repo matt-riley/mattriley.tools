@@ -47,19 +47,30 @@ const jsonld = {
   ogType="article"
 >
   <Fragment slot="metadata">
-    <div>Version: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{tool.version}</span></div>
-    <div>Binaries: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{Number(tool.binaryNames.length)}</span></div>
-    <div>Platforms: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{Number(tool.platforms.length)}</span></div>
-    <div>License: <span style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem;">{tool.license ?? "Undeclared"}</span></div>
-    {tool.homepage && <div>Homepage: <a href={tool.homepage} target="_blank" rel="noopener noreferrer" style="background: #000; color: #00E5FF; padding: 0.25rem 0.5rem; text-decoration: none;">Link ↗</a></div>}
+    <div><span class="key">Version:</span> <span class="value">{tool.version}</span></div>
+    <div><span class="key">Binaries:</span> <span class="value">{Number(tool.binaryNames.length)}</span></div>
+    <div><span class="key">Platforms:</span> <span class="value">{Number(tool.platforms.length)}</span></div>
+    <div><span class="key">License:</span> <span class="value">{tool.license ?? "Undeclared"}</span></div>
+    {tool.homepage && (
+      <div><a href={tool.homepage} target="_blank" rel="noopener noreferrer">Homepage ↗</a></div>
+    )}
   </Fragment>
 
   <Fragment slot="extra">
-    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4rem;">
-      <p style="margin-bottom: 1rem;">Install:</p>
-      <code style="background: #000; color: #00E5FF; padding: 1rem 1.5rem; display: block; border: 4px solid #000;">
-        {tool.installCommand}
-      </code>
+    <div class="install-panel">
+      <p class="install-label">Install</p>
+      <div class="install-block">
+        <span class="prompt" aria-hidden="true">$</span>
+        <code>{tool.installCommand}</code>
+        <button
+          class="copy-btn"
+          type="button"
+          data-copy={tool.installCommand}
+          aria-label={`Copy install command for ${tool.name}`}
+        >
+          <span data-copy-label>Copy</span>
+        </button>
+      </div>
     </div>
   </Fragment>
 </CatalogDetail>

@@ -18,14 +18,25 @@ A public GitHub repository marked as a template for scaffolding new projects.
 
 ## Visual Language
 
-Each domain has a distinct visual identity rather than being merged into a generic "Project" abstraction. The items are presented as massive, typography-driven cards on the catalog, and their detail pages are intensely vibrant.
+### "Engineered Index" (2026 redesign)
 
-**Critical constraint**: No gradients. All colors must be solid, unapologetic blocks of color to maintain a bold, brutalist/modern edge.
+Dark editorial-technical system: the catalog reads as a typeset index of
+instruments. Near-black surfaces, hairline grid traces, oversized Space Grotesk
+display type, JetBrains Mono utility labels, and one restrained accent per
+domain. Motion is Lenis + GSAP ScrollTrigger only (masked word reveals,
+staggered card entrances, count-ups) and fully collapses under
+`prefers-reduced-motion`. No WebGL; the hero visual is an honest data-driven
+terminal panel fed by the generated sync timestamps.
 
-- **Homebrew Tools**: Electric Blue / Cyan
-- **Neovim Plugins**: Neon Green
-- **Agent Skills**: Hot Pink / Magenta
-- **Public Templates**: Bright Yellow / Orange
+- **Homebrew Tools**: Cyan `#5AD2F2`
+- **Neovim Plugins**: Green `#4DE08A`
+- **Agent Skills**: Magenta `#F26BD6`
+- **Public Templates**: Orange `#FF9248`
+
+Tokens live in `src/styles/global.css` (contrast-verified: text/bg 16.9:1,
+muted/bg 7.2:1, accents on bg ≥ 11:1). The old neon-brutalist palette and the
+"no gradients" constraint are superseded; accents are used sparingly — markers,
+numbers, hover lines — never as large fills.
 
 ## Relationships
 

@@ -1,0 +1,28 @@
+---
+import { padIndex, splitWords } from "../utils/text";
+
+interface Props {
+  chapter: string;
+  title: string;
+  subtitle: string;
+  count: number;
+  syncLabel: string;
+}
+
+const { chapter, title, subtitle, count, syncLabel } = Astro.props;
+---
+
+<header class="chapter-head">
+  <span class="chapter-no" aria-hidden="true">{chapter}</span>
+  <div class="chapter-title">
+    <h2 data-reveal aria-label={title} set:html={splitWords(title)}></h2>
+    <p class="chapter-sub">{subtitle}</p>
+  </div>
+  <div class="chapter-meta">
+    <span class="count">
+      <span data-count={count}>{count}</span>
+      <span class="unit">entries</span>
+    </span>
+    <span class="sync">{syncLabel}</span>
+  </div>
+</header>
