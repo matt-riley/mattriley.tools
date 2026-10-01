@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { parse } from "yaml";
 
 import ciWorkflowSource from "../.github/workflows/ci.yml?raw";
 import syncWorkflowSource from "../.github/workflows/sync-tools-data.yml?raw";
@@ -6,9 +7,32 @@ import miseSource from "../mise.toml?raw";
 import pnpmWorkspaceSource from "../pnpm-workspace.yaml?raw";
 
 describe("CI workflow", () => {
+  it("explicitly runs full CI after bot-authored data syncs", () => {
+    const ci = parse(ciWorkflowSource);
+    const sync = parse(syncWorkflowSource).jobs.sync;
+    expect(ci.on).toHaveProperty("workflow_dispatch");
+    expect(ci.jobs.deploy.needs).toEqual(["ci", "generated-data"]);
+    expect(ci.jobs.deploy.if).toBe(
+      "(github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'",
+    );
+    expect(sync.permissions.actions).toBe("write");
+    const steps = sync.steps;
+    const commit = steps.findIndex(
+      (step: { name: string }) => step.name === "Commit updated site data",
+    );
+    const dispatch = steps.findIndex(
+      (step: { name: string }) => step.name === "Test and deploy synced main",
+    );
+    expect(dispatch).toBeGreaterThan(commit);
+    expect(steps[dispatch].if).toBeUndefined();
+    expect(steps[dispatch].env.GH_TOKEN).toBe("${{ github.token }}");
+    expect(steps[dispatch].run).toBe(
+      'gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref main',
+    );
+  });
   it("separates deployment dispatch and private tool reading credentials", () => {
     expect(ciWorkflowSource).toContain(
-      "matt-riley/matt-riley-ci/.github/workflows/request-app-deploy.yml@2aedbf6107ff792f9dd41b9c9074dc4801b5888c",
+      "matt-riley/matt-riley-ci/.github/workflows/request-app-deploy.yml@bebb9c178f368d8a3ee976d24f4d4dc50b4b88c4",
     );
     expect(ciWorkflowSource).toContain("dispatch-app-id: ${{ vars.INFRA_DISPATCH_APP_ID }}");
     expect(ciWorkflowSource).toContain("secrets.INFRA_DISPATCH_PRIVATE_KEY");
