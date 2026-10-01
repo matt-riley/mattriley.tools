@@ -35,9 +35,9 @@
   temporary paths, regenerates all four data files, and commits them if they
   changed.
 - `.github/workflows/ci.yml` uses the shared `matt-riley/matt-riley-ci` Node CI
-  workflow, runs a generated-data freshness check, and calls the local
-  `.github/workflows/request-infra-deploy.yml` reusable workflow for deploy
-  requests on `main` pushes.
+  workflow, runs a generated-data freshness check, and calls the shared public
+  `matt-riley/matt-riley-ci/.github/workflows/request-app-deploy.yml` workflow
+  with dedicated dispatch credentials on `main` pushes.
 
 ## Conventions
 
