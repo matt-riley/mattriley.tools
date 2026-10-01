@@ -8,7 +8,7 @@ import pnpmWorkspaceSource from "../pnpm-workspace.yaml?raw";
 describe("CI workflow", () => {
   it("separates deployment dispatch and private tool reading credentials", () => {
     expect(ciWorkflowSource).toContain(
-      "matt-riley/matt-riley-ci/.github/workflows/request-app-deploy.yml@d59f89f6a5644b10b8478b20ddec02289431b8ee",
+      "matt-riley/matt-riley-ci/.github/workflows/request-app-deploy.yml@2aedbf6107ff792f9dd41b9c9074dc4801b5888c",
     );
     expect(ciWorkflowSource).toContain("dispatch-app-id: ${{ vars.INFRA_DISPATCH_APP_ID }}");
     expect(ciWorkflowSource).toContain("secrets.INFRA_DISPATCH_PRIVATE_KEY");
