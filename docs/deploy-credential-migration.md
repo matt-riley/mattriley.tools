@@ -1,0 +1,12 @@
+# Deployment credential migration
+
+This change depends on the coordinated infrastructure migration. Before merging:
+
+1. Install a dedicated dispatch GitHub App on `matt-riley/infra`, granting only repository contents write (required by the dispatch API). It must not have Actions or Secrets administration permission.
+2. Set this repository's `INFRA_DISPATCH_APP_ID` variable and `INFRA_DISPATCH_PRIVATE_KEY` secret to that App. The infra administrator App key must never be distributed to source repositories.
+3. Configure infra's separate artifact-reader App to read this source repository's contents and Actions, then complete the infra migration review before merging this caller.
+4. Remove the legacy source `APP_ID` variable and `PRIVATE_KEY` secret only after confirming no remaining consumer uses them. Verify a successful production-branch CI dispatch and the receiver's exact revision validation.
+
+The reusable workflow is pinned to public `matt-riley-ci` commit `2aedbf6107ff792f9dd41b9c9074dc4801b5888c`. This PR neither creates Apps nor changes live secrets or deployments.
+
+The scheduled data sync additionally requires `TOOLS_READER_APP_ID` and `TOOLS_READER_PRIVATE_KEY` from a dedicated App installed only on the private tool repositories it reads, with contents read permission. Its token cannot dispatch deployments or write repositories. The sync still uses this repository's own `GITHUB_TOKEN` to push generated data; external checkouts do not retain credentials.

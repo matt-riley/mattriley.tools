@@ -117,9 +117,9 @@ pnpm format:check       # Verify formatting
 
 ## Automatic updates
 
-`.github/workflows/sync-tools-data.yml` syncs site data on a schedule (every 6 hours) and can also be triggered manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap and `agent-skills` catalog, uses the repo's existing GitHub App credentials (`vars.APP_ID` and `secrets.PRIVATE_KEY`) to identify any private tap-backed repositories so they can be excluded from the published site, regenerates and formats generated catalog outputs, and commits if any of those generated outputs changed.
+`.github/workflows/sync-tools-data.yml` syncs site data on a schedule (every 6 hours) and can also be triggered manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap and `agent-skills` catalog, uses dedicated read-only tool-reader credentials (`vars.TOOLS_READER_APP_ID` and `secrets.TOOLS_READER_PRIVATE_KEY`) to identify any private tap-backed repositories so they can be excluded from the published site, regenerates and formats generated catalog outputs, and commits if any of those generated outputs changed using this repository’s own `GITHUB_TOKEN`. The tool-reader App cannot push generated data or dispatch deployments.
 
-Deployment remains intentionally undecided; the site output is plain static Astro so hosting can be chosen later.
+Successful production CI requests deployment through the shared workflow using separate `INFRA_DISPATCH_APP_ID` / `INFRA_DISPATCH_PRIVATE_KEY` credentials. See [the migration checklist](docs/deploy-credential-migration.md) before changing the configured Apps or removing legacy secrets.
 
 ## License
 

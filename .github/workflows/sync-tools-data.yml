@@ -23,10 +23,10 @@ jobs:
 
       - name: Validate GitHub App configuration
         env:
-          APP_ID: ${{ vars.APP_ID }}
+          APP_ID: ${{ vars.TOOLS_READER_APP_ID }}
         run: |
           if [ -z "$APP_ID" ]; then
-            echo "Repository variable APP_ID is required." >&2
+            echo "Repository variable TOOLS_READER_APP_ID is required." >&2
             exit 1
           fi
 
@@ -34,21 +34,24 @@ jobs:
         id: tool-readme-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
-          client-id: ${{ vars.APP_ID }}
+          app-id: ${{ vars.TOOLS_READER_APP_ID }}
           owner: ${{ github.repository_owner }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
+          private-key: ${{ secrets.TOOLS_READER_PRIVATE_KEY }}
+          permission-contents: read
 
       - name: Check out Homebrew tap
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           repository: matt-riley/homebrew-tools
           path: tap-source
+          persist-credentials: false
 
       - name: Check out agent skills catalog
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           repository: matt-riley/agent-skills
           path: agent-skills-source
+          persist-credentials: false
 
       - name: Enable Corepack
         run: corepack enable

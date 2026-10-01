@@ -1,10 +1,26 @@
 import { describe, expect, it } from "vitest";
 
 import ciWorkflowSource from "../.github/workflows/ci.yml?raw";
+import syncWorkflowSource from "../.github/workflows/sync-tools-data.yml?raw";
 import miseSource from "../mise.toml?raw";
 import pnpmWorkspaceSource from "../pnpm-workspace.yaml?raw";
 
 describe("CI workflow", () => {
+  it("separates deployment dispatch and private tool reading credentials", () => {
+    expect(ciWorkflowSource).toContain(
+      "matt-riley/matt-riley-ci/.github/workflows/request-app-deploy.yml@2aedbf6107ff792f9dd41b9c9074dc4801b5888c",
+    );
+    expect(ciWorkflowSource).toContain("dispatch-app-id: ${{ vars.INFRA_DISPATCH_APP_ID }}");
+    expect(ciWorkflowSource).toContain("secrets.INFRA_DISPATCH_PRIVATE_KEY");
+    expect(syncWorkflowSource).toContain("vars.TOOLS_READER_APP_ID");
+    expect(syncWorkflowSource).toContain("secrets.TOOLS_READER_PRIVATE_KEY");
+    expect(syncWorkflowSource).toContain("permission-contents: read");
+    for (const source of [ciWorkflowSource, syncWorkflowSource]) {
+      expect(source).not.toContain("vars.APP_ID");
+      expect(source).not.toContain("secrets.PRIVATE_KEY");
+    }
+  });
+
   it("keeps package read permission on the shared workflow job", () => {
     expect(ciWorkflowSource).toContain("packages: read");
     expect(ciWorkflowSource).not.toContain("task-env: |");
