@@ -17,7 +17,9 @@ export default defineConfig({
   webServer: {
     // Reuse a stale-but-present dist if it exists (CI builds before test);
     // otherwise build fresh. Avoids a redundant second build in CI.
-    command: "[ -d dist ] || pnpm exec astro build; pnpm exec astro preview --port 4321",
+    // Keep the preview process in Playwright's process group so teardown can stop it.
+    command:
+      "[ -d dist ] || pnpm exec astro build; exec node ./node_modules/astro/bin/astro.mjs preview --port 4321",
     port: 4321,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
