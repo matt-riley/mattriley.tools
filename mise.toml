@@ -35,6 +35,7 @@ description = "Run unit (vitest) and mobile-layout (Playwright) tests"
 run = "pnpm run test && pnpm run test:mobile"
 
 [tasks.test-mobile]
+depends = ["install"]
 description = "Run only the Playwright mobile-layout tests (builds + serves dist first)"
 run = "pnpm run test:mobile"
 
