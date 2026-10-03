@@ -31,8 +31,8 @@ describe("CI workflow", () => {
     );
   });
   it("separates deployment dispatch and private tool reading credentials", () => {
-    expect(ciWorkflowSource).toContain(
-      "matt-riley/matt-riley-ci/.github/workflows/request-app-deploy.yml@5ba0a5d81682fec26e6089c7ce2bab6505a85923",
+    expect(parse(ciWorkflowSource).jobs.deploy.uses).toMatch(
+      /^matt-riley\/matt-riley-ci\/\.github\/workflows\/request-app-deploy\.yml@[a-f0-9]{40}$/,
     );
     expect(ciWorkflowSource).toContain("dispatch-app-id: ${{ vars.INFRA_DISPATCH_APP_ID }}");
     expect(ciWorkflowSource).toContain("secrets.INFRA_DISPATCH_PRIVATE_KEY");
