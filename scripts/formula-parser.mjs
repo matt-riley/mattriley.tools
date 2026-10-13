@@ -1,36 +1,58 @@
 import { basename } from "node:path";
 
-const BINARY_PATTERN = /bin\.install\s+"([^"]+)"/g;
-const DESC_PATTERN = /^\s*desc\s+"([^"]+)"/m;
-const HOMEPAGE_PATTERN = /^\s*homepage\s+"([^"]+)"/m;
-const LICENSE_PATTERN = /^\s*license\s+"([^"]+)"/m;
-const VERSION_PATTERN = /^\s*version\s+"([^"]+)"/m;
+// Formulas come from several publishers, so accept either Ruby quote style.
+const QUOTED = String.raw`(["'])(.*?)\1`;
+const BINARY_PATTERN = new RegExp(String.raw`bin\.install\s+${QUOTED}`, "g");
+const DESC_PATTERN = new RegExp(String.raw`^\s*desc\s+${QUOTED}\s*$`, "m");
+const HOMEPAGE_PATTERN = new RegExp(String.raw`^\s*homepage\s+${QUOTED}\s*$`, "m");
+const LICENSE_PATTERN = new RegExp(String.raw`^\s*license\s+${QUOTED}\s*$`, "m");
+const VERSION_PATTERN = new RegExp(String.raw`^\s*version\s+${QUOTED}\s*$`, "m");
+const URL_PATTERN = new RegExp(String.raw`^\s*url\s+${QUOTED}`, "gm");
+
+// Release asset names carry the platform, e.g. tool_Darwin_x86_64.tar.gz,
+// tool_linux_arm64.tar.gz or tool-aarch64-macos.tar.gz.
+const OS_PATTERN = /(?<![a-z])(darwin|macos|linux)(?![a-z])/;
+const ARCH_PATTERN = /(?<![a-z0-9])(x86_64|amd64|aarch64|arm64)(?![a-z0-9])/;
+const OS_KEYS = { darwin: "mac", macos: "mac", linux: "linux" };
+const ARCH_KEYS = { x86_64: "amd64", amd64: "amd64", aarch64: "arm64", arm64: "arm64" };
 
 function extractFirst(pattern, content) {
-  return content.match(pattern)?.[1] ?? null;
+  return content.match(pattern)?.[2] ?? null;
 }
 
 function extractAll(pattern, content) {
-  return [...content.matchAll(pattern)].map((match) => match[1]);
+  return [...content.matchAll(pattern)].map((match) => match[2]);
 }
 
 function detectPlatforms(content) {
+  const targets = new Set();
+
+  for (const url of extractAll(URL_PATTERN, content)) {
+    const asset = basename(url).toLowerCase();
+    const os = asset.match(OS_PATTERN)?.[1];
+    const arch = asset.match(ARCH_PATTERN)?.[1];
+
+    if (os && arch) {
+      targets.add(`${OS_KEYS[os]}:${ARCH_KEYS[arch]}`);
+    }
+  }
+
   const macArchitectures = [];
   const linuxArchitectures = [];
 
-  if (/(Darwin_x86_64|darwin_amd64)/.test(content)) {
+  if (targets.has("mac:amd64")) {
     macArchitectures.push("Intel");
   }
 
-  if (/(Darwin_arm64|darwin_arm64)/.test(content)) {
+  if (targets.has("mac:arm64")) {
     macArchitectures.push("Apple Silicon");
   }
 
-  if (/(Linux_x86_64|linux_amd64)/.test(content)) {
+  if (targets.has("linux:amd64")) {
     linuxArchitectures.push("x86_64");
   }
 
-  if (/(Linux_arm64|linux_arm64)/.test(content)) {
+  if (targets.has("linux:arm64")) {
     linuxArchitectures.push("arm64");
   }
 
