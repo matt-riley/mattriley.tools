@@ -181,7 +181,7 @@ importers:
         version: 5.3.0
       '@jdevalk/astro-seo-graph':
         specifier: ^2.0.0
-        version: 2.2.0(astro@7.3.6(@types/node@24.13.3)(yaml@2.9.1))(typescript@6.0.3)
+        version: 2.2.0(astro@7.3.8(@types/node@24.13.3)(esbuild@0.28.1)(yaml@2.9.1))(typescript@6.0.3)
       gsap:
         specifier: ^3.15.0
         version: 3.15.0
@@ -209,7 +209,7 @@ importers:
         version: 2.16.2
       astro:
         specifier: ^7.0.2
-        version: 7.3.6(@types/node@24.13.3)(yaml@2.9.1)
+        version: 7.3.8(@types/node@24.13.3)(esbuild@0.28.1)(yaml@2.9.1)
       oxfmt:
         specifier: ^0.71.0
         version: 0.71.0
@@ -1342,8 +1342,8 @@ packages:
     resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
     engines: {node: '>=12'}
 
-  astro@7.3.6:
-    resolution: {integrity: sha512-3q0MKxfE4cpr5IoQ9EWrN0gwxeT5tkCaSVe3SrGlLR5fnTIywHqjVqFokQkQiZexfwpNtB9dtBdUcXV9FuD+4w==}
+  astro@7.3.8:
+    resolution: {integrity: sha512-LHzDHSaV+YzZiR3EFndDYTLLeNeuMtP1qX1FLcCNUUHOCqTTIWPczy2UV3zpA5VqvJe5cWZolqM9Z8JFqR2i9w==}
     engines: {node: '>=22.12.0', npm: '>=9.6.5', pnpm: '>=7.1.0'}
     hasBin: true
     peerDependencies:
@@ -1883,9 +1883,6 @@ packages:
   p-timeout@7.0.1:
     resolution: {integrity: sha512-AxTM2wDGORHGEkPCt8yqxOTMgpfbEHqF51f/5fJCmwFC3C/zNcGT63SymH2ttOAaiIws2zVg4+izQCjrakcwHg==}
     engines: {node: '>=20'}
-
-  package-manager-detector@1.7.0:
-    resolution: {integrity: sha512-xg1eHpwYL/D/HEdWw2goFZP6vV0FH7W+PZ5rFkGjdIDLtxq7EkzBUeT3m+lndYCt8wKbmofUu1MUdMCXkCk9ZQ==}
 
   package-manager-detector@1.9.0:
     resolution: {integrity: sha512-zAMfbta9nPA8AKkA4WdmNAT8R8s6Dk0/xwPsqNnRidMFcLo1YkLuPDTgs2f64XdzS8vbLNnoJ+uUIkgbz7oRHA==}
@@ -2602,7 +2599,7 @@ snapshots:
       ci-info: 4.4.0
       dset: 3.1.4
       is-docker: 4.0.0
-      package-manager-detector: 1.7.0
+      package-manager-detector: 1.9.0
 
   '@astrojs/yaml2ts@0.2.4':
     dependencies:
@@ -2912,10 +2909,10 @@ snapshots:
   '@img/sharp-win32-x64@0.35.5':
     optional: true
 
-  '@jdevalk/astro-seo-graph@2.2.0(astro@7.3.6(@types/node@24.13.3)(yaml@2.9.1))(typescript@6.0.3)':
+  '@jdevalk/astro-seo-graph@2.2.0(astro@7.3.8(@types/node@24.13.3)(esbuild@0.28.1)(yaml@2.9.1))(typescript@6.0.3)':
     dependencies:
       '@jdevalk/seo-graph-core': 0.7.0(typescript@6.0.3)
-      astro: 7.3.6(@types/node@24.13.3)(yaml@2.9.1)
+      astro: 7.3.8(@types/node@24.13.3)(esbuild@0.28.1)(yaml@2.9.1)
       schema-dts: 2.0.0(typescript@6.0.3)
       zod: 4.4.3
     transitivePeerDependencies:
@@ -3333,7 +3330,7 @@ snapshots:
 
   assertion-error@2.0.1: {}
 
-  astro@7.3.6(@types/node@24.13.3)(yaml@2.9.1):
+  astro@7.3.8(@types/node@24.13.3)(esbuild@0.28.1)(yaml@2.9.1):
     dependencies:
       '@astrojs/compiler-rs': 0.5.1
       '@astrojs/internal-helpers': 0.12.0
@@ -3353,7 +3350,6 @@ snapshots:
       diff: 9.0.0
       dset: 3.1.4
       es-module-lexer: 3.0.3
-      esbuild: 0.28.1
       find-proc: 0.2.0
       flattie: 1.1.1
       fontace: 0.4.1
@@ -3409,6 +3405,7 @@ snapshots:
       - '@vitejs/devtools'
       - aws4fetch
       - db0
+      - esbuild
       - idb-keyval
       - ioredis
       - jiti
@@ -3595,6 +3592,7 @@ snapshots:
       '@esbuild/win32-arm64': 0.28.1
       '@esbuild/win32-ia32': 0.28.1
       '@esbuild/win32-x64': 0.28.1
+    optional: true
 
   escalade@3.2.0: {}
 
@@ -3918,8 +3916,6 @@ snapshots:
       p-timeout: 7.0.1
 
   p-timeout@7.0.1: {}
-
-  package-manager-detector@1.7.0: {}
 
   package-manager-detector@1.9.0: {}
 
