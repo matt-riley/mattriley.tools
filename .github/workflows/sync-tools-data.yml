@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Check out site repo
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Validate GitHub App configuration
         env:
@@ -36,7 +36,7 @@ jobs:
 
       - name: Create GitHub App token for private tool repos
         id: tool-readme-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3
         with:
           app-id: ${{ vars.TOOLS_READER_APP_ID }}
           owner: ${{ github.repository_owner }}
@@ -44,14 +44,14 @@ jobs:
           permission-contents: read
 
       - name: Check out Homebrew tap
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: matt-riley/homebrew-tools
           path: tap-source
           persist-credentials: false
 
       - name: Check out agent skills catalog
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: matt-riley/agent-skills
           path: agent-skills-source
