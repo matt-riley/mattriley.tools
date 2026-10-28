@@ -5,5 +5,12 @@
     "github>matt-riley/renovate-config:node",
     "github>matt-riley/renovate-config:astro",
     "github>matt-riley/renovate-config:github-actions"
+  ],
+  "packageRules": [
+    {
+      "description": "Held below 7 because astro check does not support TypeScript 7 yet. Remove once Astro supports TypeScript 7.",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7"
+    }
   ]
 }
