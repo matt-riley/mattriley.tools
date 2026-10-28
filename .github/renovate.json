@@ -9,9 +9,7 @@
   "packageRules": [
     {
       "description": "Held below 7 because astro check does not support TypeScript 7 yet. Remove once Astro supports TypeScript 7.",
-      "matchPackageNames": [
-        "typescript"
-      ],
+      "matchPackageNames": ["typescript"],
       "allowedVersions": "<7"
     }
   ]
