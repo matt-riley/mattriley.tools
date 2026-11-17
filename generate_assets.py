@@ -24,6 +24,8 @@ magick(
     "-pointsize", "20", "-annotate", "+40+602", "ROOT STUDY   /   DEADWOOD",
     "-strip", "-depth", "8", "og-default.png",
 )
-magick("-background", "none", "-density", "256", "favicon.svg", "-resize", "180x180",
+magick("-background", "none", "-density", "256", "../src/assets/under-pressure.svg", "-resize", "180x180",
        "-strip", "-depth", "8", "apple-touch-icon.png")
 magick("apple-touch-icon.png", "-define", "icon:auto-resize=48,32,16", "favicon.ico")
+magick("apple-touch-icon.png", "-resize", "32x32", "-strip", "-depth", "8",
+       "../src/assets/under-pressure-32.png")

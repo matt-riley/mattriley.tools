@@ -1,6 +1,8 @@
 ---
 import Seo from "@jdevalk/astro-seo-graph/Seo.astro";
 import "@fontsource-variable/jetbrains-mono";
+import faviconSvg from "../assets/under-pressure.svg?url";
+import faviconPng from "../assets/under-pressure-32.png?url";
 import "../styles/global.css";
 
 interface Props {
@@ -24,7 +26,8 @@ const agentHintHtml = agentHint
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f4f0e6" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={faviconPng} sizes="32x32" type="image/png" />
+    <link rel="icon" href={faviconSvg} sizes="any" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="preload" href="/fonts/anton-latin.woff2" as="font" type="font/woff2" crossorigin />
