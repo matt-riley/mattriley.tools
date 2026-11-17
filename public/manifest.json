@@ -1,11 +1,11 @@
 {
   "name": "mattriley.tools",
   "short_name": "mattriley",
-  "description": "Curated tools, plugins, skills, and templates for modern development.",
+  "description": "Under Pressure, a print exhibition of software tools by Matt Riley.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#f4f0e6",
+  "theme_color": "#f4f0e6",
   "icons": [
     {
       "src": "/apple-touch-icon.png",

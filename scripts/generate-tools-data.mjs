@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -145,179 +145,6 @@ function readPathFromArgs(argv, optionName) {
 
 function readTapPathFromArgs(argv) {
   return readPathFromArgs(argv, "--tap-path");
-}
-
-function readSkillsPathFromArgs(argv) {
-  return readPathFromArgs(argv, "--skills-path");
-}
-
-function parseYamlScalarValue(rawValue) {
-  const value = rawValue.replace(/\s+#.*$/u, "").trim();
-
-  if (
-    (value.startsWith('"') && value.endsWith('"')) ||
-    (value.startsWith("'") && value.endsWith("'"))
-  ) {
-    return value.slice(1, -1);
-  }
-
-  return value;
-}
-
-function appendYamlContinuation(container, key, rawValue) {
-  const previous = typeof container[key] === "string" ? container[key] : "";
-  const next = parseYamlScalarValue(rawValue);
-  container[key] = `${previous} ${next}`.trim();
-}
-
-function parseYamlPair(line) {
-  const pair = /^([A-Za-z0-9_-]+):(.*)$/u.exec(line);
-
-  return pair ? { key: pair[1], rawValue: pair[2] } : null;
-}
-
-function setTopLevelYamlValue(parsed, pair) {
-  const value = parseYamlScalarValue(pair.rawValue);
-  parsed[pair.key] = value || {};
-
-  return pair.key;
-}
-
-function canSetNestedYamlValue(indent, pair, currentTopLevelKey, currentValue) {
-  return (
-    indent > 0 &&
-    pair !== null &&
-    currentTopLevelKey !== null &&
-    typeof currentValue === "object" &&
-    currentValue !== null
-  );
-}
-
-function setNestedYamlValue(currentValue, pair) {
-  currentValue[pair.key] = parseYamlScalarValue(pair.rawValue);
-
-  return pair.key;
-}
-
-function appendYamlValue(parsed, currentTopLevelKey, currentValue, currentNestedKey, trimmed) {
-  if (!currentTopLevelKey) {
-    return;
-  }
-
-  if (typeof currentValue === "object" && currentValue !== null && currentNestedKey) {
-    appendYamlContinuation(currentValue, currentNestedKey, trimmed);
-    return;
-  }
-
-  appendYamlContinuation(parsed, currentTopLevelKey, trimmed);
-}
-
-function parseSimpleYamlFrontmatter(frontmatter) {
-  const parsed = {};
-  let currentTopLevelKey = null;
-  let currentNestedKey = null;
-
-  for (const rawLine of frontmatter.split("\n")) {
-    const line = rawLine.trimEnd();
-    const trimmed = line.trim();
-
-    if (!trimmed) {
-      continue;
-    }
-
-    const indent = rawLine.length - rawLine.trimStart().length;
-    const pair = parseYamlPair(trimmed);
-
-    if (indent === 0 && pair) {
-      currentTopLevelKey = setTopLevelYamlValue(parsed, pair);
-      currentNestedKey = null;
-      continue;
-    }
-
-    const currentValue = currentTopLevelKey ? parsed[currentTopLevelKey] : null;
-
-    if (canSetNestedYamlValue(indent, pair, currentTopLevelKey, currentValue)) {
-      currentNestedKey = setNestedYamlValue(currentValue, pair);
-      continue;
-    }
-
-    appendYamlValue(parsed, currentTopLevelKey, currentValue, currentNestedKey, trimmed);
-  }
-
-  return parsed;
-}
-
-function parseSkillMarkdown(markdown, sourcePath) {
-  const frontmatterMatch = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/u.exec(markdown);
-
-  if (!frontmatterMatch) {
-    throw new Error(`Skill file ${sourcePath} must start with YAML frontmatter`);
-  }
-
-  return {
-    frontmatter: parseSimpleYamlFrontmatter(frontmatterMatch[1]),
-    body: frontmatterMatch[2].trimStart(),
-  };
-}
-
-function readString(value, fallback = null) {
-  return typeof value === "string" && value.trim().length > 0 ? value.trim() : fallback;
-}
-
-async function readAgentSkills(skillsRootPath) {
-  const skillsDir = join(skillsRootPath, "skills");
-  const entries = await readdir(skillsDir, { withFileTypes: true });
-  const skillDirs = entries
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort();
-
-  const skillEntries = await Promise.all(
-    skillDirs.map(async (slug) => {
-      const skillPath = join(skillsDir, slug, "SKILL.md");
-
-      // Skip directories that don't contain a SKILL.md (e.g. archived/)
-      try {
-        await stat(skillPath);
-      } catch {
-        return null;
-      }
-
-      const content = await readFile(skillPath, "utf8");
-      const { frontmatter, body } = parseSkillMarkdown(content, skillPath);
-      const metadata =
-        typeof frontmatter.metadata === "object" && frontmatter.metadata !== null
-          ? frontmatter.metadata
-          : {};
-      const sourceUrl = `https://github.com/${GITHUB_OWNER}/agent-skills/blob/main/skills/${slug}/SKILL.md`;
-      const rawUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/agent-skills/main/skills/${slug}/SKILL.md`;
-
-      return {
-        slug,
-        name: readString(frontmatter.name, slug),
-        description: readString(frontmatter.description, "No description provided."),
-        repository: `${GITHUB_OWNER}/agent-skills`,
-        sourceUrl,
-        rawUrl,
-        license: readString(frontmatter.license),
-        homepage: readString(frontmatter.homepage),
-        compatibility: readString(
-          frontmatter.compatibility,
-          "Agent Skills-compatible coding agents.",
-        ),
-        version: readString(metadata.version, "Unversioned"),
-        maturity: readString(metadata.maturity, "Unknown"),
-        readme: {
-          markdown: body,
-          htmlUrl: sourceUrl,
-          downloadUrl: rawUrl,
-          images: [],
-        },
-      };
-    }),
-  );
-
-  return skillEntries.filter((entry) => entry !== null);
 }
 
 export async function filterPublicToolsByRepository(tools, options = {}) {
@@ -498,22 +325,16 @@ async function writeGeneratedModule(
 
 async function main() {
   const explicitTapPath = readTapPathFromArgs(process.argv);
-  const explicitSkillsPath = readSkillsPathFromArgs(process.argv);
   const configuredTapPath = explicitTapPath ?? process.env.HOMEBREW_TAP_PATH;
-  const configuredSkillsPath = explicitSkillsPath ?? process.env.AGENT_SKILLS_PATH;
   const tapPath = configuredTapPath
     ? resolve(configuredTapPath)
     : resolve(process.cwd(), "../homebrew-tools");
-  const skillsPath = configuredSkillsPath
-    ? resolve(configuredSkillsPath)
-    : resolve(process.cwd(), "../agent-skills");
   const formulaDir = join(tapPath, "Formula");
   const dataDir = resolve(process.cwd(), "src/data");
   const publicReadmeImageDir = resolve(process.cwd(), "public/generated/readme-images");
   const toolsOutputPath = join(dataDir, "tools.generated.ts");
   const pluginsOutputPath = join(dataDir, "plugins.generated.ts");
   const templatesOutputPath = join(dataDir, "templates.generated.ts");
-  const skillsOutputPath = join(dataDir, "skills.generated.ts");
   const parsedTools = await readFormulas(formulaDir);
   const publicTools = await filterPublicToolsByRepository(parsedTools);
   const githubRepos = await fetchGitHubRepos(GITHUB_OWNER);
@@ -570,9 +391,8 @@ async function main() {
       ),
     })),
   );
-  const skills = await readAgentSkills(skillsPath);
   const generatedAt = new Date().toISOString();
-  const mirroredPaths = [...tools, ...plugins, ...templates, ...skills].flatMap((entry) =>
+  const mirroredPaths = [...tools, ...plugins, ...templates].flatMap((entry) =>
     entry.readme.images.map((image) => image.mirroredPath),
   );
 
@@ -591,7 +411,6 @@ async function main() {
       templates,
       generatedAt,
     ),
-    writeGeneratedModule(skillsOutputPath, "skillsGeneratedAt", "skills", skills, generatedAt),
   ]);
 
   console.log(`Generated ${tools.length} tools from ${formulaDir}`);
@@ -599,7 +418,6 @@ async function main() {
   console.log(
     `Generated ${templates.length} templates from GitHub repositories under ${GITHUB_OWNER}`,
   );
-  console.log(`Generated ${skills.length} agent skills from ${join(skillsPath, "skills")}`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

@@ -6,6 +6,7 @@ import sitemap, { ChangeFreqEnum } from "@astrojs/sitemap";
 // https://astro.build/config
 export default defineConfig({
   site: "https://mattriley.tools",
+  vite: { build: { assetsInlineLimit: 0 } },
   integrations: [
     seoGraph({
       validateH1: true,

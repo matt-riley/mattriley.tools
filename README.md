@@ -1,6 +1,6 @@
 # mattriley.tools
 
-> A static Astro site that lists Matt Riley's Homebrew tools, Neovim plugins, agent skills, and public template repositories.
+> Under Pressure is a print exhibition of Matt Riley’s Homebrew tools, Neovim plugins and public templates. Its interactive proofs and searchable index are built with Astro.
 
 ## Stack
 
@@ -17,13 +17,11 @@ The site renders from generated data files:
 - Source of truth for Homebrew tools: `homebrew-tools/Formula/*.rb`
 - Source of truth for template repos: public, non-archived `matt-riley/*` GitHub repositories where GitHub marks the repo as a template
 - Source of truth for Neovim plugins: public, non-archived `matt-riley/*` GitHub repositories whose names contain `.nvim`
-- Source of truth for agent skills: `agent-skills/skills/*/SKILL.md`
 - Generator: `scripts/generate-tools-data.mjs`
 - Generated artifacts:
   - `src/data/tools.generated.ts`
   - `src/data/templates.generated.ts`
   - `src/data/plugins.generated.ts`
-  - `src/data/skills.generated.ts`
   - `public/generated/readme-images/`
 
 `pnpm run generate:data` owns all generated outputs. It syncs README markdown into the
@@ -63,13 +61,6 @@ The generated template data currently focuses on:
 - last updated timestamp
 - language and topics
 
-The generated skill data currently focuses on:
-
-- skill directory slug and frontmatter name
-- description, compatibility, license, version, and maturity
-- upstream `SKILL.md` source and raw URLs
-- rendered `SKILL.md` instruction content with frontmatter stripped
-
 This repo assumes the tap's duplicate cask/formula issue is resolved elsewhere and that the site consumes the formula-only end state for the Homebrew catalog.
 
 ## Local development
@@ -79,7 +70,7 @@ From the repository root:
 ```bash
 export NODE_AUTH_TOKEN=<github-token-with-package-read-access>
 pnpm install
-pnpm run generate:data -- --tap-path ../homebrew-tools --skills-path ../agent-skills
+pnpm run generate:data -- --tap-path ../homebrew-tools
 pnpm dev
 ```
 
@@ -89,10 +80,10 @@ If your tap includes formulas whose homepages point at private GitHub repositori
 repositories from the published site, then refreshes mirrored README image assets under
 `public/generated/readme-images/` for the remaining public entries.
 
-If your tap or agent-skills checkout is somewhere else, point the generator at it explicitly:
+If your tap checkout is somewhere else, point the generator at it explicitly:
 
 ```bash
-pnpm run generate:data -- --tap-path /absolute/path/to/homebrew-tools --skills-path /absolute/path/to/agent-skills
+pnpm run generate:data -- --tap-path /absolute/path/to/homebrew-tools
 ```
 
 The repo now consumes the published Snurble design-system packages from GitHub Packages, so
@@ -105,7 +96,7 @@ the auth token into the user-level `~/.npmrc` at runtime. The install task prefe
 ## Commands
 
 ```bash
-pnpm run generate:data  # Regenerate generated catalog data from the tap, GitHub, and agent-skills checkout
+pnpm run generate:data  # Regenerate generated catalog data from the tap and GitHub
 pnpm dev                # Start local dev server
 pnpm build              # Run astro check and build static output
 pnpm preview            # Preview the production build locally
@@ -117,7 +108,7 @@ pnpm format:check       # Verify formatting
 
 ## Automatic updates
 
-`.github/workflows/sync-tools-data.yml` syncs site data whenever `homebrew-tools` changes a formula (the tap dispatches it with a dedicated site-dispatch App that has Actions write access to this repository only), on a schedule (every 6 hours) to catch upstream README, plugin and skill changes, and manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap and `agent-skills` catalog, uses dedicated read-only tool-reader credentials (`vars.TOOLS_READER_APP_ID` and `secrets.TOOLS_READER_PRIVATE_KEY`) to identify any private tap-backed repositories so they can be excluded from the published site, regenerates and formats generated catalog outputs, and commits if any of those generated outputs changed using this repository’s own `GITHUB_TOKEN`. The tool-reader App cannot push generated data or dispatch deployments.
+`.github/workflows/sync-tools-data.yml` syncs site data whenever `homebrew-tools` changes a formula (the tap dispatches it with a dedicated site-dispatch App that has Actions write access to this repository only), on a schedule (every 6 hours) to catch upstream README, plugin and template changes, and manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap, uses dedicated read-only tool-reader credentials (`vars.TOOLS_READER_APP_ID` and `secrets.TOOLS_READER_PRIVATE_KEY`) to identify any private tap-backed repositories so they can be excluded from the published site, regenerates and formats generated catalog outputs, and commits if any of those generated outputs changed using this repository’s own `GITHUB_TOKEN`. The tool-reader App cannot push generated data or dispatch deployments.
 
 Successful production CI requests deployment through the shared workflow using separate `INFRA_DISPATCH_APP_ID` / `INFRA_DISPATCH_PRIVATE_KEY` credentials. See [the migration checklist](docs/deploy-credential-migration.md) before changing the configured Apps or removing legacy secrets.
 

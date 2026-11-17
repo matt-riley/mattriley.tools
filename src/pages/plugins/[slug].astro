@@ -33,7 +33,6 @@ const jsonld = {
     "README content is synced from the plugin repository when available.",
   ]}
   jsonld={jsonld}
-  domainClass="vibrant-green"
   name={plugin.name}
   subtitle={plugin.description}
   generatedAt={pluginsGeneratedAt}
@@ -50,7 +49,7 @@ const jsonld = {
     <div><span class="key">Language:</span> <span class="value">{plugin.language ?? "Unknown"}</span></div>
     <div><span class="key">Topics:</span> <span class="value">{Number(plugin.topics.length)}</span></div>
     {plugin.homepage && (
-      <div><a href={plugin.homepage} target="_blank" rel="noopener noreferrer">Homepage ↗</a></div>
+      <div><a href={plugin.homepage} target="_blank" rel="noopener noreferrer">Homepage</a></div>
     )}
   </Fragment>
 

@@ -34,7 +34,6 @@ const jsonld = {
     "README content is synced from the linked GitHub repository when available.",
   ]}
   jsonld={jsonld}
-  domainClass="vibrant-cyan"
   name={tool.name}
   subtitle={tool.description}
   generatedAt={generatedAt}
@@ -52,7 +51,7 @@ const jsonld = {
     <div><span class="key">Platforms:</span> <span class="value">{Number(tool.platforms.length)}</span></div>
     <div><span class="key">License:</span> <span class="value">{tool.license ?? "Undeclared"}</span></div>
     {tool.homepage && (
-      <div><a href={tool.homepage} target="_blank" rel="noopener noreferrer">Homepage ↗</a></div>
+      <div><a href={tool.homepage} target="_blank" rel="noopener noreferrer">Homepage</a></div>
     )}
   </Fragment>
 

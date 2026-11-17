@@ -1,4 +1,5 @@
 ---
+import { plates } from "../data/exhibition";
 import Layout from "../layouts/Layout.astro";
 import { formatUtcTimestamp } from "../utils/date";
 import { renderReadme, type SyncedReadme } from "../utils/readme";
@@ -8,7 +9,6 @@ interface Props {
   description: string;
   agentHint: string[];
   jsonld: unknown;
-  domainClass: string;
   name: string;
   subtitle: string;
   generatedAt: string;
@@ -26,7 +26,6 @@ const {
   description,
   agentHint,
   jsonld,
-  domainClass,
   name,
   subtitle,
   generatedAt,
@@ -42,41 +41,34 @@ const {
 const formattedGeneratedAt = formatUtcTimestamp(generatedAt);
 const readmeHtml = renderReadme(readme);
 
-const domainMapping: Record<string, string> = {
-  "vibrant-cyan": "domain--tools",
-  "vibrant-green": "domain--plugins",
-  "vibrant-magenta": "domain--skills",
-  "vibrant-orange": "domain--templates",
-};
 const domainLabels: Record<string, string> = {
   tools: "Homebrew Tool",
   plugins: "Neovim Plugin",
-  skills: "Agent Skill",
   templates: "Public Template",
 };
-const domainClassApplied = domainMapping[domainClass] ?? "domain--tools";
+const plate = plates.find((p) => p.id === name && p.route === sectionAnchor);
 const domainLabel = domainLabels[sectionAnchor] ?? "Catalog entry";
 
 const breadcrumbList = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
-  "itemListElement": [
+  itemListElement: [
     {
       "@type": "ListItem",
-      "position": 1,
-      "name": "Home",
-      "item": "https://mattriley.tools/",
+      position: 1,
+      name: "Home",
+      item: "https://mattriley.tools/",
     },
     {
       "@type": "ListItem",
-      "position": 2,
-      "name": sectionTitle,
-      "item": `https://mattriley.tools/${sectionAnchor}/`,
+      position: 2,
+      name: "Tool index",
+      item: "https://mattriley.tools/#index",
     },
     {
       "@type": "ListItem",
-      "position": 3,
-      "name": name,
+      position: 3,
+      name: name,
     },
   ],
 };
@@ -90,36 +82,48 @@ const combinedJsonld = {
 <Layout title={title} description={description} agentHint={agentHint} jsonld={combinedJsonld} ogType={ogType}>
   <div data-reveal-scope>
     <main>
-      <div class={`detail-page ${domainClassApplied}`}>
+      <div class="detail-page">
         <div class="container">
-        <a href="/" class="back-link"><span class="arrow" aria-hidden="true">←</span>Back to catalog</a>
+          <a href="/#index" class="back-link">
+            <span class="arrow" aria-hidden="true">
+              ←
+            </span>
+            Back to tool index
+          </a>
 
-        <header>
-          <p class="detail-ribbon">{domainLabel} — {sectionTitle}</p>
-          <h1 data-reveal>{name}</h1>
-          <p class="detail-sub">{subtitle}</p>
+          <header>
+            {plate && <img class="detail-print" src={plate.image} alt={plate.alt} width="260" height="170" />}
+            <p class="detail-ribbon">{domainLabel}</p>
+            <h1 data-reveal>{name}</h1>
+            <p class="detail-sub">{subtitle}</p>
 
-          <div class="detail-meta">
-            <slot name="metadata" />
-          </div>
+            <div class="detail-meta">
+              <slot name="metadata" />
+            </div>
 
-          <slot name="extra" />
-        </header>
+            <slot name="extra" />
+          </header>
 
-        <section class="detail-main">
-          <h2>{sectionTitle}</h2>
-          {readme.markdown ? (
-            <div class="readme-content" set:html={readmeHtml} />
-          ) : (
-            <p class="mono">{fallbackText}</p>
-          )}
-        </section>
+          <section class="detail-main">
+            <h2>{sectionTitle}</h2>
+            {readme.markdown ? (
+              <div class="readme-content" set:html={readmeHtml} />
+            ) : (
+              <p class="mono">{fallbackText}</p>
+            )}
+          </section>
 
-        <footer class="detail-footer">
-          <p>Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time></p>
-          <p><a href={sourceHref} target="_blank" rel="noopener noreferrer">{sourceLabel}</a></p>
-        </footer>
-      </div>
+          <footer class="detail-footer">
+            <p>
+              Last synced: <time datetime={generatedAt}>{formattedGeneratedAt}</time>
+            </p>
+            <p>
+              <a href={sourceHref} target="_blank" rel="noopener noreferrer">
+                {sourceLabel}
+              </a>
+            </p>
+          </footer>
+        </div>
       </div>
     </main>
   </div>

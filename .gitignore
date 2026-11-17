@@ -34,3 +34,6 @@ test-results/
 
 # local pnpm store cache
 .pnpm-store/
+
+# Local Pi search index
+.pi/cache/

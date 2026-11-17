@@ -11,7 +11,7 @@ describe("shared layout wrapper", () => {
   });
 
   it("uses absolute /#chapter links so chrome navigation works from detail pages", () => {
-    expect(layoutSource).toContain("/#${entry.id}");
-    expect(layoutSource).toContain('a[href^="/#"]');
+    expect(layoutSource).toContain('href="/#index"');
+    expect(layoutSource).toContain('href="/#plates"');
   });
 });

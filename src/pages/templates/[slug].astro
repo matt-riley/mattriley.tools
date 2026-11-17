@@ -32,7 +32,6 @@ const jsonld = {
     "Use the linked GitHub repository to create a new project from the template.",
   ]}
   jsonld={jsonld}
-  domainClass="vibrant-orange"
   name={template.name}
   subtitle={template.description}
   generatedAt={templatesGeneratedAt}
@@ -49,7 +48,7 @@ const jsonld = {
     <div><span class="key">Topics:</span> <span class="value">{Number(template.topics.length)}</span></div>
     <div><span class="key">Repository:</span> <span class="value">{template.repository}</span></div>
     {template.homepage && (
-      <div><a href={template.homepage} target="_blank" rel="noopener noreferrer">Homepage ↗</a></div>
+      <div><a href={template.homepage} target="_blank" rel="noopener noreferrer">Homepage</a></div>
     )}
   </Fragment>
 </CatalogDetail>

@@ -1,44 +1,29 @@
 #!/usr/bin/env python3
-"""Generate og-default.png (1200x630) and apple-touch-icon.png (180x180) efficiently."""
-import os
-import struct
-import sys
+"""Rebuild the checked-in sharing image and icons using ImageMagick 7."""
 from pathlib import Path
-import zlib
+from subprocess import run
 
-def create_png(width, height, r, g, b, a=255):
-    """Create a solid-color PNG efficiently."""
-    def chunk(chunk_type, data):
-        c = chunk_type + data
-        return struct.pack('>I', len(data)) + c + struct.pack('>I', zlib.crc32(c) & 0xFFFFFFFF)
+public = Path(__file__).resolve().parent / "public"
 
-    # Build raw image data using pre-allocation
-    row = b'\x00' + struct.pack('BBBB', r, g, b, a) * width
-    raw = row * height
 
-    header = b'\x89PNG\r\n\x1a\n'
-    ihdr = chunk(b'IHDR', struct.pack('>IIBBBBB', width, height, 8, 6, 0, 0, 0))
-    idat = chunk(b'IDAT', zlib.compress(raw, 9))
-    iend = chunk(b'IEND', b'')
-    return header + ihdr + idat + iend
+def magick(*args):
+    run(["magick", *args], check=True, cwd=public)
 
-outdir = Path(__file__).resolve().parent / "public"
-os.makedirs(outdir, exist_ok=True)
 
-# Generate og-default.png - 1200x630, black background
-sys.stdout.write("Generating og-default.png...")
-sys.stdout.flush()
-og_bytes = create_png(1200, 630, 0, 0, 0)
-with open(outdir / 'og-default.png', 'wb') as f:
-    f.write(og_bytes)
-print(f" {len(og_bytes)} bytes")
-
-# Generate apple-touch-icon.png - 180x180, black background
-sys.stdout.write("Generating apple-touch-icon.png...")
-sys.stdout.flush()
-icon_bytes = create_png(180, 180, 0, 0, 0)
-with open(outdir / 'apple-touch-icon.png', 'wb') as f:
-    f.write(icon_bytes)
-print(f" {len(icon_bytes)} bytes")
-
-print("Done!")
+magick(
+    "-size", "1200x630", "tile:prints/paper.png",
+    "(", "prints/root-study.webp", "-resize", "720x480", ")",
+    "-geometry", "+456+81", "-compose", "Multiply", "-composite",
+    "-font", "fonts/anton-latin.woff2", "-fill", "#201f1a",
+    "-pointsize", "27", "-annotate", "+39+46", "mattriley.tools",
+    "-draw", "rectangle 40,64 1160,65",
+    "-pointsize", "100", "-annotate", "+35+260", "UNDER",
+    "-annotate", "+35+366", "PRESSURE",
+    "-pointsize", "25", "-annotate", "+40+438", "A print exhibition of software tools",
+    "-draw", "rectangle 40,563 1160,564",
+    "-pointsize", "20", "-annotate", "+40+602", "ROOT STUDY   /   DEADWOOD",
+    "-strip", "-depth", "8", "og-default.png",
+)
+magick("-background", "none", "-density", "256", "favicon.svg", "-resize", "180x180",
+       "-strip", "-depth", "8", "apple-touch-icon.png")
+magick("apple-touch-icon.png", "-define", "icon:auto-resize=48,32,16", "favicon.ico")

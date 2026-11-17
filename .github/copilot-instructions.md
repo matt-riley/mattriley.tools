@@ -3,8 +3,8 @@
 ## Commands
 
 - Install dependencies: `pnpm install`
-- Generate site data from the sibling tap and agent-skills checkouts:
-  `pnpm run generate:data -- --tap-path ../homebrew-tools --skills-path ../agent-skills`
+- Generate site data from the sibling tap checkout:
+  `pnpm run generate:data -- --tap-path ../homebrew-tools`
 - Start local dev server: `pnpm dev`
 - Lint: `pnpm run lint`
 - Run all tests: `pnpm test`
@@ -19,20 +19,19 @@
 - `scripts/generate-tools-data.mjs` is the central data pipeline. It reads
   Homebrew formulas from a `homebrew-tools` checkout plus public `matt-riley/*`
   GitHub repositories (plugins whose names contain `.nvim` and repositories
-  marked as templates) and `agent-skills/skills/*/SKILL.md`, then writes:
+  marked as templates), then writes:
   - `src/data/tools.generated.ts`
   - `src/data/plugins.generated.ts`
   - `src/data/templates.generated.ts`
-  - `src/data/skills.generated.ts`
-- `src/pages/index.astro` renders four separate catalogs on the homepage:
-  Homebrew tools, Neovim plugins, agent skills, and public templates.
+- `src/pages/index.astro` renders a searchable index of three collections on the homepage:
+  Homebrew tools, Neovim plugins, and public templates.
 - `src/pages/tools/[slug].astro`, `src/pages/plugins/[slug].astro`,
-  `src/pages/templates/[slug].astro`, and `src/pages/skills/[slug].astro` build
+  and `src/pages/templates/[slug].astro` build
   static detail pages with `getStaticPaths()` from the generated modules.
 - `.github/workflows/sync-tools-data.yml` is the repo-owned refresh path. It
   runs on a schedule or manual dispatch, checks out the public
-  `matt-riley/homebrew-tools` and `matt-riley/agent-skills` repos into
-  temporary paths, regenerates all four data files, and commits them if they
+  `matt-riley/homebrew-tools` repository into
+  temporary paths, regenerates all three data files, and commits them if they
   changed.
 - `.github/workflows/ci.yml` uses the shared `matt-riley/matt-riley-ci` Node CI
   workflow, runs a generated-data freshness check, and calls the shared public
@@ -41,19 +40,17 @@
 
 ## Conventions
 
-- Treat this repository as the implementation target. `homebrew-tools` and
-  `agent-skills` are read-only source inputs unless Matt explicitly asks for
+- Treat this repository as the implementation target. `homebrew-tools` is a read-only source input unless Matt explicitly asks for
   cross-repo edits.
 - Preserve the current self-sync design for
   `.github/workflows/sync-tools-data.yml`: scheduled/manual sync from the
-  public tap and skills catalog. Do not reintroduce PAT-based or
+  public tap. Do not reintroduce PAT-based or
   dispatch-based cross-repo sync unless explicitly requested.
-- Treat `pnpm run generate:data` as a four-artifact contract. Generator changes
-  must keep all four generated modules in sync and should update the related
+- Treat `pnpm run generate:data` as a three-module contract. Generator changes
+  must keep all three generated modules in sync and should update the related
   tests and README when the data shape or sourcing changes.
 - Do not hand-edit `src/data/tools.generated.ts`,
-  `src/data/plugins.generated.ts`, `src/data/templates.generated.ts`, or
-  `src/data/skills.generated.ts`; regenerate them through
+  `src/data/plugins.generated.ts`, or `src/data/templates.generated.ts`; regenerate them through
   `pnpm run generate:data`.
 - When changing generator behavior, check the matching tests in
   `tests/generate-tools-data.test.ts`, `tests/plugin-repo-metadata.test.ts`,

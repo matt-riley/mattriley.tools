@@ -41,12 +41,6 @@ jobs:
           repository: matt-riley/homebrew-tools
           path: homebrew-tools-source
 
-      - name: Check out agent skills catalog
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          repository: matt-riley/agent-skills
-          path: agent-skills-source
-
       - name: Enable Corepack
         run: corepack enable
 
@@ -79,7 +73,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           NODE_AUTH_TOKEN: ${{ github.token }}
         run: |
-          pnpm run generate:data -- --tap-path "${{ github.workspace }}/homebrew-tools-source" --skills-path "${{ github.workspace }}/agent-skills-source"
+          pnpm run generate:data -- --tap-path "${{ github.workspace }}/homebrew-tools-source"
 
       - name: Report generated data drift
         run: |

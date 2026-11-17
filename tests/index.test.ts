@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import indexPageSource from "../src/pages/index.astro?raw";
 import generatorSource from "../scripts/generate-tools-data.mjs?raw";
-import skillDetailPageSource from "../src/pages/skills/[slug].astro?raw";
 import templateDetailPageSource from "../src/pages/templates/[slug].astro?raw";
+import { collections, plates } from "../src/data/exhibition";
+import { templatesGeneratedAt } from "../src/data/templates.generated";
 import { generatedAt, tools } from "../src/data/tools.generated";
 import { plugins, pluginsGeneratedAt } from "../src/data/plugins.generated";
-import { skills, skillsGeneratedAt } from "../src/data/skills.generated";
 
 function hasValidReadmeImageShape(image: unknown) {
   const readmeImage = image as { source?: unknown; mirroredPath?: unknown };
@@ -15,10 +15,6 @@ function hasValidReadmeImageShape(image: unknown) {
     typeof readmeImage.source === "string" &&
     (typeof readmeImage.mirroredPath === "string" || readmeImage.mirroredPath === null)
   );
-}
-
-function isNonEmptyString(value: unknown): value is string {
-  return typeof value === "string" && value.length > 0;
 }
 
 function hasSyncedReadmeMetadata(entry: unknown) {
@@ -40,34 +36,6 @@ function hasSyncedReadmeMetadata(entry: unknown) {
   );
 }
 
-function hasValidSkillMetadata(skill: unknown) {
-  const skillRecord = skill as {
-    slug?: unknown;
-    repository?: unknown;
-    sourceUrl?: unknown;
-    description?: unknown;
-    compatibility?: unknown;
-    version?: unknown;
-    maturity?: unknown;
-    readme?: { markdown?: unknown };
-  };
-  const markdown = skillRecord.readme?.markdown;
-
-  return (
-    skillRecord.repository === "matt-riley/agent-skills" &&
-    isNonEmptyString(skillRecord.slug) &&
-    isNonEmptyString(skillRecord.sourceUrl) &&
-    skillRecord.sourceUrl.endsWith(`/skills/${skillRecord.slug}/SKILL.md`) &&
-    [
-      skillRecord.description,
-      skillRecord.compatibility,
-      skillRecord.version,
-      skillRecord.maturity,
-      markdown,
-    ].every(isNonEmptyString)
-  );
-}
-
 describe("generated site data", () => {
   it("includes at least one tool", () => {
     expect(tools.length).toBeGreaterThan(0);
@@ -77,11 +45,6 @@ describe("generated site data", () => {
     expect(plugins.length).toBeGreaterThan(0);
   });
 
-  it("includes agent skills from the skills catalog", () => {
-    expect(skills.length).toBeGreaterThan(0);
-    expect(skills.map((skill) => skill.slug)).toContain("skill-creator");
-  });
-
   it("uses unique slugs", () => {
     const slugs = tools.map((tool) => tool.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
@@ -89,11 +52,6 @@ describe("generated site data", () => {
 
   it("uses unique plugin slugs", () => {
     const slugs = plugins.map((plugin) => plugin.slug);
-    expect(new Set(slugs).size).toBe(slugs.length);
-  });
-
-  it("uses unique skill slugs", () => {
-    const slugs = skills.map((skill) => skill.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 
@@ -120,7 +78,7 @@ describe("generated site data", () => {
   });
 
   it("stores bare version strings (no leading v) so cards never render vv0.1", () => {
-    const all = [...tools, ...plugins, ...skills];
+    const all = [...tools, ...plugins];
     expect(all.every((entry) => !/^v/i.test(entry.version))).toBe(true);
   });
 
@@ -132,50 +90,10 @@ describe("generated site data", () => {
     );
   });
 
-  it("stores SKILL.md content and metadata for every agent skill", () => {
-    expect(skills.every(hasValidSkillMetadata)).toBe(true);
-  });
-
-  it("renders plugin cards with version and description on the homepage", () => {
-    const pluginSection =
-      indexPageSource.split('id="neovim-plugins"')[1]?.split('id="agent-skills"')[0] ?? "";
-
-    expect(pluginSection).toContain("Neovim Plugins");
-    expect(pluginSection).toContain("catalog-card green-card");
-    expect(pluginSection).toContain("{plugin.description}");
-    expect(pluginSection).toContain("v{plugin.version}");
-  });
-
-  it("renders an agent skills section on the homepage", () => {
-    const skillsSection =
-      indexPageSource.split('id="agent-skills"')[1]?.split('id="public-templates"')[0] ?? "";
-
-    expect(indexPageSource).toContain('id="agent-skills"');
-    expect(skillsSection).toContain("Agent Skills");
-    expect(skillsSection).toContain("catalog-card magenta-card");
-    expect(skillsSection).toContain("v{skill.version}");
-    expect(skillsSection).toContain("{skill.maturity}");
-  });
-
-  it("renders a templates section on the homepage", () => {
-    const templatesSection = indexPageSource.split('id="public-templates"')[1] ?? "";
-
-    expect(indexPageSource).toContain('id="public-templates"');
-    expect(templatesSection).toContain("Public Templates");
-    expect(templatesSection).toContain("catalog-card orange-card");
-    expect(templatesSection).toContain('{template.language ?? "Unknown"}');
-  });
-
   it("includes template data in the generator contract", () => {
     expect(generatorSource).toContain('join(dataDir, "templates.generated.ts")');
     expect(generatorSource).toContain("templatesGeneratedAt");
     expect(generatorSource).toContain("templates");
-  });
-
-  it("includes skill data in the generator contract", () => {
-    expect(generatorSource).toContain('join(dataDir, "skills.generated.ts")');
-    expect(generatorSource).toContain("skillsGeneratedAt");
-    expect(generatorSource).toContain("readAgentSkills");
   });
 
   it("has static template detail pages", () => {
@@ -183,32 +101,26 @@ describe("generated site data", () => {
     expect(templateDetailPageSource).toContain('from "../../data/templates.generated"');
   });
 
-  it("has static skill detail pages", () => {
-    expect(skillDetailPageSource).toContain("export function getStaticPaths()");
-    expect(skillDetailPageSource).toContain('from "../../data/skills.generated"');
-  });
-
-  it("composes the homepage from the site layout and catalog sections", () => {
-    expect(indexPageSource).toContain('import Layout from "../layouts/Layout.astro"');
-    expect(indexPageSource).toContain('id="homebrew-tools"');
-    expect(indexPageSource).toContain('id="neovim-plugins"');
-    expect(indexPageSource).toContain('id="agent-skills"');
-    expect(indexPageSource).toContain('id="public-templates"');
-    expect(indexPageSource).toContain("domain-grid");
-    expect(indexPageSource).toContain("catalog-card");
-  });
-
-  it("relies on the shared layout for the main landmark", () => {
-    expect(indexPageSource).not.toContain("<main>");
-  });
-
-  it("does not render the source-of-truth eyebrow on the homepage", () => {
-    expect(indexPageSource).not.toContain("Sources of truth:");
+  it("indexes every current collection and links portraits to real entries", () => {
+    expect(collections.map((c) => c.id)).toEqual([
+      "homebrew-tools",
+      "neovim-plugins",
+      "public-templates",
+    ]);
+    expect(indexPageSource).toContain("collections.map");
+    expect(
+      plates.every((p) =>
+        collections.some(
+          (c) => c.route === p.route && c.entries.some((entry) => entry.slug === p.id),
+        ),
+      ),
+    ).toBe(true);
+    expect(generatorSource).not.toContain("skills.generated.ts");
   });
 
   it("records the last generation timestamps", () => {
     expect(Number.isNaN(Date.parse(generatedAt))).toBe(false);
     expect(Number.isNaN(Date.parse(pluginsGeneratedAt))).toBe(false);
-    expect(Number.isNaN(Date.parse(skillsGeneratedAt))).toBe(false);
+    expect(Number.isNaN(Date.parse(templatesGeneratedAt))).toBe(false);
   });
 });

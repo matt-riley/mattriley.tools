@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import catalogDetailSource from "../src/components/CatalogDetail.astro?raw";
 import pluginDetailPageSource from "../src/pages/plugins/[slug].astro?raw";
-import skillDetailPageSource from "../src/pages/skills/[slug].astro?raw";
 import templateDetailPageSource from "../src/pages/templates/[slug].astro?raw";
 import toolDetailPageSource from "../src/pages/tools/[slug].astro?raw";
 
@@ -28,13 +27,6 @@ const detailPages = [
     fallback: "This template does not currently have synced README content to display.",
     footerLinkLabel: "Open on GitHub",
   },
-  {
-    name: "skill",
-    source: skillDetailPageSource,
-    title: "SKILL.md",
-    fallback: "This skill does not currently have synced instruction content to display.",
-    footerLinkLabel: "Open SKILL.md on GitHub",
-  },
 ];
 
 describe("detail pages", () => {
@@ -47,7 +39,7 @@ describe("detail pages", () => {
     }
   });
 
-  it("renders a README or SKILL.md section via the shared component", () => {
+  it("renders a README section via the shared component", () => {
     expect(catalogDetailSource).toContain("<h2>{sectionTitle}</h2>");
     for (const { source, title, fallback } of detailPages) {
       expect(source).toContain(`sectionTitle="${title}"`);
@@ -67,7 +59,7 @@ describe("detail pages", () => {
   });
 
   it("uses noopener noreferrer on footer external links", () => {
-    expect(catalogDetailSource).toContain('rel="noopener noreferrer">{sourceLabel}</a>');
+    expect(catalogDetailSource).toMatch(/rel="noopener noreferrer">\s*\{sourceLabel\}\s*<\/a>/);
     for (const { source, footerLinkLabel } of detailPages) {
       expect(source).toContain(`sourceLabel="${footerLinkLabel}"`);
     }

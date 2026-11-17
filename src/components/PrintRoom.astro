@@ -1,0 +1,39 @@
+---
+import { plates } from "../data/exhibition";
+---
+
+<dialog id="studio" aria-labelledby="studio-title" data-plates={JSON.stringify(plates)}>
+  <div class="studio-bar">
+    <span class="brand">
+      <i class="register" aria-hidden="true"></i>Print room
+    </span>
+    <button type="button" class="close" aria-label="Close print room" autofocus>
+      Close ×
+    </button>
+  </div>
+  <div class="studio-body">
+    <div class="proof">
+      <canvas width="1080" height="1200" aria-label="Personalized exhibition proof"></canvas>
+    </div>
+    <div class="console">
+      <span class="mono" data-studio-folio></span>
+      <h2 id="studio-title"></h2>
+      <p data-instructions></p>
+      <label class="setting" for="specimen" data-setting-label>
+        Specimen
+      </label>
+      <select id="specimen"></select>
+      <div class="readout" aria-live="polite">
+        <span class="mono">Impression</span>
+        <output id="result" for="specimen"></output>
+      </div>
+      <button class="ink-button" id="pull" type="button">
+        Pull a print <span aria-hidden="true">↓</span>
+      </button>
+      <p class="studio-status mono" role="status"></p>
+      <a class="tool-link" data-tool-link>
+        Open tool details
+      </a>
+    </div>
+  </div>
+</dialog>
