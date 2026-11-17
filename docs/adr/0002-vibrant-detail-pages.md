@@ -1,5 +1,5 @@
-# Intensely Vibrant Detail Pages
+# Vibrant Detail Pages
 
-We decided that the detail pages for catalog items (which render long-form README markdown content) will be intensely vibrant, inheriting the full background signature color of their respective domains.
+Each catalog detail page renders long-form README Markdown, and its domain's signature color will fill the background.
 
-This is a significant departure from standard documentation sites which typically revert to a neutral (white/dark gray) background for readability. We accepted the trade-off that we will need to carefully tune markdown typography, syntax highlighting, and image backgrounds to remain legible on intensely colorful backgrounds, in order to maximize the "fun and vibrant" aesthetic impact.
+Documentation sites typically use neutral backgrounds, such as white or dark gray, for readability. We chose bright backgrounds for a playful look, so we'll need to adjust Markdown typography, syntax highlighting, and image backgrounds to keep the pages legible.

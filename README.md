@@ -14,9 +14,9 @@
 
 The site renders from generated data files:
 
-- Source of truth for Homebrew tools: `homebrew-tools/Formula/*.rb`
-- Source of truth for template repos: public, non-archived `matt-riley/*` GitHub repositories where GitHub marks the repo as a template
-- Source of truth for Neovim plugins: public, non-archived `matt-riley/*` GitHub repositories whose names contain `.nvim`
+- Homebrew tool source: `homebrew-tools/Formula/*.rb`
+- Template source: public, non-archived `matt-riley/*` GitHub repositories marked as templates
+- Neovim plugin source: public, non-archived `matt-riley/*` GitHub repositories whose names contain `.nvim`
 - Generator: `scripts/generate-tools-data.mjs`
 - Generated artifacts:
   - `src/data/tools.generated.ts`
@@ -24,11 +24,11 @@ The site renders from generated data files:
   - `src/data/plugins.generated.ts`
   - `public/generated/readme-images/`
 
-`pnpm run generate:data` owns all generated outputs. It syncs README markdown into the
-generated data modules and mirrors any allowed README image assets into
+`pnpm run generate:data` writes all of these outputs. It syncs README Markdown into the
+generated data modules and mirrors allowed README images into
 `public/generated/readme-images/` so the site can serve them locally.
 
-The generated Homebrew tool data currently focuses on:
+The generated Homebrew tool data includes:
 
 - formula name
 - packaged version in the tap
@@ -40,7 +40,7 @@ The generated Homebrew tool data currently focuses on:
 - install command
 - installed binary name
 
-The generated plugin data currently focuses on:
+The generated plugin data includes:
 
 - repository name and slug
 - description
@@ -52,7 +52,7 @@ The generated plugin data currently focuses on:
 - `lazy.nvim` install snippet
 - `vim.pack` install snippet
 
-The generated template data currently focuses on:
+The generated template data includes:
 
 - repository name and slug
 - description
@@ -61,7 +61,7 @@ The generated template data currently focuses on:
 - last updated timestamp
 - language and topics
 
-This repo assumes the tap's duplicate cask/formula issue is resolved elsewhere and that the site consumes the formula-only end state for the Homebrew catalog.
+This repo assumes the tap's duplicate cask/formula issue is resolved elsewhere and that the Homebrew catalog uses formulas only.
 
 ## Local development
 
@@ -80,18 +80,17 @@ If your tap includes formulas whose homepages point at private GitHub repositori
 repositories from the published site, then refreshes mirrored README image assets under
 `public/generated/readme-images/` for the remaining public entries.
 
-If your tap checkout is somewhere else, point the generator at it explicitly:
+If your tap checkout is elsewhere, pass its path:
 
 ```bash
 pnpm run generate:data -- --tap-path /absolute/path/to/homebrew-tools
 ```
 
-The repo now consumes the published Snurble design-system packages from GitHub Packages, so
-fresh installs need `NODE_AUTH_TOKEN` set before `pnpm install`. The committed `.npmrc` keeps only
-the `@matt-riley` scope pointed at `https://npm.pkg.github.com`, and the `mise install` task writes
-the auth token into the user-level `~/.npmrc` at runtime. The install task prefers
-`NODE_AUTH_TOKEN` and falls back to `MISE_GITHUB_TOKEN`, which is already available in CI via
-`mise-action`.
+The repo uses Snurble design-system packages from GitHub Packages, so set `NODE_AUTH_TOKEN`
+before `pnpm install` for fresh installs. The committed `.npmrc` points only the
+`@matt-riley` scope at `https://npm.pkg.github.com`. The `mise install` task writes the
+auth token to `~/.npmrc` at runtime. It prefers `NODE_AUTH_TOKEN` and falls back to
+`MISE_GITHUB_TOKEN`, which CI gets from `mise-action`.
 
 ## Commands
 
@@ -108,7 +107,18 @@ pnpm format:check       # Verify formatting
 
 ## Automatic updates
 
-`.github/workflows/sync-tools-data.yml` syncs site data whenever `homebrew-tools` changes a formula (the tap dispatches it with a dedicated site-dispatch App that has Actions write access to this repository only), on a schedule (every 6 hours) to catch upstream README, plugin and template changes, and manually via `workflow_dispatch`. It checks out the public `homebrew-tools` tap, uses dedicated read-only tool-reader credentials (`vars.TOOLS_READER_APP_ID` and `secrets.TOOLS_READER_PRIVATE_KEY`) to identify any private tap-backed repositories so they can be excluded from the published site, regenerates and formats generated catalog outputs, and commits if any of those generated outputs changed using this repository’s own `GITHUB_TOKEN`. The tool-reader App cannot push generated data or dispatch deployments.
+`.github/workflows/sync-tools-data.yml` syncs site data:
+
+- When `homebrew-tools` changes a formula. The tap dispatches the workflow with a dedicated
+  site-dispatch App that has Actions write access to this repository only.
+- Every 6 hours to pick up upstream README, plugin and template changes.
+- Manually via `workflow_dispatch`.
+
+The workflow checks out the public `homebrew-tools` tap and uses dedicated read-only tool-reader
+credentials (`vars.TOOLS_READER_APP_ID` and `secrets.TOOLS_READER_PRIVATE_KEY`) to identify private
+tap-backed repositories and exclude them from the published site. It regenerates and formats the
+catalog outputs and uses this repository’s own `GITHUB_TOKEN` to commit them if any changed.
+The tool-reader App cannot push generated data or dispatch deployments.
 
 Successful production CI requests deployment through the shared workflow using separate `INFRA_DISPATCH_APP_ID` / `INFRA_DISPATCH_PRIVATE_KEY` credentials. See [the migration checklist](docs/deploy-credential-migration.md) before changing the configured Apps or removing legacy secrets.
 

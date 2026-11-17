@@ -15,4 +15,4 @@ A public GitHub repository marked as a template for scaffolding new projects.
 
 ## Visual language
 
-Under Pressure presents three interactive print studies on warm paper. The featured plates use wood engraving, overprint and contour etching to illustrate specific tool behaviour. All published works enter the index from the generated catalogue. GSAP choreographs the sheet turns and yields to reduced-motion preferences.
+Under Pressure presents three interactive print studies on warm paper. The featured plates use wood engraving, overprint and contour etching to illustrate specific tool behaviour. The index lists all published works from the generated catalogue. GSAP animates the sheet turns and respects reduced-motion preferences.
