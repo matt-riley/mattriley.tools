@@ -18,7 +18,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}:${{ github.ref }}:ci
       cancel-in-progress: true
-    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@d903a20396dce0f98960a8c9ea96848349682540 # v4.2.0
+    uses: matt-riley/matt-riley-ci/.github/workflows/ci.yml@f846763f763247cb0140e3dd08002280b001f6cf # v4.2.0
     with:
       install: true
       lint: true
@@ -95,7 +95,7 @@ jobs:
       contents: read
     needs: [ci, generated-data]
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
-    uses: matt-riley/matt-riley-ci/.github/workflows/request-app-deploy.yml@d903a20396dce0f98960a8c9ea96848349682540 # v4.2.0
+    uses: matt-riley/matt-riley-ci/.github/workflows/request-app-deploy.yml@f846763f763247cb0140e3dd08002280b001f6cf # v4.2.0
     with:
       dispatch-app-id: ${{ vars.INFRA_DISPATCH_APP_ID }}
       app: mattriley-tools
